@@ -1,0 +1,63 @@
+{
+  "name": "stream-mega",
+  "version": "1.0.0",
+  "description": "Upload any video file and watch it in sync with your friends!",
+  "main": "index.js",
+  "scripts": {
+    "start": "node -r ts-node/register ./src/index.ts",
+    "dev": "nodemon",
+    "build": "tsc"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/qhyun2/Stream-Mega.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/qhyun2/Stream-Mega/issues"
+  },
+  "homepage": "https://github.com/qhyun2/Stream-Mega#readme",
+  "dependencies": {
+    "express": "^4.17.1",
+    "socket.io": "^3.0.1"
+  },
+  "devDependencies": {
+    "@types/node": "^14.14.7",
+    "@typescript-eslint/eslint-plugin": "^4.7.0",
+    "@typescript-eslint/parser": "^4.7.0",
+    "eslint": "^7.13.0",
+    "eslint-plugin-import": "^2.22.1",
+    "nodemon": "^2.0.6",
+    "ts-node": "^9.0.0",
+    "typescript": "^4.0.5"
+  },
+  "nodemonConfig": {
+    "ignore": [
+      "**/*.test.ts",
+      "**/*.spec.ts",
+      ".git",
+      "node_modules"
+    ],
+    "watch": [
+      "src"
+    ],
+    "exec": "npm start",
+    "ext": "ts"
+  },
+  "eslintConfig": {
+    "root": true,
+    "parser": "@typescript-eslint/parser",
+    "plugins": [
+      "@typescript-eslint"
+    ],
+    "extends": [
+      "eslint:recommended",
+      "plugin:@typescript-eslint/recommended"
+    ],
+    "ignorePatterns": [
+      "node_modules",
+      "dist"
+    ]
+  }
+}
