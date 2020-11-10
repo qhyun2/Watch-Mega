@@ -13,6 +13,12 @@ const videoPath = path.join(__dirname + "/../public/videos/test.mp4");
 router.get("/", (_, res) => {
   res.sendFile(path.join(__dirname + "/../public/index.html"));
 });
+router.get("/select", (_, res) => {
+  res.sendFile(path.join(__dirname + "/../public/select.html"));
+});
+router.get("/upload", (_, res) => {
+  res.sendFile(path.join(__dirname + "/../public/upload.html"));
+});
 
 router.get("/video", (req, res) => {
   fs.stat(videoPath, (err, stat) => {
