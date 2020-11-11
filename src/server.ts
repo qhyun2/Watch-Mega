@@ -4,8 +4,8 @@ import { Server as SocketServer } from "socket.io";
 import * as fs from "fs";
 import * as path from "path";
 import { urlencoded } from "body-parser";
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const serveIndex = require("serve-index");
+import serveFavicon from "serve-favicon";
+import serveIndex from "serve-index";
 import fileUpload from "express-fileupload";
 import { basename } from "path";
 
@@ -14,6 +14,8 @@ const router = express.Router();
 const http = createHTTPServer(app);
 const io = new SocketServer(http);
 let videoName = "";
+let position = 0;
+let playing = false;
 
 router.get("/", (_, res) => {
   res.sendFile(path.join(__dirname, "/../public/index.html"));
@@ -33,7 +35,9 @@ router.post("/select", (req, res) => {
     return;
   }
   videoName = path.basename(decodeURIComponent(req.body.selection));
-  console.log(videoName);
+  io.emit("newvideo");
+  playing = false;
+  position = 0;
   res.status(303).redirect("/success");
 });
 
@@ -64,7 +68,6 @@ router.get("/video", (req, res) => {
     return;
   }
   const videoPath = path.join(__dirname, `/../public/videos/${videoName}`);
-  console.log(videoPath);
   fs.stat(videoPath, (err, stat) => {
     // file not found
     if (err !== null && err.code === "ENOENT") {
@@ -104,6 +107,7 @@ router.get("/video", (req, res) => {
   });
 });
 
+app.use(serveFavicon("public/favicon.ico"));
 app.use(urlencoded({ extended: true }));
 app.use("/list", serveIndex("public/videos", { icons: true }));
 app.use(
@@ -114,16 +118,29 @@ app.use(
 );
 app.use(router);
 
+setInterval(() => {
+  if (playing) position++;
+}, 1000);
+
 // video sync
 io.on("connection", (socket) => {
+  socket.emit("seek", position);
+
+  if (playing) {
+    socket.emit("play", position);
+  }
+
   socket.on("seek", (msg) => {
     socket.broadcast.emit("seek", msg);
+    position = msg;
   });
-  socket.on("play", () => {
-    socket.broadcast.emit("play");
+  socket.on("play", (msg) => {
+    socket.broadcast.emit("play", msg);
+    playing = true;
   });
   socket.on("pause", () => {
     socket.broadcast.emit("pause");
+    playing = false;
   });
 });
 

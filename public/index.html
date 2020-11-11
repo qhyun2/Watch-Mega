@@ -16,7 +16,7 @@
   <body class="bg-dark">
     <div class="app">
       <header>
-        <nav class="navbar navbar-expand-lg navbar-dark bg-secondary">
+        <nav class="navbar navbar-expand navbar-dark bg-secondary">
           <h1 class="navbar-brand mb-0" href="#">Stream Mega</h1>
           <button
             class="navbar-toggler"
@@ -48,7 +48,7 @@
       </header>
       <div class="container">
         <div class="row">
-          <div class="col-md-8 m-auto pt-4">
+          <div class="col-md-9 m-auto pt-4">
             <script src="/socket.io/socket.io.js"></script>
             <script>
               window.onload = function () {
@@ -60,19 +60,30 @@
                 var ignorePlay = false;
                 var ignorePause = false;
 
+                // chrome does not allow autoplay with sound
+                if (/chrome/i.test(navigator.userAgent)) {
+                  video.muted = true;
+                }
+
                 socket.on("seek", (msg) => {
                   ignoreSeek = true;
                   video.currentTime = msg;
                 });
 
-                socket.on("play", () => {
+                socket.on("play", (msg) => {
                   ignorePlay = true;
+                  ignoreSeek = true;
+                  video.currentTime = msg;
                   video.play();
                 });
 
                 socket.on("pause", () => {
                   ignorePause = true;
                   video.pause();
+                });
+
+                socket.on("newvideo", () => {
+                  video.src = `./video?t=${Math.random()}`;
                 });
 
                 video.addEventListener("seeked", (e) => {
@@ -87,7 +98,7 @@
                     ignorePlay = false;
                     return;
                   }
-                  socket.emit("play");
+                  socket.emit("play", video.currentTime);
                 });
                 video.addEventListener("pause", (e) => {
                   if (ignorePause) {

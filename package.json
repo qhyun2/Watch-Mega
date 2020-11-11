@@ -21,6 +21,7 @@
   "dependencies": {
     "express": "^4.17.1",
     "express-fileupload": "^1.2.0",
+    "serve-favicon": "^2.5.0",
     "serve-index": "^1.9.1",
     "socket.io": "^3.0.1"
   },
@@ -28,6 +29,8 @@
     "@types/express": "^4.17.8",
     "@types/express-fileupload": "^1.1.5",
     "@types/node": "^14.14.7",
+    "@types/serve-favicon": "^2.5.1",
+    "@types/serve-index": "^1.7.30",
     "@types/socket.io": "^2.1.11",
     "@typescript-eslint/eslint-plugin": "^4.7.0",
     "@typescript-eslint/parser": "^4.7.0",
