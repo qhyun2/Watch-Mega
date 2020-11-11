@@ -7,7 +7,6 @@ import { urlencoded } from "body-parser";
 import serveFavicon from "serve-favicon";
 import serveIndex from "serve-index";
 import fileUpload from "express-fileupload";
-import { basename } from "path";
 
 const app = express();
 const router = express.Router();
@@ -18,14 +17,14 @@ let position = 0;
 let playing = false;
 
 router.get("/", (_, res) => {
-  res.sendFile(path.join(__dirname, "/../public/index.html"));
+  res.sendFile(path.join(__dirname, "public/index.html"));
 });
 
 const files = ["success", "fail", "select", "upload"];
 
 files.forEach((endpoint) => {
   router.get(`/${endpoint}`, (_, res) => {
-    res.sendFile(path.join(__dirname, `/../public/${endpoint}.html`));
+    res.sendFile(path.join(__dirname, `public/${endpoint}.html`));
   });
 });
 
@@ -51,7 +50,7 @@ router.post("/upload", function (req, res) {
 
   const saveLocation = path.join(
     __dirname,
-    "/../public/videos/",
+    "public/videos/",
     req.files.video.name
   );
 
@@ -67,7 +66,7 @@ router.get("/video", (req, res) => {
     res.sendStatus(404);
     return;
   }
-  const videoPath = path.join(__dirname, `/../public/videos/${videoName}`);
+  const videoPath = path.join(__dirname, `public/videos/${videoName}`);
   fs.stat(videoPath, (err, stat) => {
     // file not found
     if (err !== null && err.code === "ENOENT") {
@@ -107,9 +106,12 @@ router.get("/video", (req, res) => {
   });
 });
 
-app.use(serveFavicon("public/favicon.ico"));
+app.use(serveFavicon(path.join(__dirname, "public/favicon.ico")));
 app.use(urlencoded({ extended: true }));
-app.use("/list", serveIndex("public/videos", { icons: true }));
+app.use(
+  "/list",
+  serveIndex(path.join(__dirname, "public/videos"), { icons: true })
+);
 app.use(
   fileUpload({
     useTempFiles: true,
