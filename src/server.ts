@@ -8,23 +8,33 @@ import serveFavicon from "serve-favicon";
 import serveIndex from "serve-index";
 import fileUpload from "express-fileupload";
 
+import { TClient } from "./download";
+
 const app = express();
 const router = express.Router();
 const http = createHTTPServer(app);
 const io = new SocketServer(http);
+const tclient = new TClient();
 let videoName = "";
 let position = 0;
 let playing = false;
 
-router.get("/", (_, res) => {
-  res.sendFile(path.join(__dirname, "public/index.html"));
+// tclient.download(magnetURI);
+// setInterval(() => console.log(tclient.getStatus()), 400);
+
+router.get("/", function (req, res) {
+  res.render("index", { title: "Hey", message: "Hello there!" });
 });
+
+// router.get("/", (_, res) => {
+//   res.sendFile(path.join(__dirname, "public/index.html"));
+// });
 
 const files = ["success", "fail", "select", "upload"];
 
 files.forEach((endpoint) => {
   router.get(`/${endpoint}`, (_, res) => {
-    res.sendFile(path.join(__dirname, `public/${endpoint}.html`));
+    res.render(endpoint);
   });
 });
 
@@ -106,12 +116,16 @@ router.get("/video", (req, res) => {
   });
 });
 
+app.set("view engine", "pug");
+app.set("views", path.join(__dirname, "views"));
+
 app.use(serveFavicon(path.join(__dirname, "public/favicon.ico")));
 app.use(urlencoded({ extended: true }));
 app.use(
   "/list",
   serveIndex(path.join(__dirname, "public/videos"), { icons: true })
 );
+app.use(express.static(path.join(__dirname, "public")));
 app.use(
   fileUpload({
     useTempFiles: true,

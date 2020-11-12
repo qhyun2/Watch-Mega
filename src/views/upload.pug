@@ -1,0 +1,28 @@
+doctype html
+head
+  include head
+.app
+  header
+    include navbar
+    +navbar("upload")
+  body.bg-dark
+    .container
+      .row.mt-5.justify-content-center
+        .col-4
+          script.
+            window.onload = () => {
+            document.getElementById("upload").addEventListener("click", function () {
+            document.getElementById("upload").innerText =
+            "Uploading...";
+            document.getElementById("uploadForm").submit();
+            });
+            };
+          form#uploadForm(ref='uploadForm' action='/upload' method='post' enctype='multipart/form-data')
+            label.bg-dark.text-light(for='upload')
+              h3 Upload video file
+            input.mt-4.text-light.form-control-file(type='file' name='video' accept='video/mp4')
+            .form-group
+              button#upload.btn.btn-secondary.mt-5(value='Upload')
+                | Upload
+
+  include bootstrap

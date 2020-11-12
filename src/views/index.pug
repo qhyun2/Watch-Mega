@@ -1,0 +1,18 @@
+doctype html
+head
+  include head
+  link(rel="stylesheet" href="https://vjs.zencdn.net/7.8.4/video-js.css")
+.app
+  header
+    include navbar
+    +navbar()
+  body.bg-dark
+    .container
+      .row
+        .col-md-9.m-auto.pt-4
+          script(src='/socket.io/socket.io.js')
+          script(src='/js/watch.js')
+          video#video.video-js.vjs-fill(controls)
+            source(type='video/mp4')
+    script(src='https://vjs.zencdn.net/7.8.4/video.js')
+  include bootstrap
