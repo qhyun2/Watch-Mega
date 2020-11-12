@@ -9,7 +9,7 @@ COPY ./src ./src
 RUN npm run build
 
 # copy to fresh container
-FROM node:12
+FROM node:12-alpine
 WORKDIR /app
 ENV NODE_ENV=production
 COPY package*.json ./

@@ -1,5 +1,5 @@
 {
-  "name": "stream-mega",
+  "name": "watch-mega",
   "version": "1.0.0",
   "description": "Upload any video file and watch it in sync with your friends!",
   "main": "index.js",
@@ -10,14 +10,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/qhyun2/Stream-Mega.git"
+    "url": "git+https://github.com/qhyun2/Watch-Mega.git"
   },
   "author": "",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/qhyun2/Stream-Mega/issues"
+    "url": "https://github.com/qhyun2/Watch-Mega/issues"
   },
-  "homepage": "https://github.com/qhyun2/Stream-Mega#readme",
+  "homepage": "https://github.com/qhyun2/Watch-Mega#readme",
   "dependencies": {
     "express": "^4.17.1",
     "express-fileupload": "^1.2.0",
