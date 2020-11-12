@@ -14,5 +14,8 @@ head
           script(src='/js/watch.js')
           video#video.video-js.vjs-fill(controls)
             source(type='video/mp4')
+      .row
+        .col-4.m-auto.pt-4.text-center
+          #watching.alert.alert-dark 1 user currently watching
     script(src='https://vjs.zencdn.net/7.8.4/video.js')
   include bootstrap

@@ -17,6 +17,7 @@ const io = new SocketServer(http);
 const tclient = new TClient();
 let videoName = "";
 let position = 0;
+let connectedUsers = 0;
 let playing = false;
 
 // tclient.download(magnetURI);
@@ -140,7 +141,9 @@ setInterval(() => {
 
 // video sync
 io.on("connection", (socket) => {
+  connectedUsers++;
   socket.emit("seek", position);
+  io.sockets.emit("watching", connectedUsers);
 
   if (playing) {
     socket.emit("play", position);
@@ -157,6 +160,10 @@ io.on("connection", (socket) => {
   socket.on("pause", () => {
     socket.broadcast.emit("pause");
     playing = false;
+  });
+  socket.on("disconnect", () => {
+    connectedUsers--;
+    io.sockets.emit("watching", connectedUsers);
   });
 });
 
