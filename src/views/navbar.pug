@@ -1,10 +1,13 @@
+mixin navitem(link, text, active)
+  li.nav-item(class=active && 'active')
+    a.nav-link(href=link class=active && 'text-info')= text
+
+
 mixin navbar(tab)
   nav.navbar.navbar-expand.navbar-dark.bg-secondary
-    h1.navbar-brand.mb-0(href='#') Watch Mega
+    h1.navbar-brand.mb-0(href='#')
+      b Watch Mega
     ul.navbar-nav.mr-auto
-      li.nav-item
-        a.nav-link(href='/') Watch
-      li.nav-item
-        a.nav-link(href='/select') Select
-      li.nav-item
-        a.nav-link(href='/upload') Upload
+      +navitem("/", "Watch", (tab == "watch"))
+      +navitem("/select", "Select", (tab == "select"))
+      +navitem("/upload", "Upload", (tab == "upload"))
