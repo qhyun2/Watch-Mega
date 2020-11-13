@@ -10,12 +10,15 @@ RUN npm run build
 
 # copy to fresh container
 FROM node:12-alpine
-WORKDIR /app
 ENV NODE_ENV=production
+# git needed by unknown npm library
+RUN apk add git
+WORKDIR /app
 COPY package*.json ./
-RUN npm ci --quiet --only=production
+RUN npm install --quiet --only=production
 COPY --from=builder /usr/src/app/dist ./
 COPY ./src/public ./public
+COPY ./src/views ./views
 
 # run
 EXPOSE 3000

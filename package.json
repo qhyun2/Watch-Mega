@@ -6,7 +6,9 @@
   "scripts": {
     "start": "node -r ts-node/register ./src/server.ts",
     "dev": "nodemon",
-    "build": "tsc"
+    "build": "tsc",
+    "docker:build": "docker build . -t watchmega:latest",
+    "docker:push": "docker tag watchmega:latest registry.digitalocean.com/qhyun2-main/watchmega && docker push registry.digitalocean.com/qhyun2-main/watchmega"
   },
   "repository": {
     "type": "git",
