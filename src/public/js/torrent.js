@@ -7,8 +7,11 @@ window.onload = () => {
 };
 
 function updateTable(torrents) {
+  // clear table
+  torrentTable.innerHTML = "";
+
+  // add rows
   for (const [name, value] of Object.entries(torrents)) {
-    console.log(name, value);
     let templateCopy = torrentTemplate.content.cloneNode(true);
     let progress = Math.ceil(value * 100);
     let progressText = `${progress}%`;
@@ -23,14 +26,8 @@ function updateTable(torrents) {
   }
 }
 
-setTimeout(
-  () =>
-    updateTable({
-      asd: 0.04,
-      aaaa: 0.52,
-      wdwdwokw: 0.892,
-      waaa: 1,
-      waa: 0,
-    }),
-  1000
-);
+setInterval(() => {
+  axios.get("/api/torrent/status").then((res) => {
+    updateTable(res.data);
+  });
+}, 1000);

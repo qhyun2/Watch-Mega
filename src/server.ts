@@ -8,7 +8,8 @@ import serveFavicon from "serve-favicon";
 import serveIndex from "serve-index";
 import fileUpload from "express-fileupload";
 
-import { TClient } from "./download";
+import { TClient } from "./TClient";
+import { ApiRouter } from "./api";
 
 const app = express();
 const router = express.Router();
@@ -20,16 +21,14 @@ let position = 0;
 let connectedUsers = 0;
 let playing = false;
 
-// tclient.download(magnetURI);
+// const torrentId =
+// "magnet:?xt=urn:btih:08ada5a7a6183aae1e09d831df6748d566095a10&dn=Sintel&tr=udp%3A%2F%2Fexplodie.org%3A6969&tr=udp%3A%2F%2Ftracker.coppersurfer.tk%3A6969&tr=udp%3A%2F%2Ftracker.empire-js.us%3A1337&tr=udp%3A%2F%2Ftracker.leechers-paradise.org%3A6969&tr=udp%3A%2F%2Ftracker.opentrackr.org%3A1337&tr=wss%3A%2F%2Ftracker.btorrent.xyz&tr=wss%3A%2F%2Ftracker.fastcast.nz&tr=wss%3A%2F%2Ftracker.openwebtorrent.com&ws=https%3A%2F%2Fwebtorrent.io%2Ftorrents%2F&xs=https%3A%2F%2Fwebtorrent.io%2Ftorrents%2Fsintel.torrent";
+// tclient.download(torrentId);
 // setInterval(() => console.log(tclient.getStatus()), 400);
 
 router.get("/", function (req, res) {
-  res.render("index", { title: "Hey", message: "Hello there!" });
+  res.render("index");
 });
-
-// router.get("/", (_, res) => {
-//   res.sendFile(path.join(__dirname, "public/index.html"));
-// });
 
 const files = ["success", "fail", "select", "upload", "torrent"];
 
@@ -39,12 +38,14 @@ files.forEach((endpoint) => {
   });
 });
 
+router.use("/api", new ApiRouter(tclient).router);
+
 router.post("/select", (req, res) => {
   if (!req.body.selection || req.body.selection == "") {
     res.status(303).redirect("/fail");
     return;
   }
-  videoName = path.basename(decodeURIComponent(req.body.selection));
+  videoName = decodeURIComponent(req.body.selection).split("list")[1];
   io.emit("newvideo");
   playing = false;
   position = 0;

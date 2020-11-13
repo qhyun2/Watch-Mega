@@ -9,7 +9,7 @@ head
     .container
       .row
         .col-4.m-auto.py-4.justify-content-center
-          form(action="" method="post").form-inline.d-flex.flex-nowrap
+          form(action="/api/torrent/start" method="post").form-inline.d-flex.flex-nowrap
             input.form-control(type="text" name="magnet" placeholder="magnet:?xt=urn:btih:")
             button.btn.btn-secondary.ml-4(type="submit") Download
       .row
@@ -24,11 +24,12 @@ head
             tbody
     template#torrentrow
       tr
-        td.align-middle.text-truncate.my-1 aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+        td.align-middle.text-truncate.my-1
         td.align-middle
           .progress.align-self-center(style="height: 20px;")
             .progress-bar.progress-bar-striped.progress-bar-animated.bg-info(role="progressbar" style="width: 100%") 100%
         td
           button.btn.btn-sm.btn-outline-danger.m-1 X
   include bootstrap
+  script(src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js")
   script(src="/js/torrent.js")
