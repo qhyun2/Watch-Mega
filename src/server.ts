@@ -31,7 +31,7 @@ router.get("/", function (req, res) {
 //   res.sendFile(path.join(__dirname, "public/index.html"));
 // });
 
-const files = ["success", "fail", "select", "upload"];
+const files = ["success", "fail", "select", "upload", "torrent"];
 
 files.forEach((endpoint) => {
   router.get(`/${endpoint}`, (_, res) => {
