@@ -51,7 +51,6 @@ router.post("/select", (req, res) => {
 // configure upload middleware
 upload.configure({
   uploadDir: path.join(__dirname + "/public/videos"),
-  uploadUrl: "/uploads",
 });
 
 router.get("/video", (req, res) => {
