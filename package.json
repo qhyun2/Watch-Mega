@@ -23,7 +23,7 @@
   "dependencies": {
     "express": "^4.17.1",
     "express-fileupload": "^1.2.0",
-    "jquery-file-upload-middleware": "^0.1.8",
+    "jquery-file-upload-middleware": "qhyun2/jquery-file-upload-middleware#master",
     "pug": "^3.0.0",
     "serve-favicon": "^2.5.0",
     "serve-index": "^1.9.1",
