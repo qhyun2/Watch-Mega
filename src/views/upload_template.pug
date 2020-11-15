@@ -1,16 +1,17 @@
 script#template-upload(type='text/x-tmpl').
     {% for (var i=0, file; file=o.files[i]; i++) { %}
     <tr class="template-upload">
-    <td>
-    <span class="preview"></span>
-    </td>
-    <td>
-    <p class="name text-light">{%=file.name%}</p>
+    <td class="align-middle">
+    <p class="name text-light my-0">{%=file.name%}</p>
     <strong class="error text-danger"></strong>
     </td>
-    <td>
-    <p class="size text-light">Processing...</p>
-    <div class="progress progress-striped active" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><div class="progress-bar progress-bar-success" style="width:0%;"></div></div>
+    <td class="align-middle">
+    <div class="progress progress-striped align-middle active" role="progressbar" style="height:30px;">
+        <div class="progress-bar progress-bar-success" style="width:0%;"></div>
+        <h6 class="progress-extended d-flex position-relative justify-content-center my-0 align-items-center size" style="left: 0; height: inherit; width: 100%;">
+        Processing...
+        </h6>
+    </div>
     </td>
     <td>
     {% if (!o.options.autoUpload && o.options.edit && o.options.loadImageFileTypes.test(file.type)) { %}
