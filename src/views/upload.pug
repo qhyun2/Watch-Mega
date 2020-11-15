@@ -1,7 +1,6 @@
 doctype html
 head
   include head
-  link(rel='stylesheet' href='https://blueimp.github.io/Gallery/css/blueimp-gallery.min.css')
   link(rel='stylesheet' href='css/upload/jquery.fileupload.css')
   link(rel='stylesheet' href='css/upload/jquery.fileupload-ui.css')
 .app
@@ -13,10 +12,8 @@ head
       .row.mt-5.justify-content-center
         .col-10
           form#fileupload(action='' method='POST' enctype='multipart/form-data')
-            // The fileupload-buttonbar contains buttons to add/delete files and start/cancel the upload
-            .row.fileupload-buttonbar
-              .col-lg-6
-                // The fileinput-button span is used to style the file input field as button
+            .row.fileupload-buttonbar.flex-nowrap
+              .col-lg-6.d-flex.flex-nowrap
                 span.mx-2.btn.btn-success.fileinput-button
                   span Add files
                   input(type='file' name='files[]' multiple='')
@@ -25,19 +22,16 @@ head
                 button.mx-2.btn.btn-warning.cancel(type='reset')
                   span Cancel upload
                 span.fileupload-process
-              // The global progress state
               .col-lg-6.fileupload-progress
-                // The global progress bar
-                .progress.align-self-center(style="height: 100%;")
-                  .progress-bar.progress-bar-success(style='width: 0%;')
+                .progress.align-self-center.h-100
+                  .progress-bar.progress-bar-success.w-0
+                  h6.progress-extended.d-flex.w-100.h-100.position-absolute.justify-content-center.my-0.align-items-center
 
-                // The extended global progress state
-                .progress-extended.text-light &nbsp;
             // The table listing the files available for upload/download
             table.table.table-striped(role='presentation')
               tbody.files
   include upload_template
-  script(src='https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js' integrity='sha384-nvAa0+6Qg9clwYCGGPpDQLVpLNn0fRaROjHqs13t4Ggj3Ez50XnGQqc/r8MhnRDZ' crossorigin='anonymous')
+  script(src='https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js')
   script(src='js/upload/vendor/jquery.ui.widget.js')
   script(src='js/upload/tmpl.min.js')
   script(src='js/upload/jquery.fileupload.js')
