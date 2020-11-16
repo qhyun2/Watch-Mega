@@ -13,31 +13,31 @@ head
         .col-10
           form#fileupload(action='' method='POST' enctype='multipart/form-data')
             .row.fileupload-buttonbar.flex-nowrap
-              .col-lg-6.d-flex.flex-nowrap
+              .col-lg-5.d-flex.flex-nowrap
                 // control buttons
-                span.mx-2.btn.btn-success.fileinput-button
+                span.mx-2.btn.btn-info.fileinput-button
                   span Add files
                   input(type='file' name='files[]' multiple='')
-                button.mx-2.btn.btn-primary.start(type='submit')
-                  span Start upload
-                button.mx-2.btn.btn-warning.cancel(type='reset')
-                  span Cancel upload
+                button.mx-2.btn.btn-secondary.start(type='submit')
+                  span Upload
+                button.mx-2.btn.btn-default.cancel(type='reset')
+                  span Cancel
                 span.fileupload-process
-              .col-lg-6.fileupload-progress
+              .col-lg-7.fileupload-progress
                 .progress.align-self-center.h-100
-                  .progress-bar.progress-bar-success.w-0
+                  .progress-bar.progress-bar-striped.bg-info.w-0
                   h6.progress-extended.d-flex.w-100.h-100.position-absolute.justify-content-center.my-0.align-items-center(style='left: 0;')
             // file upload table
-            table.table.table-striped.table-borderless.mt-5(role='presentation')
+            table.table.table-borderless.table-dark.mt-5(role='presentation')
               thead(style="")
                 tr
                   th.text-light(style="width: 60%;")
-                    h3 Selected files
+                    h3.my-0 Files
                   th(style="width: 40%;")
                   th(style="width: 0%;")
               tbody.files
   include upload_template
-  script(src='https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js')
+  script(src='js/upload/jquery.min.js')
   script(src='js/upload/vendor/jquery.ui.widget.js')
   script(src='js/upload/tmpl.min.js')
   script(src='js/upload/jquery.fileupload.js')

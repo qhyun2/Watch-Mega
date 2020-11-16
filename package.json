@@ -7,7 +7,7 @@
     "start": "node -r ts-node/register ./src/server.ts",
     "dev": "nodemon",
     "build": "tsc",
-    "docker:build": "docker build . -t watchmega:latest",
+    "docker:build": "rm -rf ./src/public/videos && docker build . -t watchmega:latest",
     "docker:push": "docker tag watchmega:latest registry.digitalocean.com/qhyun2-main/watchmega && docker push registry.digitalocean.com/qhyun2-main/watchmega"
   },
   "repository": {
