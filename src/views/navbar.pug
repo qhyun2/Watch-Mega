@@ -1,14 +1,21 @@
 mixin navitem(link, text, active)
   li.nav-item(class=active && 'active')
-    a.nav-link(href=link class=active && 'text-info')= text
+    a.nav-link(href=link class=active && 'text-info')
+      h5.my-0= text
 
 
 mixin navbar(tab)
+  script(src="./js/username.js")
   nav.navbar.navbar-expand.navbar-dark.bg-secondary
-    h1.navbar-brand.mb-0(href='#')
-      b Watch Mega
+    .navbar-brand.mb-0(href='#')
+      b
+        h3.my-0 Watch Mega
     ul.navbar-nav.mr-auto
       +navitem("/", "Watch", (tab == "watch"))
       +navitem("/select", "Select", (tab == "select"))
       +navitem("/upload", "Upload", (tab == "upload"))
       +navitem("/torrent", "Torrent", (tab == "torrent"))
+    div.col-6.col-lg-5.col-xl-4#username
+      button.px-4.bg-dark.text-light.username-field#username-btn
+        h5.my-0.text-truncate#username-btn-text Set Username
+      input.px-4.text-light.username-field#username-input
