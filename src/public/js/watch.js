@@ -1,10 +1,6 @@
-/* eslint-disable */
-
-window.onload = function () {
+$(() => {
   window.HELP_IMPROVE_VIDEOJS = false;
-  var socket = io();
   var video = document.getElementById("video");
-  var watching = document.getElementById("watching");
   video.src = `./video?t=${Math.random()}`;
   var ignoreSeek = false;
   var ignorePlay = false;
@@ -34,11 +30,22 @@ window.onload = function () {
     video.src = `./video?t=${Math.random()}`;
   });
 
-  socket.on("watching", (users) => {
-    watching.innerText =
-      users + " user" + (users == 1 ? "" : "s") + " currently watching";
-  });
   // users watching
+  socket.on("watching", (users) => {
+    const count = users.count;
+    const names = users.usernames;
+    $("#count").text(count + ` user${count === 1 ? "" : "s"} currently watching`);
+    $("#users-table").children("tbody").text("");
+    names.forEach((name) => {
+      $("#users-table").children("tbody").append(`<tr><td>${name}</td></tr>`);
+    });
+    const anon = count - names.length;
+    if (anon && names.length > 1) {
+      $("#users-table")
+        .children("tbody")
+        .append(`<tr><td>and ${anon} other user${anon === 1 ? "" : "s"}</td></tr>`);
+    }
+  });
 
   video.addEventListener("seeked", (e) => {
     if (ignoreSeek) {
@@ -61,4 +68,8 @@ window.onload = function () {
     }
     socket.emit("pause");
   });
-};
+
+  $("#collapse").click(() => {
+    $("#users").collapse("toggle");
+  });
+});

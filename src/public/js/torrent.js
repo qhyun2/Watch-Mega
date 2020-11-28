@@ -1,10 +1,9 @@
-/* eslint-disable */
 let torrentTable, torrentTemplate;
 
-window.onload = () => {
+$(() => {
   torrentTable = document.querySelector("tbody");
   torrentTemplate = document.querySelector("#torrentrow");
-};
+});
 
 function updateTable(torrents) {
   // clear table

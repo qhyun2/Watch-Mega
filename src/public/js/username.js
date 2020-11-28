@@ -1,9 +1,8 @@
-/* eslint-disable */
-
 function usernameSubmit() {
-  let input = $("#username-input").val();
+  let input = $("#username-input").val().trim();
   if (input) {
     $("#username-btn-text").text(input);
+    socket.emit("name", input);
   }
 
   $("#username-input").val("");
@@ -12,7 +11,7 @@ function usernameSubmit() {
   $("#username-btn").show();
 }
 
-$(document).ready(() => {
+$(() => {
   $("#username-btn").click(function () {
     $("#username-btn").hide();
     $("#username-input").addClass("username-shown");

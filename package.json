@@ -71,7 +71,8 @@
     ],
     "ignorePatterns": [
       "node_modules",
-      "dist"
+      "dist",
+      "src/public/js"
     ]
   }
 }

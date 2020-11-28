@@ -30,3 +30,28 @@
   grid-row: 1;
   grid-column: 1;
 }
+.panel-heading a:before {
+  float: right;
+  transition: all 0.5s;
+}
+
+.card-header.active a:before {
+  transform: rotate(180deg);
+}
+
+.fa {
+  margin-right: 0.5rem;
+  font-size: 24px;
+  font-weight: bold;
+  position: relative;
+  top: 2px;
+}
+
+#users-table tr:first-child td:first-child {
+  border-top: none;
+}
+
+#users-table td {
+  padding-top: 0.3rem;
+  padding-bottom: 0.3rem;
+}

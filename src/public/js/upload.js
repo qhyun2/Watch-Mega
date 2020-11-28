@@ -1,4 +1,4 @@
-$(function () {
+$(() => {
   $("#fileupload").fileupload({
     url: "/uploads",
     maxFileSize: 4 * 1000 * 1000 * 1000, // 4GB

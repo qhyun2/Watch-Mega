@@ -10,11 +10,18 @@ head
     .container
       .row
         .col-md-9.m-auto.pt-4
-          script(src='/socket.io/socket.io.js')
           script(src='/js/watch.js')
           video#video.video-js.vjs-fill(controls)
             source(type='video/mp4')
       .row
-        .col-4.m-auto.pt-4.text-center
-          #watching.alert.alert-dark 1 user currently watching
+        .col-4.m-auto.pt-4
+          .card.bg-secondary
+            .card-header.p-0
+              button.btn.bg-secondary.w-100.h-100#collapse
+                i.fa.fa-angle-right.arrow.text-justify-left
+                span#count 1 user currently watching
+            #users.collapse
+              .card-body
+                table.table.table-dark.bg-secondary.text-dark.mb-0#users-table
+                  tbody
     script(src='https://vjs.zencdn.net/7.8.4/video.js')
