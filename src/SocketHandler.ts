@@ -20,23 +20,24 @@ export class SocketServer {
       this.connectedUsers++;
       this.updateWatching();
 
-      socket.emit("seek", this.position);
+      socket.emit("seek", "Server ", this.position);
 
       if (this.playing) {
-        socket.emit("play", this.position);
+        socket.emit("play", "Server ", this.position);
       }
 
       socket.on("seek", (msg) => {
-        socket.broadcast.emit("seek", msg);
         this.position = msg;
+        socket.broadcast.emit("seek", this.getName(socket.id), this.position);
       });
       socket.on("play", (msg) => {
-        socket.broadcast.emit("play", msg);
         this.playing = true;
+        this.position = msg;
+        socket.broadcast.emit("play", this.getName(socket.id), this.position);
       });
       socket.on("pause", () => {
-        socket.broadcast.emit("pause");
         this.playing = false;
+        socket.broadcast.emit("pause", this.getName(socket.id));
       });
       socket.on("disconnect", () => {
         this.idToUserName.delete(socket.id);
@@ -46,7 +47,8 @@ export class SocketServer {
 
       // received username
       socket.on("name", (msg) => {
-        this.idToUserName.set(socket.id, String(msg));
+        msg = String(msg).slice(0, 30); // cap at 20 chars
+        this.idToUserName.set(socket.id, msg);
         console.log(this.idToUserName);
         console.log(Array.from(this.idToUserName.values()));
         this.updateWatching();
@@ -57,5 +59,12 @@ export class SocketServer {
   updateWatching(): void {
     const users = Array.from(this.idToUserName.values());
     this.io.sockets.emit("watching", { count: this.connectedUsers, usernames: users });
+  }
+
+  getName(id: string): string {
+    if (this.idToUserName.has(id)) {
+      return this.idToUserName.get(id);
+    }
+    return "Anon";
   }
 }

@@ -3,7 +3,6 @@ function doUsernameSubmit() {
 }
 
 function usernameSubmit(name) {
-  console.log(name);
   if (name) {
     $("#username-btn-text").text(name);
     Cookies.set("username", name, { sameSite: "strict" });

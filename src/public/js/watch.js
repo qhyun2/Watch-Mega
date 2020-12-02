@@ -13,19 +13,23 @@ $(() => {
   }
 
   // video events from server
-  socket.on("seek", (msg) => {
+  socket.on("seek", (user, time) => {
     ignoreSeek = true;
-    video.currentTime = msg;
+    console.log(user, time);
+    video.currentTime = time;
+    sendNotif(`${user} seeked the video`);
   });
-  socket.on("play", (msg) => {
+  socket.on("play", (user, time) => {
     ignorePlay = true;
     ignoreSeek = true;
-    video.currentTime = msg;
+    video.currentTime = time;
     video.play();
+    sendNotif(`${user} played the video`);
   });
-  socket.on("pause", () => {
+  socket.on("pause", (user) => {
     ignorePause = true;
     video.pause();
+    sendNotif(`${user} paused the video`);
   });
   socket.on("newvideo", () => {
     newVideo();
@@ -78,4 +82,17 @@ $(() => {
 function newVideo() {
   $("#subs").attr("src", `subs?t=${Math.random()}`);
   video.src = `video?t=${Math.random()}`;
+}
+
+function sendNotif(msg) {
+  Toastify({
+    text: msg,
+    duration: 4000,
+    newWindow: true,
+    close: true,
+    gravity: "bottom",
+    position: "right",
+    stopOnFocus: true,
+    backgroundColor: "#6c757d",
+  }).showToast();
 }
