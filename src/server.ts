@@ -12,6 +12,7 @@ import { TClient } from "./TClient";
 import { ApiRouter } from "./api";
 import { SocketServer } from "./SocketHandler";
 import { serveVideo } from "./VideoServer";
+import { serveSubs } from "./SubServer";
 
 const app = express();
 const router = express.Router();
@@ -55,8 +56,14 @@ upload.configure({
   uploadDir: path.join(__dirname + "/public/videos"),
 });
 
+// video endpoint
 router.get("/video", (req, res) => {
   serveVideo(req, res, videoName);
+});
+
+// subtitles endpoint
+router.get("/subs", (req, res) => {
+  serveSubs(req, res, videoName);
 });
 
 app.use(serveFavicon(path.join(__dirname, "public/favicon.ico")));

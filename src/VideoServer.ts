@@ -1,7 +1,8 @@
 import * as fs from "fs";
 import * as path from "path";
+import { Request, Response } from "express";
 
-export function serveVideo(req, res, videoName) {
+export function serveVideo(req: Request, res: Response, videoName: string): void {
   if (videoName == "") {
     res.sendStatus(404);
     return;

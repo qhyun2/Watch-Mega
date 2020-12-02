@@ -1,10 +1,11 @@
 $(() => {
   window.HELP_IMPROVE_VIDEOJS = false;
   var video = document.getElementById("video");
-  video.src = `./video?t=${Math.random()}`;
   var ignoreSeek = false;
   var ignorePlay = false;
   var ignorePause = false;
+
+  newVideo();
 
   // chrome does not allow autoplay with sound
   if (/chrome/i.test(navigator.userAgent)) {
@@ -27,7 +28,7 @@ $(() => {
     video.pause();
   });
   socket.on("newvideo", () => {
-    video.src = `./video?t=${Math.random()}`;
+    newVideo();
   });
 
   // users watching
@@ -73,3 +74,8 @@ $(() => {
     $("#users").collapse("toggle");
   });
 });
+
+function newVideo() {
+  $("#subs").attr("src", `subs?t=${Math.random()}`);
+  video.src = `video?t=${Math.random()}`;
+}
