@@ -4,8 +4,6 @@ import * as path from "path";
 import { urlencoded } from "body-parser";
 import serveFavicon from "serve-favicon";
 import serveIndex from "serve-index";
-var upload = require("jquery-file-upload-middleware");
-// import fileUpload from "express-fileupload";
 
 import { TClient } from "./TClient";
 import { ApiRouter } from "./api";
@@ -28,7 +26,7 @@ router.get("/", function (req, res) {
   res.render("index");
 });
 
-const files = ["success", "fail", "select", "upload", "torrent"];
+const files = ["success", "fail", "select", "torrent"];
 
 files.forEach((endpoint) => {
   router.get(`/${endpoint}`, (_, res) => {
@@ -54,11 +52,6 @@ router.post("/select", (req, res) => {
   res.status(303).redirect("/success");
 });
 
-// configure upload middleware
-upload.configure({
-  uploadDir: path.join(__dirname + "/public/videos"),
-});
-
 // video endpoint
 router.get("/video", (req, res) => {
   serveVideo(req, res, videoName);
@@ -73,7 +66,6 @@ app.use(serveFavicon(path.join(__dirname, "public/favicon.ico")));
 app.use(urlencoded({ extended: true }));
 app.use("/list", serveIndex(path.join(__dirname, "public/videos"), { icons: true }));
 app.use(express.static(path.join(__dirname, "public")));
-app.use("/uploads", upload.fileHandler());
 app.use(router);
 
 http.listen(3000, () => {

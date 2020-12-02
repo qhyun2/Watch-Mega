@@ -13,7 +13,7 @@ mixin navbar(tab)
     ul.navbar-nav.mr-auto
       +navitem("/", "Watch", (tab == "watch"))
       +navitem("/select", "Select", (tab == "select"))
-      +navitem("/upload", "Upload", (tab == "upload"))
+      //- +navitem("/upload", "Upload", (tab == "upload"))
       +navitem("/torrent", "Torrent", (tab == "torrent"))
     div.col-6.col-lg-5.col-xl-4#username
       button.px-4.bg-dark.text-light.username-field#username-btn
