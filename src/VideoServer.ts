@@ -3,11 +3,11 @@ import * as path from "path";
 import { Request, Response } from "express";
 
 export function serveVideo(req: Request, res: Response, videoName: string): void {
-  if (videoName == "") {
-    res.sendStatus(404);
-    return;
+  let videoPath = path.join(__dirname, `public/videos/${videoName}`);
+  if (!videoName) {
+    videoPath = path.join(__dirname, "public/default.mp4");
   }
-  const videoPath = path.join(__dirname, `public/videos/${videoName}`);
+  console.log(videoPath);
   fs.stat(videoPath, (err, stat) => {
     // file not found
     if (err !== null && err.code === "ENOENT") {

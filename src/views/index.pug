@@ -13,8 +13,11 @@ head
         .col-md-9.m-auto.pt-4
           script(src='/js/watch.js')
           video#video.video-js.vjs-fill(controls)
-            source#video-source(type='video/mp4')
+            source#video-source(src="video" type='video/mp4')
             track#subs(src="subs" kind="captions" label="English" default)
+          //- video#video.video-js.vjs-16-9.vjs-big-play-centered(controls data-setup='{}')
+            source#video-source(src="video" type='video/mp4')
+            //- track#subs(src="subs" kind="captions" label="English" default)
       .row
         .col-4.m-auto.pt-4
           .card.bg-secondary
