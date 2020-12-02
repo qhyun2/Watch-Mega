@@ -2,19 +2,20 @@ import * as fs from "fs";
 import * as path from "path";
 import { Request, Response } from "express";
 
-export function serveVideo(req: Request, res: Response, videoName: string): void {
-  let videoPath = path.join(__dirname, `public/videos/${videoName}`);
-  if (!videoName) {
+export function getPath(name: string): string {
+  let videoPath = path.join(__dirname, `public/videos/${name}`);
+  // default file
+  const exists = fs.existsSync(videoPath) && fs.statSync(videoPath).isFile();
+
+  if (!exists) {
     videoPath = path.join(__dirname, "public/default.mp4");
   }
-  console.log(videoPath);
-  fs.stat(videoPath, (err, stat) => {
-    // file not found
-    if (err !== null && err.code === "ENOENT") {
-      res.sendStatus(404);
-      return;
-    }
+  return videoPath;
+}
 
+export function serveVideo(req: Request, res: Response, videoName: string): void {
+  const videoPath = getPath(videoName);
+  fs.stat(videoPath, (err, stat) => {
     const fileSize = stat.size;
     const range = req.headers.range;
 

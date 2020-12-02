@@ -1,6 +1,5 @@
 import express from "express";
 import { createServer as createHTTPServer } from "http";
-import * as fs from "fs";
 import * as path from "path";
 import { urlencoded } from "body-parser";
 import serveFavicon from "serve-favicon";
@@ -13,11 +12,13 @@ import { ApiRouter } from "./api";
 import { SocketServer } from "./SocketHandler";
 import { serveVideo } from "./VideoServer";
 import { serveSubs } from "./SubServer";
+import { logger } from "./Logger";
 
 const app = express();
 const router = express.Router();
 const http = createHTTPServer(app);
 const ss = new SocketServer(http);
+
 let videoName = "";
 
 // pub views
@@ -45,6 +46,8 @@ router.post("/select", (req, res) => {
     return;
   }
   videoName = decodeURIComponent(req.body.selection).split("list")[1];
+
+  logger.info(`New video selected: ${videoName}`);
   ss.io.emit("newvideo");
   ss.playing = false;
   ss.position = 0;
@@ -74,5 +77,5 @@ app.use("/uploads", upload.fileHandler());
 app.use(router);
 
 http.listen(3000, () => {
-  console.log(`Server listening on port 3000`);
+  logger.info(`Server listening on port 3000`);
 });

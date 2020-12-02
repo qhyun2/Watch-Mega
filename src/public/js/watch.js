@@ -15,7 +15,6 @@ $(() => {
   // video events from server
   socket.on("seek", (user, time) => {
     ignoreSeek = true;
-    console.log(user, time);
     video.currentTime = time;
     sendNotif(`${user} seeked the video`);
   });

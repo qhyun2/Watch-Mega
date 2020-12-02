@@ -1,5 +1,6 @@
 import WebTorrent from "webtorrent";
 import * as path from "path";
+import { logger } from "./Logger";
 
 export class TClient {
   client: WebTorrent.Instance;
@@ -7,22 +8,20 @@ export class TClient {
     this.client = new WebTorrent();
   }
 
-  download(magnet: string): boolean {
-    this.client.add(
-      magnet,
-      { path: path.join(__dirname, "public/videos/") },
-      (torrent) => {
-        torrent.on("done", function () {
-          console.log(`${torrent.name} download finished`);
-          torrent.destroy();
-        });
+  download(magnet: string): void {
+    this.client.add(magnet, { path: path.join(__dirname, "public/videos/") }, (torrent) => {
+      torrent.on("ready", () => {
+        logger.info(`${torrent.name} download started`);
+      });
+      torrent.on("done", () => {
+        logger.info(`${torrent.name} download finished`);
+        torrent.destroy();
+      });
 
-        torrent.on("error", function () {
-          console.log(`${torrent.name} download failed`);
-        });
-      }
-    );
-    return true;
+      torrent.on("error", () => {
+        logger.info(`${torrent.name} download failed`);
+      });
+    });
   }
 
   getStatus(): Record<string, number> {

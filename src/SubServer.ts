@@ -1,11 +1,13 @@
 import * as fs from "fs";
 import * as path from "path";
 import { Request, Response } from "express";
+import { logger } from "./Logger";
 
 export function serveSubs(req: Request, res: Response, name: string): void {
+  if (!name) return;
   const videoName = path.basename(name) + ".vtt";
   const filePath = path.join(__dirname, "public/subs", videoName);
-  console.log(filePath);
+  logger.info(`Serving subs for ${videoName}`);
   if (!fs.existsSync(filePath)) {
     // download file
     res.send("not found");
