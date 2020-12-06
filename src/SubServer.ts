@@ -1,18 +1,17 @@
 import * as fs from "fs";
-import * as path from "path";
 import { Request, Response } from "express";
-import { logger } from "./Logger";
+import { logger } from "./helpers/Logger";
 
-export function serveSubs(req: Request, res: Response, name: string): void {
-  if (!name) return;
-  const videoName = path.basename(name) + ".vtt";
-  const filePath = path.join(__dirname, "public/subs", videoName);
-  logger.info(`Serving subs for ${videoName}`);
-  if (!fs.existsSync(filePath)) {
-    // download file
-    res.send("not found");
-    res.status(404);
+export async function serveSubs(req: Request, res: Response, name: string): Promise<void> {
+  if (!name) {
+    res.sendStatus(200);
     return;
   }
-  fs.createReadStream(filePath).pipe(res);
+
+  const subsPath = name + ".vtt";
+  if (!fs.existsSync(subsPath)) {
+    logger.info("Subs not found");
+  }
+  logger.info(`Serving subs file ${subsPath}`);
+  fs.createReadStream(subsPath).pipe(res);
 }

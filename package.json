@@ -7,7 +7,7 @@
     "start": "node -r ts-node/register ./src/server.ts",
     "dev": "nodemon",
     "build": "tsc",
-    "docker:build": "rm -rf ./src/public/videos && docker build . -t watchmega:latest",
+    "docker:build": "docker build . -t watchmega:latest",
     "docker:push": "docker tag watchmega:latest registry.digitalocean.com/qhyun2-main/watchmega && docker push registry.digitalocean.com/qhyun2-main/watchmega"
   },
   "repository": {
@@ -21,10 +21,14 @@
   },
   "homepage": "https://github.com/qhyun2/Watch-Mega#readme",
   "dependencies": {
+    "@types/axios": "^0.14.0",
     "@types/pino": "^6.3.4",
+    "axios": "^0.21.0",
+    "dotenv": "^8.2.0",
     "express": "^4.17.1",
     "express-fileupload": "^1.2.0",
     "jquery-file-upload-middleware": "qhyun2/jquery-file-upload-middleware#master",
+    "opensubtitles-api": "^5.1.2",
     "pino": "^6.7.0",
     "pino-pretty": "^4.3.0",
     "pug": "^3.0.0",

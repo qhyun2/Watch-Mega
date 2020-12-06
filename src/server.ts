@@ -1,3 +1,5 @@
+import { config } from "dotenv";
+config();
 import express from "express";
 import { createServer as createHTTPServer } from "http";
 import * as path from "path";
@@ -10,7 +12,7 @@ import { ApiRouter } from "./api";
 import { SocketServer } from "./SocketHandler";
 import { serveVideo } from "./VideoServer";
 import { serveSubs } from "./SubServer";
-import { logger } from "./Logger";
+import { logger } from "./helpers/Logger";
 
 const app = express();
 const router = express.Router();

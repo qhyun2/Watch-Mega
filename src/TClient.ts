@@ -1,6 +1,6 @@
 import WebTorrent from "webtorrent";
 import * as path from "path";
-import { logger } from "./Logger";
+import { logger } from "./helpers/Logger";
 
 export class TClient {
   client: WebTorrent.Instance;
