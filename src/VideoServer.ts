@@ -1,6 +1,7 @@
 import * as fs from "fs";
 import * as path from "path";
 import { Request, Response } from "express";
+import { logger } from "./helpers/Logger";
 
 export function getPath(name: string): string {
   let videoPath = path.join(__dirname, `public/videos/${name}`);
@@ -13,9 +14,11 @@ export function getPath(name: string): string {
   return videoPath;
 }
 
-export function serveVideo(req: Request, res: Response, videoName: string): void {
-  const videoPath = getPath(videoName);
+export function serveVideo(req: Request, res: Response, videoPath: string): void {
   fs.stat(videoPath, (err, stat) => {
+    if (err) {
+      logger.error(`Video not found: ${videoPath}`);
+    }
     const fileSize = stat.size;
     const range = req.headers.range;
 
@@ -46,4 +49,15 @@ export function serveVideo(req: Request, res: Response, videoName: string): void
       fs.createReadStream(videoPath).pipe(res);
     }
   });
+}
+
+export function serveSubs(req: Request, res: Response, videoPath: string): Promise<void> {
+  const subsPath = videoPath + ".vtt";
+  if (!fs.existsSync(subsPath)) {
+    logger.info(`Subs not found: ${subsPath}`);
+    res.sendStatus(404);
+    return;
+  }
+  logger.info(`Serving subs file ${subsPath}`);
+  fs.createReadStream(subsPath).pipe(res);
 }

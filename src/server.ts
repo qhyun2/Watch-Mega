@@ -10,16 +10,17 @@ import serveIndex from "serve-index";
 import { TClient } from "./TClient";
 import { ApiRouter } from "./api";
 import { SocketServer } from "./SocketHandler";
-import { serveVideo } from "./VideoServer";
-import { serveSubs } from "./SubServer";
+import { getPath, serveSubs, serveVideo } from "./VideoServer";
 import { logger } from "./helpers/Logger";
+
+import { getSubs } from "./helpers/Subtitler";
 
 const app = express();
 const router = express.Router();
 const http = createHTTPServer(app);
 const ss = new SocketServer(http);
 
-let videoName = "";
+let videoName = getPath("");
 
 // pub views
 app.set("view engine", "pug");
@@ -40,17 +41,19 @@ files.forEach((endpoint) => {
 const tclient = new TClient();
 router.use("/api", new ApiRouter(tclient).router);
 
-router.post("/select", (req, res) => {
+router.post("/select", async (req, res) => {
   if (!req.body.selection || req.body.selection == "") {
     res.status(303).redirect("/fail");
     return;
   }
   videoName = decodeURIComponent(req.body.selection).split("list")[1];
+  videoName = getPath(videoName);
 
   logger.info(`New video selected: ${videoName}`);
   ss.io.emit("newvideo");
   ss.playing = false;
   ss.position = 0;
+  await getSubs(videoName).catch((e) => logger.error(e));
   res.status(303).redirect("/success");
 });
 
