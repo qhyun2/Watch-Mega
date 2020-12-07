@@ -1,38 +1,66 @@
-$(() => {
-  window.HELP_IMPROVE_VIDEOJS = false;
-  var video = document.getElementById("video");
-  var ignoreSeek = false;
-  var ignorePlay = false;
-  var ignorePause = false;
+let video;
 
-  newVideo();
+$(() => {
+  videojs("video").ready(function () {
+    video = this;
+    var ignoreSeek = false;
+    var ignorePlay = false;
+    var ignorePause = false;
+
+    // video events to send
+    this.on("seeked", (e) => {
+      if (ignoreSeek) {
+        ignoreSeek = false;
+        return;
+      }
+      socket.emit("seek", video.currentTime());
+    });
+    this.on("play", (e) => {
+      if (ignorePlay) {
+        ignorePlay = false;
+        return;
+      }
+      socket.emit("play", video.currentTime());
+    });
+    this.on("pause", (e) => {
+      if (ignorePause) {
+        ignorePause = false;
+        return;
+      }
+      socket.emit("pause", video.currentTime());
+    });
+
+    // video events from server
+    socket.on("seek", (user, time) => {
+      sendNotif(`${user} seeked the video`);
+      ignoreSeek = true;
+      video.currentTime(time);
+    });
+    socket.on("play", (user, time) => {
+      sendNotif(`${user} played the video`);
+      ignorePlay = true;
+      ignoreSeek = true;
+      video.currentTime(time);
+      video.play();
+    });
+    socket.on("pause", (user, time) => {
+      sendNotif(`${user} paused the video`);
+      ignorePause = true;
+      ignoreSeek = true;
+      video.currentTime(time);
+      video.pause();
+    });
+
+    socket.on("newvideo", () => {
+      updateVideo(this);
+    });
+    updateVideo(this);
+  });
 
   // chrome does not allow autoplay with sound
   if (/chrome/i.test(navigator.userAgent)) {
-    video.muted = true;
+    video.muted(true);
   }
-
-  // video events from server
-  socket.on("seek", (user, time) => {
-    ignoreSeek = true;
-    video.currentTime = time;
-    sendNotif(`${user} seeked the video`);
-  });
-  socket.on("play", (user, time) => {
-    ignorePlay = true;
-    ignoreSeek = true;
-    video.currentTime = time;
-    video.play();
-    sendNotif(`${user} played the video`);
-  });
-  socket.on("pause", (user) => {
-    ignorePause = true;
-    video.pause();
-    sendNotif(`${user} paused the video`);
-  });
-  socket.on("newvideo", () => {
-    newVideo();
-  });
 
   // users watching
   socket.on("watching", (users) => {
@@ -51,36 +79,15 @@ $(() => {
     }
   });
 
-  video.addEventListener("seeked", (e) => {
-    if (ignoreSeek) {
-      ignoreSeek = false;
-      return;
-    }
-    socket.emit("seek", video.currentTime);
-  });
-  video.addEventListener("play", (e) => {
-    if (ignorePlay) {
-      ignorePlay = false;
-      return;
-    }
-    socket.emit("play", video.currentTime);
-  });
-  video.addEventListener("pause", (e) => {
-    if (ignorePause) {
-      ignorePause = false;
-      return;
-    }
-    socket.emit("pause");
-  });
-
   $("#collapse").click(() => {
     $("#users").collapse("toggle");
   });
 });
 
-function newVideo() {
-  $("#subs").attr("src", `subs?t=${Math.random()}`);
-  video.src = `video?t=${Math.random()}`;
+// change src with random t parameter to prevent caching
+function updateVideo(video) {
+  video.textTracks()[0].src = `subs?t=${Math.random()}`;
+  video.src({ type: "video/mp4", src: `video?t=${Math.random()}` });
 }
 
 function sendNotif(msg) {

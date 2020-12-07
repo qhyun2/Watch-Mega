@@ -40,9 +40,10 @@ export class SocketServer {
         socket.broadcast.emit("play", this.getName(socket.id), this.position);
         logger.info(`${socket.id} played the video`);
       });
-      socket.on("pause", () => {
+      socket.on("pause", (msg) => {
         this.playing = false;
-        socket.broadcast.emit("pause", this.getName(socket.id));
+        this.position = msg;
+        socket.broadcast.emit("pause", this.getName(socket.id), this.position);
         logger.info(`${socket.id} paused the video`);
       });
       socket.on("disconnect", () => {
@@ -53,7 +54,7 @@ export class SocketServer {
 
       // received username
       socket.on("name", (msg) => {
-        msg = xss(String(msg).slice(0, 30)); // cap at 20 chars
+        msg = xss(String(msg).slice(0, 50));
         logger.info(`${socket.id} set their username to ${msg}`);
         this.idToUserName.set(socket.id, msg);
         this.updateWatching();
