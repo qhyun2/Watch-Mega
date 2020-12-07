@@ -114,3 +114,4 @@ dist
 .vscode-test
 
 src/public/videos
+test videos

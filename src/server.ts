@@ -53,7 +53,6 @@ router.post("/select", async (req, res) => {
   ss.io.emit("newvideo");
   ss.playing = false;
   ss.position = 0;
-  await getSubs(videoName).catch((e) => logger.error(e));
   res.status(303).redirect("/success");
 });
 
