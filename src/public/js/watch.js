@@ -76,8 +76,63 @@ $(() => {
   $("#collapse").click(() => {
     $("#users").collapse("toggle");
   });
+
+  initHotkeys();
 });
 
+// adapted from
+// https://gist.github.com/buzamahmooza/b940c84b16f0b5719fa994d54c785cab
+function initHotkeys() {
+  document.addEventListener("keydown", (e) => {
+    if (!e.shiftKey && !e.ctrlKey && !e.altKey && !e.metaKey) {
+      switch (e.key) {
+        case "f":
+          toggleFullScreen();
+          break;
+        case "k":
+        case " ":
+          if (video.paused) video.play();
+          else video.pause();
+          e.preventDefault();
+          break;
+        case "l":
+          video.currentTime += 10;
+          e.preventDefault();
+          break;
+        case "ArrowRight":
+          video.currentTime += 5;
+          e.preventDefault();
+          break;
+        case "j":
+          video.currentTime -= 10;
+          e.preventDefault();
+          break;
+        case "ArrowLeft":
+          video.currentTime -= 5;
+          e.preventDefault();
+          break;
+        case "ArrowUp":
+          if (video.volume <= 0.9) video.volume += 0.1;
+          e.preventDefault();
+          break;
+        case "ArrowDown":
+          if (video.volume >= 0.1) video.volume -= 0.1;
+          e.preventDefault();
+          break;
+      }
+    }
+  });
+}
+
+function toggleFullScreen() {
+  if (document.fullscreenElement != video) {
+    if (video.requestFullscreen) video.requestFullscreen();
+  } else {
+    document.exitFullscreen();
+  }
+}
+
+// set sub and video src to have a new t param to avoid caching
 function newVideo() {
   $("#subs").attr("src", `subs?t=${Math.random()}`);
   video.src = `video?t=${Math.random()}`;
