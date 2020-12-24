@@ -1,8 +1,11 @@
+var isInputing = false;
+
 function doUsernameSubmit() {
   usernameSubmit($("#username-input").val().trim());
 }
 
 function usernameSubmit(name) {
+  isInputing = false;
   if (name) {
     $("#username-btn-text").text(name);
     Cookies.set("username", name, { sameSite: "strict" });
@@ -19,6 +22,7 @@ function usernameSubmit(name) {
 
 $(() => {
   $("#username-btn").click(function () {
+    isInputing = true;
     $("#username-btn").hide();
     $("#username-input").addClass("username-shown");
     $("#username-input").removeAttr("disabled");

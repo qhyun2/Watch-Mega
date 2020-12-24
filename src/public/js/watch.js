@@ -7,10 +7,8 @@ $(() => {
 
   newVideo();
 
-  // chrome does not allow autoplay with sound
-  if (/chrome/i.test(navigator.userAgent)) {
-    video.muted = true;
-  }
+  // most browsers do not allow autoplay with sound
+  video.muted = true;
 
   // video events from server
   socket.on("seek", (user, time) => {
@@ -76,7 +74,6 @@ $(() => {
   $("#collapse").click(() => {
     $("#users").collapse("toggle");
   });
-
   initHotkeys();
 });
 
@@ -84,10 +81,14 @@ $(() => {
 // https://gist.github.com/buzamahmooza/b940c84b16f0b5719fa994d54c785cab
 function initHotkeys() {
   document.addEventListener("keydown", (e) => {
+    // user is typing into text box
+    if (isInputing) return;
+
     if (!e.shiftKey && !e.ctrlKey && !e.altKey && !e.metaKey) {
       switch (e.key) {
         case "f":
           toggleFullScreen();
+          e.preventDefault();
           break;
         case "k":
         case " ":
