@@ -1,5 +1,6 @@
 import { config } from "dotenv";
 config();
+
 import express from "express";
 import { createServer as createHTTPServer } from "http";
 import * as path from "path";
@@ -12,8 +13,6 @@ import { ApiRouter } from "./api";
 import { SocketServer } from "./SocketHandler";
 import { getPath, serveSubs, serveVideo } from "./VideoServer";
 import { logger } from "./helpers/Logger";
-
-import { getSubs } from "./helpers/Subtitler";
 
 const app = express();
 const router = express.Router();
@@ -29,7 +28,7 @@ router.get("/", function (req, res) {
   res.render("index");
 });
 
-const files = ["success", "fail", "select", "torrent"];
+const files = ["success", "fail", "torrent"];
 
 files.forEach((endpoint) => {
   router.get(`/${endpoint}`, (_, res) => {
@@ -37,24 +36,21 @@ files.forEach((endpoint) => {
   });
 });
 
-// api endpoint
-const tclient = new TClient();
-router.use("/api", new ApiRouter(tclient).router);
-
-router.post("/select", async (req, res) => {
-  if (!req.body.selection || req.body.selection == "") {
-    res.status(303).redirect("/fail");
-    return;
-  }
-  videoName = decodeURIComponent(req.body.selection).split("list")[1];
-  videoName = getPath(videoName);
-
+// video selection endpoint
+const fileSelectCSS = path.join(__dirname, "public/css/fileselect.css");
+app.use("/select", serveIndex(path.join(__dirname, "public/videos"), { icons: true, stylesheet: fileSelectCSS }));
+app.use("/select", (req, res) => {
+  videoName = getPath(decodeURIComponent(req.path));
   logger.info(`New video selected: ${videoName}`);
   ss.io.emit("newvideo");
   ss.playing = false;
   ss.position = 0;
   res.status(303).redirect("/success");
 });
+
+// api endpoint
+const tclient = new TClient();
+router.use("/api", new ApiRouter(tclient).router);
 
 // video endpoint
 router.get("/video", (req, res) => {
@@ -68,10 +64,11 @@ router.get("/subs", (req, res) => {
 
 app.use(serveFavicon(path.join(__dirname, "public/favicon.ico")));
 app.use(urlencoded({ extended: true }));
-app.use("/list", serveIndex(path.join(__dirname, "public/videos"), { icons: true }));
+
 app.use(express.static(path.join(__dirname, "public")));
 app.use(router);
 
-http.listen(3000, () => {
-  logger.info(`Server listening on port 3000`);
+const PORT = process.env.PORT || 3000;
+http.listen(PORT, () => {
+  logger.info(`Server listening on port ${PORT}`);
 });

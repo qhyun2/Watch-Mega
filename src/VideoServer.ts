@@ -4,7 +4,8 @@ import { Request, Response } from "express";
 import { logger } from "./helpers/Logger";
 
 export function getPath(name: string): string {
-  let videoPath = path.join(__dirname, `public/videos/${name}`);
+  let videoPath = path.join(__dirname, "public/videos", name);
+
   // default file
   const exists = fs.existsSync(videoPath) && fs.statSync(videoPath).isFile();
 
