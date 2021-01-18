@@ -1,6 +1,3 @@
-import { config } from "dotenv";
-config();
-
 import express from "express";
 import { createServer as createHTTPServer } from "http";
 import * as path from "path";
