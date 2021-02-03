@@ -8,7 +8,8 @@ $(() => {
   newVideo();
 
   // most browsers do not allow autoplay with sound
-  video.muted = true;
+  // TODO something better than this
+  video.volume = 0;
 
   // video events from server
   socket.on("seek", (user, time) => {
@@ -113,11 +114,11 @@ function initHotkeys() {
           e.preventDefault();
           break;
         case "ArrowUp":
-          if (video.volume <= 0.9) video.volume += 0.1;
+          video.volume = Math.min(video.volume + 0.1, 1);
           e.preventDefault();
           break;
         case "ArrowDown":
-          if (video.volume >= 0.1) video.volume -= 0.1;
+          video.volume = Math.max(video.volume - 0.1, 0);
           e.preventDefault();
           break;
       }
