@@ -39,9 +39,10 @@ app.use("/select", serveIndex(path.join(__dirname, "public/videos"), { icons: tr
 app.use("/select", (req, res) => {
   videoName = getPath(decodeURIComponent(req.path));
   logger.info(`New video selected: ${videoName}`);
-  ss.io.emit("newvideo");
+  ss.videoName = path.basename(videoName);
   ss.playing = false;
   ss.position = 0;
+  ss.newVideo();
   res.status(303).redirect("/success");
 });
 

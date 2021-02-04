@@ -8,6 +8,10 @@ head
     +navbar("watch")
   body.bg-dark
     .container
+      .row.pt-4
+        .col-md-10.m-auto
+          .alert.alert-dark.bg-secondary(role="alert" style="border-style: none")
+            h5.text-center.text-white.mb-0#videoname Loading...
       .row
         .col-md-9.m-auto.pt-4
           script(src='/js/watch.js')

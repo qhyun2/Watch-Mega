@@ -9,6 +9,7 @@ export class SocketServer {
   connectedUsers = 0;
   playing = false;
   idToUserName: Map<string, string> = new Map();
+  videoName = "";
 
   constructor(http: Server) {
     setInterval(() => {
@@ -58,7 +59,12 @@ export class SocketServer {
         this.idToUserName.set(socket.id, msg);
         this.updateWatching();
       });
+      this.newVideo();
     });
+  }
+
+  newVideo(): void {
+    this.io.sockets.emit("newvideo", this.videoName);
   }
 
   updateWatching(): void {

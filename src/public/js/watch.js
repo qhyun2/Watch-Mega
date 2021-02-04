@@ -29,8 +29,8 @@ $(() => {
     video.pause();
     sendNotif(`${user} paused the video`);
   });
-  socket.on("newvideo", () => {
-    newVideo();
+  socket.on("newvideo", (name) => {
+    newVideo(name);
   });
 
   // users watching
@@ -135,9 +135,10 @@ function toggleFullScreen() {
 }
 
 // set sub and video src to have a new t param to avoid caching
-function newVideo() {
+function newVideo(name) {
   $("#subs").attr("src", `subs?t=${Math.random()}`);
   video.src = `video?t=${Math.random()}`;
+  $("#videoname").text(name);
 }
 
 function sendNotif(msg) {
