@@ -43,7 +43,7 @@ app.use("/select", (req, res) => {
   ss.playing = false;
   ss.position = 0;
   ss.newVideo();
-  res.status(303).redirect("/success");
+  res.status(303).redirect("/");
 });
 
 // api endpoint
