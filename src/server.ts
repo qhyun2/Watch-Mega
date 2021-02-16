@@ -24,16 +24,13 @@ let videoName = getPath("");
 // pub views
 app.set("view engine", "pug");
 app.set("views", path.join(__dirname, "views"));
+
 router.get("/", function (req, res) {
   res.render("index");
 });
 
-const files = ["success", "fail", "torrent"];
-
-files.forEach((endpoint) => {
-  router.get(`/${endpoint}`, (_, res) => {
-    res.render(endpoint);
-  });
+router.get(`/torrent`, (_, res) => {
+  res.render("torrent");
 });
 
 // video selection endpoint

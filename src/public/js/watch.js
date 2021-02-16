@@ -69,7 +69,7 @@ $(() => {
       ignorePause = false;
       return;
     }
-    socket.emit("pause");
+    socket.emit("pause", video.currentTime);
   });
 
   $("#collapse").click(() => {

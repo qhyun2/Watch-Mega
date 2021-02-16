@@ -16,7 +16,7 @@ export class ApiRouter {
 
     this.router.post("/torrent/start", (req, res) => {
       tclient.download(req.body.magnet);
-      res.status(303).redirect("/success");
+      res.status(303).redirect("/torrent");
     });
   }
 }
