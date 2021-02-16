@@ -1,9 +1,15 @@
 version: "3.8"
 services:
   web:
-    image: registry.digitalocean.com/qhyun2-main/watchmega:latest
+    container_name: watchmega_node
+    image: qhyun2/watch-mega:latest
     ports:
       - "80:3000"
     volumes:
       - /home/howard/videos:/app/public/videos
+      - /home/howard/subs:/app/public/subs
+    restart: always
+  redis:
+    container_name: watchmega_redis
+    image: redis:6.0
     restart: always
