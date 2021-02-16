@@ -2,53 +2,71 @@ import { Server } from "http";
 import { Server as SocketIOServer, Socket } from "socket.io";
 import { logger } from "./helpers/Logger";
 import xss from "xss";
+import * as Redis from "ioredis";
+import * as RC from "./RedisConstants";
 
 export class SocketServer {
   io: SocketIOServer;
-  position = 0;
-  connectedUsers = 0;
-  playing = false;
   idToUserName: Map<string, string> = new Map();
-  videoName = "";
+  redis: Redis.Redis;
 
   constructor(http: Server) {
+    this.io = new SocketIOServer(http);
+    this.redis = new Redis.default();
+    this.redis.set(RC.REDIS_CONNECTIONS, 0);
+    this.redis.set(RC.REDIS_POSITION, 0);
+    this.redis.set(RC.REDIS_PLAYING, RC.RFALSE);
+    this.redis.set(RC.REDIS_VIDEO_NAME, "");
+
     setInterval(() => {
-      if (this.playing) this.position++;
+      this.redis.get(RC.REDIS_PLAYING).then((playing) => {
+        if (playing == RC.RTRUE) {
+          console.log(playing);
+          this.redis.incr(RC.REDIS_POSITION).catch((e) => {
+            console.log(e);
+          });
+        }
+      });
     }, 1000);
 
-    this.io = new SocketIOServer(http);
-
     // video sync
-    this.io.on("connection", (socket: Socket) => {
-      this.connectedUsers++;
-      logger.info(`${socket.id} has connected. Total ${this.connectedUsers} user(s) connected`);
+    this.io.on("connection", async (socket: Socket) => {
+      this.redis.incr(RC.REDIS_CONNECTIONS);
+      logger.info(`${socket.id} has connected. Total ${await this.redis.get(RC.REDIS_CONNECTIONS)} user(s) connected`);
 
       this.updateWatching();
-      socket.emit("seek", "Server ", this.position);
+      socket.emit("seek", "Server ", await this.redis.get(RC.REDIS_POSITION));
 
-      if (this.playing) {
-        socket.emit("play", "Server ", this.position);
+      if ((await this.redis.get(RC.REDIS_PLAYING)) == RC.RTRUE) {
+        socket.emit("play", "Server ", await this.redis.get(RC.REDIS_POSITION));
       }
 
       socket.on("seek", (msg) => {
-        this.position = msg;
-        socket.broadcast.emit("seek", this.getName(socket.id), this.position);
+        this.redis.set(RC.REDIS_POSITION, msg);
+        this.redis.get(RC.REDIS_POSITION).then((pos) => {
+          socket.broadcast.emit("seek", this.getName(socket.id), pos);
+        });
         logger.info(`${socket.id} seeked the video`);
       });
-      socket.on("play", (msg) => {
-        this.playing = true;
-        this.position = msg;
-        socket.broadcast.emit("play", this.getName(socket.id), this.position);
+
+      socket.on("play", async (msg) => {
+        this.redis.set(RC.REDIS_PLAYING, RC.RTRUE);
+        this.redis.set(RC.REDIS_POSITION, msg);
+        this.redis.get(RC.REDIS_POSITION).then((pos) => {
+          socket.broadcast.emit("play", this.getName(socket.id), pos);
+        });
         logger.info(`${socket.id} played the video`);
       });
       socket.on("pause", () => {
-        this.playing = false;
-        socket.broadcast.emit("pause", this.getName(socket.id));
+        this.redis.set(RC.REDIS_PLAYING, RC.RFALSE);
+        this.redis.get(RC.REDIS_POSITION).then((pos) => {
+          socket.broadcast.emit("pause", this.getName(socket.id), pos);
+        });
         logger.info(`${socket.id} paused the video`);
       });
       socket.on("disconnect", () => {
         this.idToUserName.delete(socket.id);
-        this.connectedUsers--;
+        this.redis.decr(RC.REDIS_CONNECTIONS);
         this.updateWatching();
       });
 
@@ -59,17 +77,20 @@ export class SocketServer {
         this.idToUserName.set(socket.id, msg);
         this.updateWatching();
       });
-      this.newVideo();
     });
   }
 
   newVideo(): void {
-    this.io.sockets.emit("newvideo", this.videoName);
+    this.redis.get(RC.REDIS_VIDEO_NAME).then((videoname) => {
+      this.io.sockets.emit("newvideo", videoname);
+    });
   }
 
   updateWatching(): void {
     const users = Array.from(this.idToUserName.values());
-    this.io.sockets.emit("watching", { count: this.connectedUsers, usernames: users });
+    this.redis.get(RC.REDIS_CONNECTIONS).then((connections) => {
+      this.io.sockets.emit("watching", { count: connections, usernames: users });
+    });
   }
 
   getName(id: string): string {
