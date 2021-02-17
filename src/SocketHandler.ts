@@ -12,7 +12,7 @@ export class SocketServer {
 
   constructor(http: Server) {
     this.io = new SocketIOServer(http);
-    this.redis = new Redis.default();
+    this.redis = new Redis.default("redis://redis");
     this.redis.set(RC.REDIS_CONNECTIONS, 0);
     this.redis.set(RC.REDIS_POSITION, 0);
     this.redis.set(RC.REDIS_PLAYING, RC.RFALSE);

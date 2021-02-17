@@ -17,7 +17,7 @@ const app = express();
 const router = express.Router();
 const http = createHTTPServer(app);
 const ss = new SocketServer(http);
-const redis = new Redis.default();
+const redis = new Redis.default("redis://redis");
 
 let videoName = getPath("");
 
