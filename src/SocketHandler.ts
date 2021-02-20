@@ -3,20 +3,24 @@ import { Server as SocketIOServer, Socket } from "socket.io";
 import { logger } from "./helpers/Logger";
 import xss from "xss";
 import * as Redis from "ioredis";
+import * as path from "path";
 import * as RC from "./RedisConstants";
+import { getPath } from "./VideoServer";
 
 export class SocketServer {
   io: SocketIOServer;
   idToUserName: Map<string, string> = new Map();
   redis: Redis.Redis;
+  redisSub: Redis.Redis;
 
   constructor(http: Server) {
     this.io = new SocketIOServer(http);
-    this.redis = new Redis.default();
+    this.redis = new Redis.default(6379, process.env.REDIS_URL);
+    this.redisSub = new Redis.default(6379, process.env.REDIS_URL);
     this.redis.set(RC.REDIS_CONNECTIONS, 0);
     this.redis.set(RC.REDIS_POSITION, 0);
     this.redis.set(RC.REDIS_PLAYING, RC.RFALSE);
-    this.redis.set(RC.REDIS_VIDEO_NAME, "");
+    this.redis.set(RC.REDIS_VIDEO_PATH, getPath(""));
 
     setInterval(() => {
       this.redis.get(RC.REDIS_PLAYING).then((playing) => {
@@ -71,6 +75,11 @@ export class SocketServer {
         });
         logger.info(`${socket.id} paused the video`);
       });
+
+      socket.on("next", () => {
+        this.redis.publish(RC.VIDEO_EVENT, "nextep");
+      });
+
       socket.on("disconnect", () => {
         this.idToUserName.delete(socket.id);
         this.redis.decr(RC.REDIS_CONNECTIONS);
@@ -87,9 +96,18 @@ export class SocketServer {
     });
   }
 
+  subscribeRedis(): void {
+    this.redisSub.subscribe(RC.VIDEO_EVENT);
+    this.redisSub.on("message", (_, event) => {
+      if (event == "newvideo") {
+        this.newVideo();
+      }
+    });
+  }
+
   newVideo(): void {
-    this.redis.get(RC.REDIS_VIDEO_NAME).then((videoname) => {
-      this.io.sockets.emit("newvideo", videoname);
+    this.redis.get(RC.REDIS_VIDEO_PATH).then((videoname) => {
+      this.io.sockets.emit("newvideo", path.basename(videoname));
     });
   }
 

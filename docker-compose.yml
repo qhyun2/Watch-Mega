@@ -1,7 +1,8 @@
-version: "3.8"
+version: "3"
 services:
   web:
-    container_name: watchmega_node
+    env_file:
+      - .docker.env
     links:
       - redis
     image: qhyun2/watch-mega:latest
@@ -13,6 +14,3 @@ services:
     restart: always
   redis:
     image: redis:6.0
-    container_name: redis
-    expose:
-      - 6379

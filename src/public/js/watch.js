@@ -75,6 +75,10 @@ $(() => {
   $("#collapse").click(() => {
     $("#users").collapse("toggle");
   });
+
+  $("#nextep").click(() => {
+    socket.emit("next");
+  });
   initHotkeys();
 });
 

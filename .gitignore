@@ -115,3 +115,5 @@ dist
 
 src/public/videos
 test videos
+.docker.env
+dump.rdb
