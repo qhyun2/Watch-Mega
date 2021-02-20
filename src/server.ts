@@ -11,13 +11,14 @@ import { ApiRouter } from "./api";
 import { SocketServer } from "./SocketHandler";
 import { getPath, serveSubs, serveVideo } from "./VideoServer";
 import { logger } from "./helpers/Logger";
+import { watchingToString } from "./helpers/Aux";
 import * as RC from "./RedisConstants";
 
 const app = express();
 const router = express.Router();
 const http = createHTTPServer(app);
 const ss = new SocketServer(http);
-const redis = new Redis.default("redis://redis");
+const redis = new Redis.default();
 
 let videoName = getPath("");
 
@@ -25,8 +26,11 @@ let videoName = getPath("");
 app.set("view engine", "pug");
 app.set("views", path.join(__dirname, "views"));
 
-router.get("/", function (req, res) {
-  res.render("index");
+router.get("/", async (_, res) => {
+  let videoName = await redis.get(RC.REDIS_VIDEO_NAME);
+  if (videoName == "") videoName = "Select a video...";
+  const count = parseInt(await redis.get(RC.REDIS_CONNECTIONS)) + 1;
+  res.render("index", { videoName: videoName, count: watchingToString(count) });
 });
 
 router.get(`/torrent`, (_, res) => {

@@ -11,7 +11,7 @@ head
       .row.pt-4
         .col-md-10.m-auto
           .alert.alert-dark.bg-secondary(role="alert" style="border-style: none")
-            h5.text-center.text-white.mb-0#videoname Loading...
+            h5.text-center.text-white.mb-0#videoname #{videoName}
       .row
         .col-md-9.m-auto.pt-4
           script(src='/js/watch.js')
@@ -24,7 +24,7 @@ head
             .card-header.p-0
               button.btn.bg-secondary.w-100.h-100#collapse
                 i.fa.fa-angle-right.arrow.text-justify-left
-                span#count 1 user currently watching
+                span#count #{count}
             #users.collapse
               .card-body
                 table.table.table-dark.bg-secondary.text-dark.mb-0#users-table
