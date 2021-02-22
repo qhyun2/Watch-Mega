@@ -1,85 +1,28 @@
-$(() => {
+var ignoreSeek = false;
+var ignorePlay = false;
+var ignorePause = false;
+
+$(async () => {
   window.HELP_IMPROVE_VIDEOJS = false;
   var video = document.getElementById("video");
-  var ignoreSeek = false;
-  var ignorePlay = false;
-  var ignorePause = false;
-
+  video.volume = 0.8;
   newVideo();
-
-  // most browsers do not allow autoplay with sound
-  // TODO something better than this
-  video.volume = 0;
-
-  // video events from server
-  socket.on("seek", (user, time) => {
-    ignoreSeek = true;
-    video.currentTime = time;
-    sendNotif(`${user} seeked the video`);
-  });
-  socket.on("play", (user, time) => {
-    ignorePlay = true;
-    ignoreSeek = true;
-    video.currentTime = time;
-    video.play();
-    sendNotif(`${user} played the video`);
-  });
-  socket.on("pause", (user) => {
-    ignorePause = true;
-    video.pause();
-    sendNotif(`${user} paused the video`);
-  });
-  socket.on("newvideo", (name) => {
-    newVideo(name);
-  });
-
-  // users watching
-  socket.on("watching", (users) => {
-    const count = users.count;
-    const names = users.usernames;
-    $("#count").text(count + ` user${count === 1 ? "" : "s"} currently watching`);
-    $("#users-table").children("tbody").text("");
-    names.forEach((name) => {
-      $("#users-table").children("tbody").append(`<tr><td>${name}</td></tr>`);
-    });
-    const anon = count - names.length;
-    if (anon && names.length > 1) {
-      $("#users-table")
-        .children("tbody")
-        .append(`<tr><td>and ${anon} other user${anon === 1 ? "" : "s"}</td></tr>`);
-    }
-  });
-
-  video.addEventListener("seeked", (e) => {
-    if (ignoreSeek) {
-      ignoreSeek = false;
-      return;
-    }
-    socket.emit("seek", video.currentTime);
-  });
-  video.addEventListener("play", (e) => {
-    if (ignorePlay) {
-      ignorePlay = false;
-      return;
-    }
-    socket.emit("play", video.currentTime);
-  });
-  video.addEventListener("pause", (e) => {
-    if (ignorePause) {
-      ignorePause = false;
-      return;
-    }
-    socket.emit("pause", video.currentTime);
-  });
-
-  $("#collapse").click(() => {
-    $("#users").collapse("toggle");
-  });
-
-  $("#nextep").click(() => {
-    socket.emit("next");
-  });
   initHotkeys();
+  initSocket();
+  initVideoListeners();
+  initButtons();
+
+  var playingPopup;
+  await new Promise((resolve, _) => {
+    socket.on("info", (info) => {
+      playingPopup = info.playing;
+      resolve();
+    });
+  });
+
+  if (playingPopup) {
+    $("#joinroom").modal({ backdrop: "static" });
+  }
 });
 
 // adapted from
@@ -136,6 +79,86 @@ function toggleFullScreen() {
   } else {
     document.exitFullscreen();
   }
+}
+
+function initSocket() {
+  // video events from server
+  socket.on("seek", (user, time) => {
+    ignoreSeek = true;
+    video.currentTime = time;
+    if (user) sendNotif(`${user} seeked the video`);
+  });
+  socket.on("play", (user, time) => {
+    ignorePlay = true;
+    ignoreSeek = true;
+    video.currentTime = time;
+    video.play();
+    if (user) sendNotif(`${user} played the video`);
+  });
+  socket.on("pause", (user) => {
+    ignorePause = true;
+    video.pause();
+    if (user) sendNotif(`${user} paused the video`);
+  });
+  socket.on("newvideo", (name) => {
+    newVideo(name);
+  });
+
+  // users watching
+  socket.on("watching", (users) => {
+    const count = users.count;
+    const names = users.usernames;
+    $("#count").text(count + ` user${count === 1 ? "" : "s"} currently watching`);
+    $("#users-table").children("tbody").text("");
+    names.forEach((name) => {
+      $("#users-table").children("tbody").append(`<tr><td>${name}</td></tr>`);
+    });
+    const anon = count - names.length;
+    if (anon && names.length > 1) {
+      $("#users-table")
+        .children("tbody")
+        .append(`<tr><td>and ${anon} other user${anon === 1 ? "" : "s"}</td></tr>`);
+    }
+  });
+}
+
+function initVideoListeners() {
+  video.addEventListener("seeked", (e) => {
+    if (ignoreSeek) {
+      ignoreSeek = false;
+      return;
+    }
+    socket.emit("seek", video.currentTime);
+  });
+  video.addEventListener("play", (e) => {
+    if (ignorePlay) {
+      ignorePlay = false;
+      return;
+    }
+    socket.emit("play", video.currentTime);
+  });
+  video.addEventListener("pause", (e) => {
+    if (ignorePause) {
+      ignorePause = false;
+      return;
+    }
+    socket.emit("pause", video.currentTime);
+  });
+}
+
+function initButtons() {
+  $("#collapse").click(() => {
+    $("#users").collapse("toggle");
+  });
+
+  $("#nextep").click(() => {
+    socket.emit("next");
+  });
+
+  $("#dismiss").click(() => {
+    $("#joinroom").modal("hide");
+    socket.emit("ready");
+  });
 }
 
 // set sub and video src to have a new t param to avoid caching

@@ -6,6 +6,7 @@ import * as Redis from "ioredis";
 import * as path from "path";
 import * as RC from "./RedisConstants";
 import { getPath } from "./VideoServer";
+import { stringify } from "querystring";
 
 export class SocketServer {
   io: SocketIOServer;
@@ -42,14 +43,18 @@ export class SocketServer {
       );
 
       this.updateWatching();
+      socket.emit("info", { playing: (await this.redis.get(RC.REDIS_PLAYING)) == RC.RTRUE });
+      socket.emit("seek", null, await this.redis.get(RC.REDIS_POSITION));
 
-      if ((await this.redis.get(RC.REDIS_POSITION)) != "0") {
-        socket.emit("seek", "Server ", await this.redis.get(RC.REDIS_POSITION));
-      }
-
-      if ((await this.redis.get(RC.REDIS_PLAYING)) == RC.RTRUE) {
-        socket.emit("play", "Server ", await this.redis.get(RC.REDIS_POSITION));
-      }
+      socket.on("ready", () => {
+        Promise.all([this.redis.get(RC.REDIS_PLAYING), this.redis.get(RC.REDIS_POSITION)]).then(([playing, pos]) => {
+          if (playing == RC.RTRUE) {
+            socket.emit("play", null, pos);
+          } else {
+            socket.emit("seek", null, pos);
+          }
+        });
+      });
 
       socket.on("seek", (msg) => {
         this.redis.set(RC.REDIS_POSITION, parseInt(msg));

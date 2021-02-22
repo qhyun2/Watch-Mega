@@ -32,4 +32,13 @@ head
               .card-body
                 table.table.table-dark.bg-secondary.text-dark.mb-0#users-table
                   tbody
+    // modal for joining playing video
+    #joinroom.modal.fade.text-white
+      .modal-dialog.modal-dialog-centered(role='document')
+        .modal-content.bg-secondary
+          .modal-body.d-flex.flex-column.justify-content-center
+            h2.text-center.p-3 Welcome to WatchMega
+            p.text-center The video is already playing
+            button#dismiss.btn.btn-success.p-2(type='button')
+              h5.mb-0 Start watching
     script(type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js")
