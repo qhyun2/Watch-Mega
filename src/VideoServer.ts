@@ -24,7 +24,10 @@ export async function serveVideo(req: Request, res: Response): Promise<void> {
   const videoPath = await redis.get(RC.REDIS_VIDEO_PATH);
   fs.stat(videoPath, (err, stat) => {
     if (err) {
-      logger.error(`Video not found: ${videoPath}`);
+      const error = `Video not found: ${videoPath}`;
+      logger.warn(error);
+      res.status(404).send(error);
+      return;
     }
     const fileSize = stat.size;
     const range = req.headers.range;
@@ -37,7 +40,6 @@ export async function serveVideo(req: Request, res: Response): Promise<void> {
       const end = parts[1] ? parseInt(parts[1], 10) : fileSize - 1;
 
       const chunksize = end - start + 1;
-      const file = fs.createReadStream(videoPath, { start, end });
       const head = {
         "Content-Range": `bytes ${start}-${end}/${fileSize}`,
         "Accept-Ranges": "bytes",
@@ -45,8 +47,14 @@ export async function serveVideo(req: Request, res: Response): Promise<void> {
         "Content-Type": "video/mp4",
       };
 
-      res.writeHead(206, head);
-      file.pipe(res);
+      try {
+        const file = fs.createReadStream(videoPath, { start, end });
+        res.writeHead(206, head);
+        file.pipe(res);
+      } catch (error) {
+        res.status(400).send(error.stack);
+        logger.warn(error.stack);
+      }
     } else {
       const head = {
         "Content-Length": fileSize,
@@ -62,7 +70,7 @@ export async function serveSubs(req: Request, res: Response): Promise<void> {
   const videoPath = await redis.get(RC.REDIS_VIDEO_PATH);
   const subsPath = videoPath + ".vtt";
   if (!fs.existsSync(subsPath)) {
-    logger.info(`Subs not found: ${subsPath}`);
+    logger.warn(`Subs not found: ${subsPath}`);
     res.sendStatus(404);
     return;
   }
