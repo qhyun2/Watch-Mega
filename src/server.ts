@@ -47,7 +47,7 @@ app.use("/select", (req, res) => {
   redis.set(RC.REDIS_VIDEO_PATH, videoName);
   redis.set(RC.REDIS_PLAYING, RC.RFALSE);
   redis.set(RC.REDIS_POSITION, 0);
-  ss.newVideo();
+  redis.publish(RC.VIDEO_EVENT, RC.VE_NEWVID);
   res.status(303).redirect("/");
 });
 

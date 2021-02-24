@@ -2,8 +2,11 @@ import * as fs from "fs";
 import * as path from "path";
 import * as Redis from "ioredis";
 import { Request, Response } from "express";
+import "ffprobe";
+import { path as ffprobePath } from "ffprobe-static";
 import { logger } from "./helpers/Logger";
 import * as RC from "./RedisConstants";
+import getInfo from "ffprobe";
 
 const redis = new Redis.default(6379, process.env.REDIS_URL);
 const redisSub = new Redis.default(6379, process.env.REDIS_URL);
@@ -82,10 +85,26 @@ export function subscribeRedis(): void {
   redisSub.subscribe(RC.VIDEO_EVENT);
 
   redisSub.on("message", (_, event) => {
-    if (event == "nextep") {
-      nextEpisode();
+    switch (event) {
+      case RC.VE_NEWVID:
+        newVideo();
+        break;
+      case RC.VE_NEXTEP:
+        nextEpisode();
+        break;
     }
   });
+}
+
+async function newVideo(): Promise<void> {
+  const currentVideo = await redis.get(RC.REDIS_VIDEO_PATH);
+  getInfo(currentVideo, { path: ffprobePath })
+    .then((info) => {
+      redis.set(RC.REDIS_VIDEO_LENGTH, info.streams[0].duration);
+    })
+    .catch((err) => {
+      logger.error(err);
+    });
 }
 
 async function nextEpisode(): Promise<void> {
@@ -108,7 +127,7 @@ async function nextEpisode(): Promise<void> {
       }
     })
     .then(async (name) => {
-      await redis.publish(RC.VIDEO_EVENT, "newvideo");
+      await redis.publish(RC.VIDEO_EVENT, RC.VE_NEWVID);
       return name;
     })
     .then((name) => {

@@ -20,16 +20,18 @@ export class SocketServer {
     this.redisSub = new Redis.default(6379, process.env.REDIS_URL);
     this.redis.set(RC.REDIS_CONNECTIONS, 0);
     this.redis.set(RC.REDIS_POSITION, 0);
+    this.redis.set(RC.REDIS_VIDEO_LENGTH, 10);
     this.redis.set(RC.REDIS_PLAYING, RC.RFALSE);
     this.redis.set(RC.REDIS_VIDEO_PATH, getPath(""));
 
     setInterval(() => {
-      this.redis.get(RC.REDIS_PLAYING).then((playing) => {
-        if (playing == RC.RTRUE) {
-          this.redis.incr(RC.REDIS_POSITION).catch((e) => {
-            console.log(e);
-          });
-        }
+      Promise.all([
+        this.redis.get(RC.REDIS_PLAYING),
+        this.redis.get(RC.REDIS_POSITION),
+        this.redis.get(RC.REDIS_VIDEO_LENGTH),
+      ]).then(([playing, position, length]) => {
+        if (playing == RC.RTRUE) this.redis.incr(RC.REDIS_POSITION);
+        if (parseInt(position) > parseInt(length)) this.redis.set(RC.REDIS_PLAYING, RC.RFALSE);
       });
     }, 1000);
 
@@ -104,7 +106,7 @@ export class SocketServer {
   subscribeRedis(): void {
     this.redisSub.subscribe(RC.VIDEO_EVENT);
     this.redisSub.on("message", (_, event) => {
-      if (event == "newvideo") {
+      if (event == RC.VE_NEWVID) {
         this.newVideo();
       }
     });
