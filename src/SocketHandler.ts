@@ -6,7 +6,6 @@ import * as Redis from "ioredis";
 import * as path from "path";
 import * as RC from "./RedisConstants";
 import { getPath } from "./VideoServer";
-import { stringify } from "querystring";
 
 export class SocketServer {
   io: SocketIOServer;
@@ -90,7 +89,10 @@ export class SocketServer {
       });
 
       socket.on("next", () => {
-        this.redis.publish(RC.VIDEO_EVENT, "nextep");
+        this.redis.publish(RC.VIDEO_EVENT, RC.VE_NEXTEP);
+      });
+      socket.on("prev", () => {
+        this.redis.publish(RC.VIDEO_EVENT, RC.VE_PREVEP);
       });
 
       socket.on("disconnect", () => {

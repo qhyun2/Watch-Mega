@@ -11,19 +11,22 @@ head
     +navbar("watch")
   body.bg
     .container
-      .row.pt-4
-        .col-md-10.m-auto
-          .alert.alert-dark.bg-c-secondary(role="alert" style="border-style: none")
+      .row.pt-4.justify-content-center
+        .col-1
+          button.btn.bg-c-secondary.text-white.h-100.w-100#prevep
+            h4.mb-0 &lt;
+        .col-10.m-auto
+          .alert.alert-dark.bg-c-secondary.mb-0(role="alert" style="border-style: none")
             h5.text-center.text-highlight.mb-0#videoname #{videoName}
+        .col-1
+          button.btn.bg-c-secondary.text-white.h-100.w-100#nextep
+            h4.mb-0 &gt;
       .row
         .col-md-9.m-auto.pt-4
           script(src='/js/watch.js')
           video#video.video-js.vjs-fluid.vjs-lime(controls, preload="auto")
             source#video-source(src="video" type='video/mp4')
             track#subs(src="subs" kind="captions" label="English" default)
-      .row
-        .col-md-9.m-auto.pt-4.d-flex.justify-content-center
-          button.btn.bg-c-secondary.text-white#nextep Next Episode
       .row
         .col-4.m-auto.pt-4
           .card.bg-c-secondary

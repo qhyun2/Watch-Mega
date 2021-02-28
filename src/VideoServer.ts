@@ -90,7 +90,10 @@ export function subscribeRedis(): void {
         newVideo();
         break;
       case RC.VE_NEXTEP:
-        nextEpisode();
+        seekEpisode(1);
+        break;
+      case RC.VE_PREVEP:
+        seekEpisode(-1);
         break;
     }
   });
@@ -107,33 +110,41 @@ async function newVideo(): Promise<void> {
     });
 }
 
-async function nextEpisode(): Promise<void> {
-  const currentVideo = await redis.get(RC.REDIS_VIDEO_PATH);
-  const videoName = path.basename(currentVideo);
-  const currentDir = path.dirname(currentVideo);
-  fs.promises
-    .readdir(currentDir)
+function getEpisodes(): Promise<string[]> {
+  return redis
+    .get(RC.REDIS_VIDEO_PATH)
+    .then((currentVideo) => {
+      const currentDir = path.dirname(currentVideo);
+      return fs.promises.readdir(currentDir);
+    })
     .then((files) => {
-      files = files.filter((f) => f.match(/.(mov|mpeg|mkv|mp4|wmv|flv|avi)$/i)).sort();
-      const nextIdx = files.indexOf(videoName) + 1;
-      if (nextIdx >= files.length) {
-        throw "End of season";
-      } else {
-        return new Promise((resolve, _) => {
-          redis.set(RC.REDIS_VIDEO_PATH, path.join(currentDir, files[nextIdx])).then(() => {
-            resolve(files[nextIdx]);
-          });
-        });
-      }
-    })
-    .then(async (name) => {
-      await redis.publish(RC.VIDEO_EVENT, RC.VE_NEWVID);
-      return name;
-    })
-    .then((name) => {
-      logger.info(`Loaded next episode: ${name}`);
-    })
-    .catch((error) => {
-      logger.warn(`Could not load next episode: ${error}`);
+      return files.filter((f) => f.match(/.(mov|mpeg|mkv|mp4|wmv|flv|avi)$/i)).sort();
     });
+}
+
+function setVideo(path: string): Promise<void> {
+  return redis
+    .set(RC.REDIS_VIDEO_PATH, path)
+    .then(() => {
+      redis.publish(RC.VIDEO_EVENT, RC.VE_NEWVID);
+    })
+    .then(() => {
+      logger.info(`Loaded video: ${path}`);
+    });
+}
+
+async function seekEpisode(n: number): Promise<void> {
+  try {
+    const videoPath = await redis.get(RC.REDIS_VIDEO_PATH);
+    const videoName = path.basename(videoPath);
+    const currentDir = path.dirname(videoPath);
+    const files = await getEpisodes();
+    const nextIdx = files.indexOf(videoName) + n;
+    if (0 > nextIdx || nextIdx >= files.length) {
+      throw "Out of range";
+    }
+    setVideo(path.join(currentDir, files[nextIdx]));
+  } catch (error) {
+    logger.warn(`Could not load next episode: ${error}`);
+  }
 }

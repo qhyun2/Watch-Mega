@@ -153,6 +153,10 @@ function initButtons() {
     socket.emit("next");
   });
 
+  $("#prevep").click(() => {
+    socket.emit("prev");
+  });
+
   $("#dismiss").click(() => {
     $("#joinroom").modal("hide");
     socket.emit("ready");

@@ -6,7 +6,8 @@ export const REDIS_USERS = "users";
 export const REDIS_VIDEO_PATH = "videoName";
 
 export const VIDEO_EVENT = "videoevent";
-export const VE_NEXTEP = "nextep";
+export const VE_NEXTEP = "NEXTEP";
+export const VE_PREVEP = "PREVEP";
 export const VE_NEWVID = "newvideo";
 
 export const RTRUE = "true";
