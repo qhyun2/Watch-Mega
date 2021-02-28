@@ -1,11 +1,11 @@
 var ignoreSeek = false;
 var ignorePlay = false;
 var ignorePause = false;
+var vjs;
 
 $(async () => {
-  window.HELP_IMPROVE_VIDEOJS = false;
-  var video = document.getElementById("video");
-  video.volume = 0.8;
+  vjs = videojs("video");
+  vjs.volume(0.8);
   newVideo();
   initHotkeys();
   initSocket();
@@ -25,8 +25,7 @@ $(async () => {
   }
 });
 
-// adapted from
-// https://gist.github.com/buzamahmooza/b940c84b16f0b5719fa994d54c785cab
+// adapted from https://gist.github.com/buzamahmooza/b940c84b16f0b5719fa994d54c785cab
 function initHotkeys() {
   document.addEventListener("keydown", (e) => {
     // user is typing into text box
@@ -35,37 +34,37 @@ function initHotkeys() {
     if (!e.shiftKey && !e.ctrlKey && !e.altKey && !e.metaKey) {
       switch (e.key) {
         case "f":
-          toggleFullScreen();
+          vjs.isFullscreen() ? vjs.exitFullscreen() : vjs.requestFullscreen();
           e.preventDefault();
           break;
         case "k":
         case " ":
-          if (video.paused) video.play();
-          else video.pause();
+          console.log("bork");
+          vjs.paused() ? vjs.play() : vjs.pause();
           e.preventDefault();
           break;
         case "l":
-          video.currentTime += 10;
+          seek(10);
           e.preventDefault();
           break;
         case "ArrowRight":
-          video.currentTime += 5;
+          seek(5);
           e.preventDefault();
           break;
         case "j":
-          video.currentTime -= 10;
+          seek(-10);
           e.preventDefault();
           break;
         case "ArrowLeft":
-          video.currentTime -= 5;
+          seek(-5);
           e.preventDefault();
           break;
         case "ArrowUp":
-          video.volume = Math.min(video.volume + 0.1, 1);
+          vjs.volume(Math.min(vjs.volume() + 0.1, 1));
           e.preventDefault();
           break;
         case "ArrowDown":
-          video.volume = Math.max(video.volume - 0.1, 0);
+          vjs.volume(Math.max(vjs.volume() - 0.1, 0));
           e.preventDefault();
           break;
       }
@@ -73,31 +72,29 @@ function initHotkeys() {
   });
 }
 
-function toggleFullScreen() {
-  if (document.fullscreenElement != video) {
-    if (video.requestFullscreen) video.requestFullscreen();
-  } else {
-    document.exitFullscreen();
-  }
+function seek(amount) {
+  vjs.currentTime(vjs.currentTime() + amount);
 }
 
 function initSocket() {
   // video events from server
   socket.on("seek", (user, time) => {
     ignoreSeek = true;
-    video.currentTime = time;
+    vjs.currentTime(time);
     if (user) sendNotif(`${user} seeked the video`);
   });
   socket.on("play", (user, time) => {
     ignorePlay = true;
     ignoreSeek = true;
-    video.currentTime = time;
-    video.play();
+    vjs.currentTime(time);
+    vjs.play();
     if (user) sendNotif(`${user} played the video`);
   });
-  socket.on("pause", (user) => {
+  socket.on("pause", (user, time) => {
     ignorePause = true;
-    video.pause();
+    ignoreSeek = true;
+    vjs.pause();
+    vjs.currentTime(time);
     if (user) sendNotif(`${user} paused the video`);
   });
   socket.on("newvideo", (name) => {
@@ -123,26 +120,27 @@ function initSocket() {
 }
 
 function initVideoListeners() {
-  video.addEventListener("seeked", (e) => {
+  vjs.on("seeked", (e) => {
     if (ignoreSeek) {
       ignoreSeek = false;
+      console.log("ignored");
       return;
     }
-    socket.emit("seek", video.currentTime);
+    socket.emit("seek", vjs.currentTime());
   });
-  video.addEventListener("play", (e) => {
+  vjs.on("play", (e) => {
     if (ignorePlay) {
       ignorePlay = false;
       return;
     }
-    socket.emit("play", video.currentTime);
+    socket.emit("play", vjs.currentTime());
   });
-  video.addEventListener("pause", (e) => {
+  vjs.on("pause", (e) => {
     if (ignorePause) {
       ignorePause = false;
       return;
     }
-    socket.emit("pause", video.currentTime);
+    socket.emit("pause", vjs.currentTime());
   });
 }
 
@@ -164,7 +162,7 @@ function initButtons() {
 // set sub and video src to have a new t param to avoid caching
 function newVideo(name) {
   $("#subs").attr("src", `subs?t=${Math.random()}`);
-  video.src = `video?t=${Math.random()}`;
+  vjs.src({ type: "video/mp4", src: `video?t=${Math.random()}` });
   $("#videoname").text(name);
 }
 

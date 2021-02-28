@@ -30,8 +30,8 @@ export class SocketServer {
         this.redis.get(RC.REDIS_POSITION),
         this.redis.get(RC.REDIS_VIDEO_LENGTH),
       ]).then(([playing, position, length]) => {
-        if (playing == RC.RTRUE) this.redis.incr(RC.REDIS_POSITION);
-        if (parseInt(position) > parseInt(length)) this.redis.set(RC.REDIS_PLAYING, RC.RFALSE);
+        if (playing == RC.RTRUE) this.redis.incrbyfloat(RC.REDIS_POSITION, 1);
+        if (parseFloat(position) >= parseInt(length) - 1) this.redis.set(RC.REDIS_PLAYING, RC.RFALSE);
       });
     }, 1000);
 
@@ -59,28 +59,34 @@ export class SocketServer {
       });
 
       socket.on("seek", (msg) => {
-        this.redis.set(RC.REDIS_POSITION, parseInt(msg));
+        const pos = parseFloat(msg);
+        if (isNaN(pos)) return;
+        this.redis.set(RC.REDIS_POSITION, pos);
         this.redis.get(RC.REDIS_POSITION).then((pos) => {
           socket.broadcast.emit("seek", this.getName(socket.id), pos);
         });
-        logger.info(`${socket.id} seeked the video`);
+        logger.info(`${socket.id} seeked the video to ${pos}`);
       });
 
       socket.on("play", async (msg) => {
+        const pos = parseFloat(msg);
+        if (isNaN(pos)) return;
         this.redis.set(RC.REDIS_PLAYING, RC.RTRUE);
-        this.redis.set(RC.REDIS_POSITION, parseInt(msg));
+        this.redis.set(RC.REDIS_POSITION, pos);
         this.redis.get(RC.REDIS_POSITION).then((pos) => {
           socket.broadcast.emit("play", this.getName(socket.id), pos);
         });
-        logger.info(`${socket.id} played the video`);
+        logger.info(`${socket.id} played the video at ${pos}`);
       });
       socket.on("pause", (msg) => {
+        const pos = parseInt(msg);
+        if (isNaN(pos)) return;
         this.redis.set(RC.REDIS_PLAYING, RC.RFALSE);
-        this.redis.set(RC.REDIS_POSITION, parseInt(msg));
+        this.redis.set(RC.REDIS_POSITION, pos);
         this.redis.get(RC.REDIS_POSITION).then((pos) => {
           socket.broadcast.emit("pause", this.getName(socket.id), pos);
         });
-        logger.info(`${socket.id} paused the video`);
+        logger.info(`${socket.id} paused the video at ${pos}`);
       });
 
       socket.on("next", () => {

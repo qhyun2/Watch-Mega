@@ -2,6 +2,8 @@ doctype html
 head
   include head
   link(rel="stylesheet" href="css/toastify.css")
+  link(href="https://unpkg.com/video.js/dist/video-js.min.css" rel="stylesheet")
+  script(src="https://unpkg.com/video.js/dist/video.min.js")
 .app
   header
     include navbar
@@ -15,7 +17,7 @@ head
       .row
         .col-md-9.m-auto.pt-4
           script(src='/js/watch.js')
-          video#video.w-100.h-100(controls)
+          video#video.video-js.vjs-fluid(controls, preload="auto")
             source#video-source(src="video" type='video/mp4')
             track#subs(src="subs" kind="captions" label="English" default)
       .row
