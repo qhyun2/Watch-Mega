@@ -5,13 +5,13 @@ head
   header
     include navbar
     +navbar("torrent")
-  body.bg-dark
+  body.bg
     .container
       .row
         .col-4.m-auto.py-4.justify-content-center
           form(action="/api/torrent/start" method="post").form-inline.d-flex.flex-nowrap
             input.form-control(type="text" name="magnet" placeholder="magnet:?xt=urn:btih:")
-            button.btn.btn-secondary.ml-4(type="submit") Download
+            button.btn.bg-c-secondary.ml-4.text-white(type="submit") Download
       .row
         .col-10.m-auto
           table.table.table-dark.table-striped(style="table-layout: fixed;")

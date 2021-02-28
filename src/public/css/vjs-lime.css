@@ -1,0 +1,115 @@
+/* Modded Lime theme from https://pztxb.csb.app/ */
+
+@keyframes rotate {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.video-js.vjs-lime .vjs-big-play-button {
+  width: 2.25em;
+  height: 2em;
+  line-height: 1.9em;
+  border-radius: 0.7em;
+  left: calc(50% - 1em);
+  top: calc(50% - 0.75em);
+  backdrop-filter: blur(3px);
+  background-color: rgba(0, 0, 0, 0.5);
+  border: 2px solid black;
+  color: #fff;
+  transition: background 0.2s ease-in;
+}
+
+.video-js.vjs-lime .vjs-big-play-button:hover,
+.video-js.vjs-lime .vjs-big-play-button:focus {
+  background-color: #64008cc4;
+  color: #fff;
+}
+
+.video-js.vjs-lime .vjs-loading-spinner {
+  border: 3px solid rgba(0, 0, 0, 0.5);
+  width: 45px;
+  height: 45px;
+}
+
+.video-js.vjs-lime .vjs-loading-spinner:before,
+.video-js.vjs-lime .vjs-loading-spinner:after {
+  margin: -3px;
+  animation: rotate 0.8s linear infinite;
+  border-top-color: #65008c;
+}
+
+.video-js.vjs-lime .vjs-loading-spinner:after {
+  display: none;
+  border-top-color: #2315ff;
+}
+
+.video-js.vjs-lime .vjs-control-bar {
+  height: 5em;
+  padding-top: 2em;
+  background: linear-gradient(0deg, rgba(0, 0, 0, 0.7) 0%, rgba(0, 0, 0, 0.4) 35%, transparent 100%);
+  border-bottom-left-radius: 0.5em;
+  border-bottom-right-radius: 0.5em;
+}
+
+.video-js.vjs-lime button.vjs-icon-cog {
+  font-size: 1.3em;
+}
+
+.video-js.vjs-lime .vjs-menu-button-popup .vjs-menu .vjs-menu-content {
+  background-color: rgba(0, 0, 0, 0.6);
+  border-radius: 0.5em;
+  backdrop-filter: blur(4px);
+}
+
+.video-js.vjs-lime video {
+  border-radius: 0.5em;
+}
+
+.video-js.vjs-lime video:focus {
+  outline: none;
+}
+
+.video-js.vjs-lime .vjs-slider {
+  background-color: rgba(255, 255, 255, 0.3);
+  border-radius: 10px;
+}
+
+.video-js.vjs-lime .vjs-load-progress,
+.video-js.vjs-lime .vjs-load-progress div {
+  background: none;
+}
+
+.video-js.vjs-lime .vjs-progress-control:hover .vjs-progress-holder {
+  font-size: 1em !important;
+}
+
+.video-js.vjs-lime .vjs-time-tooltip {
+  background: #fff;
+  color: #000;
+  font-size: 1.25em !important;
+}
+
+.video-js .vjs-progress-control .vjs-mouse-display {
+  z-index: 50;
+}
+
+.video-js.vjs-lime .vjs-progress-holder .vjs-play-progress,
+.video-js.vjs-lime .vjs-progress-holder .vjs-load-progress,
+.video-js.vjs-lime .vjs-progress-holder .vjs-load-progress > div {
+  border-radius: 10px;
+}
+
+.video-js.vjs-lime .vjs-volume-control .vjs-volume-bar .vjs-volume-level,
+.video-js.vjs-lime .vjs-slider-bar.vjs-play-progress {
+  background: #65008c;
+}
+
+.video-js.vjs-lime .vjs-menu li.vjs-menu-item:focus:not(.vjs-selected),
+.video-js.vjs-lime .vjs-menu li.vjs-menu-item:hover:not(.vjs-selected),
+.video-js.vjs-lime .js-focus-visible .vjs-menu li.vjs-menu-item:hover:not(.vjs-selected) {
+  background-color: rgba(255, 255, 255, 0.3);
+}
+.video-js.vjs-lime .vjs-control .vjs-play-progress .vjs-time-tooltip {
+  display: none;
+}

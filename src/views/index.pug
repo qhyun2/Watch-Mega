@@ -3,41 +3,42 @@ head
   include head
   link(rel="stylesheet" href="css/toastify.css")
   link(href="https://unpkg.com/video.js/dist/video-js.min.css" rel="stylesheet")
+  link(href="css/vjs-lime.css" rel="stylesheet")
   script(src="https://unpkg.com/video.js/dist/video.min.js")
 .app
   header
     include navbar
     +navbar("watch")
-  body.bg-dark
+  body.bg
     .container
       .row.pt-4
         .col-md-10.m-auto
-          .alert.alert-dark.bg-secondary(role="alert" style="border-style: none")
-            h5.text-center.text-white.mb-0#videoname #{videoName}
+          .alert.alert-dark.bg-c-secondary(role="alert" style="border-style: none")
+            h5.text-center.text-highlight.mb-0#videoname #{videoName}
       .row
         .col-md-9.m-auto.pt-4
           script(src='/js/watch.js')
-          video#video.video-js.vjs-fluid(controls, preload="auto")
+          video#video.video-js.vjs-fluid.vjs-lime(controls, preload="auto")
             source#video-source(src="video" type='video/mp4')
             track#subs(src="subs" kind="captions" label="English" default)
       .row
         .col-md-9.m-auto.pt-4.d-flex.justify-content-center
-          button.btn.bg-secondary#nextep Next Episode
+          button.btn.bg-c-secondary.text-white#nextep Next Episode
       .row
         .col-4.m-auto.pt-4
-          .card.bg-secondary
+          .card.bg-c-secondary
             .card-header.p-0
-              button.btn.bg-secondary.w-100.h-100#collapse
+              button.btn.bg-c-secondary.w-100.h-100#collapse
                 i.fa.fa-angle-right.arrow.text-justify-left
-                span#count #{count}
+                span.text-white#count #{count}
             #users.collapse
               .card-body
-                table.table.table-dark.bg-secondary.text-dark.mb-0#users-table
-                  tbody
+                table.table.table-dark.bg-c-secondary.text-dark.mb-0#users-table
+                  tbody.text-white
     // modal for joining playing video
     #joinroom.modal.fade.text-white
       .modal-dialog.modal-dialog-centered(role='document')
-        .modal-content.bg-secondary
+        .modal-content.bg-c-secondary
           .modal-body.d-flex.flex-column.justify-content-center
             h2.text-center.p-3 Welcome to WatchMega
             p.text-center The video is already playing

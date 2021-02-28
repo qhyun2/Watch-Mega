@@ -7,3 +7,19 @@ body {
 *:focus {
   outline: none !important;
 }
+
+.bg {
+  background: #212529;
+}
+
+.bg-c-secondary {
+  background: #65008c;
+}
+
+.text-highlight {
+  color: #ebc82d;
+}
+
+.btn:focus {
+  box-shadow: none;
+}

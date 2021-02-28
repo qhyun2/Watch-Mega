@@ -1,12 +1,12 @@
 mixin navitem(link, text, active)
   li.nav-item(class=active && 'active')
-    a.nav-link(href=link class=active && 'text-info')
-      h5.my-0= text
+    a.nav-link.text-white(href=link)
+      h5.my-0(class=active && 'text-highlight')= text
 
 
 mixin navbar(tab)
   script(src="./js/username.js")
-  nav.navbar.navbar-expand.navbar-dark.bg-secondary
+  nav.navbar.navbar-expand.navbar-dark.bg-c-secondary
     .navbar-brand.mb-0(href='#')
       b
         h3.my-0 Watch Mega
