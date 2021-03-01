@@ -3,26 +3,25 @@ var ignorePlay = false;
 var ignorePause = false;
 var vjs;
 
-$(async () => {
-  vjs = videojs("video");
-  vjs.volume(0.8);
-  newVideo();
-  initHotkeys();
-  initSocket();
-  initVideoListeners();
-  initButtons();
-
-  var playingPopup;
-  await new Promise((resolve, _) => {
-    socket.on("info", (info) => {
-      playingPopup = info.playing;
-      resolve();
+$(() => {
+  vjs = videojs("video", {}, async () => {
+    vjs.volume(0.8);
+    newVideo();
+    initHotkeys();
+    initSocket();
+    initVideoListeners();
+    initButtons();
+    var playingPopup;
+    await new Promise((resolve, _) => {
+      socket.on("info", (info) => {
+        playingPopup = info.playing;
+        resolve();
+      });
     });
+    if (playingPopup) {
+      $("#joinroom").modal({ backdrop: "static" });
+    }
   });
-
-  if (playingPopup) {
-    $("#joinroom").modal({ backdrop: "static" });
-  }
 });
 
 // adapted from https://gist.github.com/buzamahmooza/b940c84b16f0b5719fa994d54c785cab
@@ -123,7 +122,6 @@ function initVideoListeners() {
   vjs.on("seeked", (e) => {
     if (ignoreSeek) {
       ignoreSeek = false;
-      console.log("ignored");
       return;
     }
     socket.emit("seek", vjs.currentTime());
@@ -161,13 +159,17 @@ function initButtons() {
     $("#joinroom").modal("hide");
     socket.emit("ready");
   });
+  $("#suboffset").on("input", function (e) {
+    setOffset(e.target.valueAsNumber / 1000);
+  });
 }
 
-// set sub and video src to have a new t param to avoid caching
+// set video src to have a new t param to avoid caching
 function newVideo(name) {
-  $("#subs").attr("src", `subs?t=${Math.random()}`);
   vjs.src({ type: "video/mp4", src: `video?t=${Math.random()}` });
   $("#videoname").text(name);
+  vjs.addRemoteTextTrack({ src: "subs", kind: "subtitles", srclang: "en", label: "English" }, false);
+  vjs.textTracks()[0].mode = "showing";
 }
 
 function sendNotif(msg) {
@@ -181,4 +183,25 @@ function sendNotif(msg) {
     stopOnFocus: true,
     backgroundColor: "#6c757d",
   }).showToast();
+}
+
+var currentOffset = 0;
+
+function setOffset(offset) {
+  if (isNaN(offset)) return;
+  const change = offset - currentOffset;
+  offsetSubs(change);
+  console.log("Set offset to: " + offset);
+  currentOffset = offset;
+}
+
+function offsetSubs(offset) {
+  Array.from(vjs.textTracks()).forEach((track) => {
+    if (track.mode === "showing") {
+      Array.from(track.cues).forEach((cue) => {
+        cue.startTime += offset;
+        cue.endTime += offset;
+      });
+    }
+  });
 }

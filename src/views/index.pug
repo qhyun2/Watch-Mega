@@ -25,8 +25,7 @@ head
         .col-md-9.m-auto.pt-4
           script(src='/js/watch.js')
           video#video.video-js.vjs-fluid.vjs-lime(controls, preload="auto")
-            source#video-source(src="video" type='video/mp4')
-            track#subs(src="subs" kind="captions" label="English" default)
+            source(src="video" type='video/mp4')
       .row
         .col-4.m-auto.pt-4
           .card.bg-c-secondary
@@ -38,6 +37,15 @@ head
               .card-body
                 table.table.table-dark.bg-c-secondary.text-dark.mb-0#users-table
                   tbody.text-white
+      .row
+        .col-2.m-auto.pt-4.d-flex.justify-content-center
+          div.form-outline
+            label.form-label.text-white(for="suboffset") Subtitle delay
+            div.input-group
+              input.form-control.black-border-solid#suboffset(type="number" step="50" value="0")
+              div(class="input-group-append")
+                span.bg-c-secondary.text-white.black-border-solid(class="input-group-text") ms
+
     // modal for joining playing video
     #joinroom.modal.fade.text-white
       .modal-dialog.modal-dialog-centered(role='document')

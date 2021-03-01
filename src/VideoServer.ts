@@ -72,9 +72,11 @@ export async function serveVideo(req: Request, res: Response): Promise<void> {
 export async function serveSubs(req: Request, res: Response): Promise<void> {
   const videoPath = await redis.get(RC.REDIS_VIDEO_PATH);
   const subsPath = videoPath + ".vtt";
+  res.contentType("text/vtt");
   if (!fs.existsSync(subsPath)) {
     logger.warn(`Subs not found: ${subsPath}`);
-    res.sendStatus(404);
+    res.send("WEBVTT");
+    res.status(200);
     return;
   }
   logger.info(`Serving subs file ${subsPath}`);
