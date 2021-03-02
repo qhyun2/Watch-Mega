@@ -4,8 +4,7 @@ mixin navitem(link, text, active)
       h5.my-0(class=active && 'text-highlight')= text
 
 
-mixin navbar(tab)
-  script(src="./js/username.js")
+mixin navbar(tab, username=true)
   nav.navbar.navbar-expand.navbar-dark.bg-c-secondary
     .navbar-brand.mb-0(href='#')
       b
@@ -13,9 +12,15 @@ mixin navbar(tab)
     ul.navbar-nav.mr-auto
       +navitem("/", "Watch", (tab == "watch"))
       +navitem("/select", "Select", (tab == "select"))
-      //- +navitem("/upload", "Upload", (tab == "upload"))
       +navitem("/torrent", "Torrent", (tab == "torrent"))
-    div.col-6.col-lg-5.col-xl-4#username
-      button.px-4.bg-dark.text-light.username-field#username-btn
-        h5.my-0.text-truncate#username-btn-text
-      input.px-4.text-light.username-field#username-input(maxlength="30")
+    if username
+      script(src="https://cdn.jsdelivr.net/npm/js-cookie@rc/dist/js.cookie.min.js")
+      script(src="./js/username.js")
+      script(src="socket.io/socket.io.js")
+      script(src="js/socket.js")
+      style
+        include ../public/css/username.css
+      div.col-6.col-lg-5.col-xl-4#username
+        button.px-4.bg-dark.text-light.username-field#username-btn
+          h5.my-0.text-truncate#username-btn-text
+        input.px-4.text-light.username-field#username-input(maxlength="30")
