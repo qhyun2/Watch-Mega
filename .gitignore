@@ -117,3 +117,10 @@ src/public/videos
 test videos
 .docker.env
 dump.rdb
+
+# next.js
+/.next/
+/out/
+
+# production
+/build
