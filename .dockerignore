@@ -1,5 +1,8 @@
 # ignore .git and .cache folders
+.next
+assets
+data
+dist
+node_modules
 .git
 .cache
-./src/public/videos/*
-README.md

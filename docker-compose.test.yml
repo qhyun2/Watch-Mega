@@ -1,0 +1,13 @@
+version: "3"
+services:
+  web:
+    image: watchmega:latest
+    ports:
+      - "3030:3000"
+    env_file:
+      - .docker.env
+    volumes:
+      - ./data:/app/data
+  redis:
+    image: redis:6.0
+    container_name: redis

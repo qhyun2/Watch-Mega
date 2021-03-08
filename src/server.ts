@@ -44,7 +44,7 @@ next.prepare().then(() => {
   router.use("/api", new ApiRouter(new TClient()).router);
 
   // video selection endpoint
-  router.use("/select", serveIndex("data", { icons: true, stylesheet: "styles/fileselect.css" }));
+  router.use("/select", serveIndex("data", { icons: true, stylesheet: "public/fileselect.css" }));
   router.use("/select", (req, res) => {
     const videoName = getPath(decodeURIComponent(req.path));
     logger.info(`New video selected: ${videoName}`);
