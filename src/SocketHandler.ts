@@ -44,7 +44,11 @@ export class SocketServer {
       );
 
       this.updateWatching();
-      socket.emit("info", { playing: (await this.redis.get(RC.REDIS_PLAYING)) == RC.RTRUE });
+      Promise.all([this.redis.get(RC.REDIS_PLAYING), this.redis.get(RC.REDIS_VIDEO_PATH)]).then(
+        ([playing, videoName]) => {
+          socket.emit("info", { playing: playing == RC.RTRUE, videoName: path.basename(videoName) });
+        }
+      );
       socket.emit("seek", null, await this.redis.get(RC.REDIS_POSITION));
 
       socket.on("ready", () => {

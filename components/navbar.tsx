@@ -1,3 +1,74 @@
+import React from "react";
+import { createRef } from "react";
+import Col from "react-bootstrap/Col";
+
+import style from "../styles/custom.module.css";
+
+class UsernameInput extends React.Component<
+  { socket: SocketIOClient.Socket },
+  { username: string; isInputing: boolean }
+> {
+  input = createRef<HTMLInputElement>();
+
+  constructor(props) {
+    super(props);
+    this.state = {
+      username: "",
+      isInputing: false,
+    };
+  }
+
+  submit(name) {
+    this.props.socket.emit("name", name);
+    this.setState({ username: name, isInputing: false });
+  }
+
+  render() {
+    return (
+      <Col xs="6" lg="5" xl="4" className={style.username}>
+        <button
+          style={{ visibility: this.state.isInputing ? "hidden" : "visible" }}
+          className={"px-4 bg-dark text-light " + style.usernameField + " " + style.usernameBtn}
+          onClick={() => {
+            this.setState({ isInputing: true });
+            setTimeout(() => this.input.current.focus(), 100);
+          }}
+          disabled={this.state.isInputing}
+        >
+          <h5 className="my-0 text-truncate">
+            {this.state.isInputing ? "" : this.state.username ? this.state.username : "Set username"}
+          </h5>
+        </button>
+        <input
+          className={
+            "px-4 text-light " +
+            style.usernameField +
+            " " +
+            style.usernameInput +
+            " " +
+            (this.state.isInputing ? style.usernameShown : "")
+          }
+          maxLength={30}
+          disabled={!this.state.isInputing}
+          ref={this.input}
+          onBlur={(e) => {
+            this.submit(e.target.value);
+          }}
+          onKeyUp={(e) => {
+            if (e.key == "Enter") {
+              this.submit(this.input.current.value);
+            }
+          }}
+          onChange={(e) => {
+            this.setState({ username: e.target.value });
+          }}
+          value={this.state.isInputing ? this.state.username : ""}
+        ></input>
+      </Col>
+    );
+  }
+}
+
 function navItem(link, text, active) {
   return (
     <li className={"nav-item" + (active ? " active" : "")}>
@@ -8,7 +79,7 @@ function navItem(link, text, active) {
   );
 }
 
-export default function Navbar(page) {
+export default function Navbar(props): JSX.Element {
   return (
     <nav className="navbar navbar-expand navbar-dark bg-c-secondary">
       <div className="navbar-brand mb-0">
@@ -17,30 +88,11 @@ export default function Navbar(page) {
         </b>
       </div>
       <ul className="navbar-nav mr-auto">
-        {navItem("/", "Watch", page == "watch")}
-        {navItem("/select", "Select", page == "select")}
-        {navItem("/torrent", "Torrent", page == "torrent")}
+        {navItem("/", "Watch", props.page == "watch")}
+        {navItem("/select", "Select", props.page == "select")}
+        {navItem("/torrent", "Torrent", props.page == "torrent")}
       </ul>
+      {props.socket && <UsernameInput socket={props.socket}></UsernameInput>}
     </nav>
   );
 }
-
-//   nav.navbar.navbar-expand.navbar-dark.bg-c-secondary
-//     .navbar-brand.mb-0(href='#')
-//       b
-//         h3.my-0 Watch Mega
-//     ul.navbar-nav.mr-auto
-//       +navitem("/", "Watch", (tab == "watch"))
-//       +navitem("/select", "Select", (tab == "select"))
-//       +navitem("/torrent", "Torrent", (tab == "torrent"))
-// if username
-//   script(src="https://cdn.jsdelivr.net/npm/js-cookie@rc/dist/js.cookie.min.js")
-//   script(src="./js/username.js")
-//   script(src="socket.io/socket.io.js")
-//   script(src="js/socket.js")
-//   style
-//     include ../public/css/username.css
-//   div.col-6.col-lg-5.col-xl-4#username
-//     button.px-4.bg-dark.text-light.username-field#username-btn
-//       h5.my-0.text-truncate#username-btn-text
-//     input.px-4.text-light.username-field#username-input(maxlength="30")

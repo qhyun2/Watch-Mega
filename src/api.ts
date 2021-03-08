@@ -18,5 +18,10 @@ export class ApiRouter {
       tclient.download(req.body.magnet);
       res.status(303).redirect("/torrent");
     });
+
+    this.router.post("/torrent/stop", (req, res) => {
+      tclient.delete(req.body.magnet);
+      res.status(303).redirect("/torrent");
+    });
   }
 }

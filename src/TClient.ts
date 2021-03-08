@@ -10,6 +10,9 @@ export class TClient {
   }
 
   download(magnet: string): void {
+    // alreadying downloading
+    if (this.client.torrents.some((t) => t.magnetURI == magnet)) return;
+
     this.client
       .add(magnet, { path: path.join(__dirname, "public/videos/") }, (torrent) => {
         torrent.on("ready", () => {
@@ -38,11 +41,19 @@ export class TClient {
       });
   }
 
-  getStatus(): Record<string, number> {
-    const info = {};
+  getStatus(): { name: string; value: number; id: string }[] {
+    const info = [];
     this.client.torrents.forEach((t) => {
-      info[t.name] = t.progress;
+      info.push({ name: t.name, value: t.progress, id: t.magnetURI });
     });
     return info;
+  }
+
+  delete(magnet: string): void {
+    this.client.torrents.forEach((t) => {
+      if (t.magnetURI == magnet) {
+        t.destroy({ destroyStore: true });
+      }
+    });
   }
 }
