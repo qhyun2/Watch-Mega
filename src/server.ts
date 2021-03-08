@@ -9,11 +9,11 @@ import serveIndex from "serve-index";
 import * as Redis from "ioredis";
 
 import { TClient } from "./TClient";
-import { ApiRouter } from "./api";
+import { ApiRouter } from "./Api";
 import { SocketServer } from "./SocketHandler";
 import { getPath, serveSubs, serveVideo, subscribeRedis } from "./VideoServer";
-import { logger } from "./helpers/Logger";
-import { auth, login } from "./helpers/Auth";
+import { logger } from "./Logger";
+import { auth, login } from "./Auth";
 import * as RC from "./RedisConstants";
 
 const dev = process.env.NODE_ENV !== "production";
@@ -44,10 +44,7 @@ next.prepare().then(() => {
   router.use("/api", new ApiRouter(new TClient()).router);
 
   // video selection endpoint
-  router.use(
-    "/select",
-    serveIndex(path.join(__dirname, "public/videos"), { icons: true, stylesheet: "styles/fileselect.css" })
-  );
+  router.use("/select", serveIndex("data", { icons: true, stylesheet: "styles/fileselect.css" }));
   router.use("/select", (req, res) => {
     const videoName = getPath(decodeURIComponent(req.path));
     logger.info(`New video selected: ${videoName}`);

@@ -6,7 +6,7 @@ import "bootstrap/dist/css/bootstrap.css";
 
 import axios from "axios";
 
-export default class Login extends React.Component<unknown, state> {
+export default class Login extends React.Component<unknown> {
   state = { isLoading: false, isInvalid: false, password: "" };
 
   submitPassword(e): void {
@@ -45,7 +45,7 @@ export default class Login extends React.Component<unknown, state> {
           <Row className="h-100 justify-content-center">
             <form className="my-auto d-flex flex-column align-content-center">
               <div className="form-group">
-                <label className="form-label text-white" for="password">
+                <label className="form-label text-white" htmlFor="password">
                   <h3>Enter Access Code</h3>
                 </label>
                 <input

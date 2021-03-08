@@ -1,7 +1,7 @@
 import WebTorrent from "webtorrent";
 import * as path from "path";
-import { logger } from "./helpers/Logger";
-import { processVideos } from "./helpers/VideoProcessor";
+import { logger } from "./Logger";
+import { processVideos } from "./VideoProcessor";
 
 export class TClient {
   client: WebTorrent.Instance;
@@ -14,7 +14,7 @@ export class TClient {
     if (this.client.torrents.some((t) => t.magnetURI == magnet)) return;
 
     this.client
-      .add(magnet, { path: path.join(__dirname, "public/videos/") }, (torrent) => {
+      .add(magnet, { path: "data/" }, (torrent) => {
         torrent.on("ready", () => {
           logger.info(`${torrent.name} download started`);
         });
@@ -24,7 +24,7 @@ export class TClient {
           const names: string[] = [];
           torrent.files.forEach(function (file) {
             if (file.path.match(/.(mov|mpeg|mkv|mp4|wmv|flv|avi)$/i)) {
-              names.push(path.join(__dirname, "public", "videos", file.path));
+              names.push(path.join("data", file.path));
             }
           });
 

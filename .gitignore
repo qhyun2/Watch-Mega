@@ -113,7 +113,7 @@ dist
 # Stores VSCode versions used for testing VSCode extensions
 .vscode-test
 
-src/public/videos
+/data/
 test videos
 .docker.env
 dump.rdb

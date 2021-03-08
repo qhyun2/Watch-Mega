@@ -4,7 +4,7 @@ import * as Redis from "ioredis";
 import { Request, Response } from "express";
 import "ffprobe";
 import { path as ffprobePath } from "ffprobe-static";
-import { logger } from "./helpers/Logger";
+import { logger } from "./Logger";
 import * as RC from "./RedisConstants";
 import getInfo from "ffprobe";
 
@@ -12,13 +12,13 @@ const redis = new Redis.default(6379, process.env.REDIS_URL);
 const redisSub = new Redis.default(6379, process.env.REDIS_URL);
 
 export function getPath(name: string): string {
-  let videoPath = path.join(__dirname, "public/videos", name);
+  let videoPath = path.join("data", name);
 
   // default file
   const exists = fs.existsSync(videoPath) && fs.statSync(videoPath).isFile();
 
   if (!exists) {
-    videoPath = path.join(__dirname, "public/default.mp4");
+    videoPath = "public/default.mp4";
   }
   return videoPath;
 }
