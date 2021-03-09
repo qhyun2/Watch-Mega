@@ -14,7 +14,7 @@ export default class Login extends React.Component<unknown> {
     this.setState({ isLoading: true });
     axios({
       method: "post",
-      url: "/login",
+      url: "/api/auth/login",
       data: {
         password: this.state.password,
       },
@@ -56,21 +56,18 @@ export default class Login extends React.Component<unknown> {
                   type="password"
                   value={this.state.password}
                   onBlur={() => this.setState({ isInvalid: false })}
-                  onChange={(e) => this.setState({ password: e.target.value })}
-                ></input>
+                  onChange={(e) => this.setState({ password: e.target.value })}></input>
                 <div className="invalid-feedback">Access code incorrect</div>
               </div>
               <div className="form-group mx-auto">
                 <button
                   className="btn bg-c-secondary text-white"
                   disabled={this.state.isLoading}
-                  onClick={(e) => this.submitPassword(e)}
-                >
+                  onClick={(e) => this.submitPassword(e)}>
                   <span
                     className="spinner-border spinner-border-sm"
                     role="status"
-                    style={{ display: this.state.isLoading ? "visible" : "none" }}
-                  ></span>
+                    style={{ display: this.state.isLoading ? "visible" : "none" }}></span>
                   Submit
                 </button>
               </div>

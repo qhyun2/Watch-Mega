@@ -8,9 +8,15 @@ import Head from "next/head";
 import Navbar from "../components/navbar";
 
 import axios from "axios";
+import { auth } from "../src/Auth";
 
 interface state {
   progress: { name: string; value: number }[];
+}
+
+export async function getServerSideProps({ req, res, next }) {
+  auth(req, res);
+  return { props: {} };
 }
 
 export default class Torrent extends React.Component<unknown, state> {
@@ -101,8 +107,7 @@ export default class Torrent extends React.Component<unknown, state> {
             <div
               className="progress-bar progress-bar-striped progress-bar-animated bg-c-secondary"
               role="progressbar"
-              style={{ width: progressText }}
-            >
+              style={{ width: progressText }}>
               {progressText}
             </div>
           </div>

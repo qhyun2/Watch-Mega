@@ -18,6 +18,12 @@ import "video.js/dist/video-js.min.css";
 
 import socketIOClient from "socket.io-client";
 import Toastify from "toastify-js";
+import { auth } from "../src/Auth";
+
+export async function getServerSideProps({ req, res }) {
+  auth(req, res);
+  return { props: {} };
+}
 
 interface state {
   playingPopup: boolean;
@@ -89,8 +95,7 @@ export default class Index extends React.Component<unknown, state> {
                 onChange={(e) => {
                   this.setState({ subtitleDelay: e.target.valueAsNumber });
                   this.setOffset(e.target.valueAsNumber);
-                }}
-              ></input>
+                }}></input>
               <div className="input-group-append ">
                 <span className={"bg-c-secondary text-white input-group-text " + style.blackBorderSolid}>ms</span>
               </div>
@@ -113,8 +118,7 @@ export default class Index extends React.Component<unknown, state> {
             onClick={() => {
               this.setState({ playingPopup: false });
               this.socket.emit("ready");
-            }}
-          >
+            }}>
             <h5 className="mb-0">Start watching</h5>
           </button>
         </div>
@@ -138,8 +142,7 @@ export default class Index extends React.Component<unknown, state> {
               <button
                 className="btn bg-c-secondary text-white h-100 w-100"
                 id="prevep"
-                onClick={() => this.socket.emit("prev")}
-              >
+                onClick={() => this.socket.emit("prev")}>
                 <FontAwesomeIcon icon={faArrowLeft}></FontAwesomeIcon>
               </button>
             </Col>
@@ -154,8 +157,7 @@ export default class Index extends React.Component<unknown, state> {
               <button
                 className="btn bg-c-secondary text-white h-100 w-100"
                 id="nextep"
-                onClick={() => this.socket.emit("next")}
-              >
+                onClick={() => this.socket.emit("next")}>
                 <FontAwesomeIcon icon={faArrowRight}></FontAwesomeIcon>
               </button>
             </Col>

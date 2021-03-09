@@ -13,7 +13,6 @@ import { ApiRouter } from "./Api";
 import { SocketServer } from "./SocketHandler";
 import { getPath, serveSubs, serveVideo, subscribeRedis } from "./VideoServer";
 import { logger } from "./Logger";
-import { auth, login } from "./Auth";
 import * as RC from "./RedisConstants";
 
 const dev = process.env.NODE_ENV !== "production";
@@ -37,11 +36,11 @@ next.prepare().then(() => {
   router.use(json());
   router.use(cookieParser());
   router.use(urlencoded({ extended: true }));
-  router.use(auth);
+  // router.use(auth);
 
-  router.get("/video", auth, serveVideo);
-  router.get("/subs", auth, serveSubs);
-  router.use("/api", new ApiRouter(new TClient()).router);
+  router.get("/video", serveVideo);
+  router.get("/subs", serveSubs);
+  // router.use("/api", new ApiRouter(new TClient()).router);
 
   // video selection endpoint
   router.use("/select", serveIndex("data", { icons: true, stylesheet: "public/fileselect.css" }));
@@ -55,11 +54,9 @@ next.prepare().then(() => {
     res.status(303).redirect("/");
   });
 
-  router.get("*", (req, res) => nextHandler(req, res));
+  router.all("*", (req, res) => nextHandler(req, res));
 
   // ---- NO AUTH ENDPOINTS ----
-  app.use(json());
-  app.post("/login", login);
   app.use(router);
 
   const PORT = process.env.PORT || 3000;
