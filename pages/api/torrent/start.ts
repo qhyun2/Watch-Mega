@@ -1,7 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import { tc } from "../../../src/Instances";
 import * as path from "path";
-import { logger } from "../../../src/Logger";
+import { logger } from "../../../src/Instances";
 import { processVideos } from "../../../src/VideoProcessor";
 
 function addTorrent(magnet: string): void {

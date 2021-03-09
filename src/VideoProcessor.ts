@@ -1,5 +1,5 @@
 import { encodeVideo } from "./Encoder";
-import { logger } from "./Logger";
+import { logger } from "./Instances";
 import { getSubs } from "./Subtitler";
 
 export async function processVideos(paths: string[]): Promise<void> {

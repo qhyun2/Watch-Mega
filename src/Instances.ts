@@ -1,6 +1,7 @@
 import WebTorrent from "webtorrent";
-import * as path from "path";
-import { logger } from "./Logger";
-import { processVideos } from "./VideoProcessor";
+import Logger from "pino";
 
 export const tc = new WebTorrent();
+export const logger = Logger({
+  prettyPrint: { colorize: true, ignore: "pid,hostname", translateTime: "SYS:ddd mmm dd yyyy HH:MM:ss" },
+});

@@ -1,12 +1,11 @@
 import { config } from "dotenv";
 config();
 import express from "express";
-import { json, urlencoded } from "body-parser";
 import { createServer as createHTTPServer } from "http";
 import serveIndex from "serve-index";
 import { SocketServer } from "./SocketHandler";
 import { subscribeRedis } from "./VideoServer";
-import { logger } from "./Logger";
+import { logger } from "./Instances";
 
 const dev = process.env.NODE_ENV !== "production";
 import Next from "next";
@@ -19,8 +18,6 @@ next.prepare().then(() => {
   ss.subscribeRedis();
   subscribeRedis();
 
-  app.use(json());
-  app.use(urlencoded({ extended: true }));
   app.use("/api/media/select", serveIndex("data", { icons: true, stylesheet: "public/fileselect.css" }));
   app.all("*", (req, res) => next.getRequestHandler()(req, res));
 

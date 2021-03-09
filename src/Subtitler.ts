@@ -2,7 +2,7 @@ import OpenSubtitles from "opensubtitles-api";
 import Axios from "axios";
 import * as fs from "fs";
 import srt2vtt from "srt-to-vtt";
-import { logger } from "./Logger";
+import { logger } from "./Instances";
 
 const OS = new OpenSubtitles({
   ssl: true,

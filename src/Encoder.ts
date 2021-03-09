@@ -1,4 +1,4 @@
-import { logger } from "./Logger";
+import { logger } from "./Instances";
 import { promises as fsPromises } from "fs";
 import MediaInfoFactory from "mediainfo.js/dist/mediainfo";
 import type { MediaInfo, ReadChunkFunc, ResultObject } from "mediainfo.js/dist/types";

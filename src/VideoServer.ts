@@ -4,7 +4,7 @@ import * as Redis from "ioredis";
 import * as RC from "./RedisConstants";
 import getInfo from "ffprobe";
 import { path as ffprobePath } from "ffprobe-static";
-import { logger } from "./Logger";
+import { logger } from "./Instances";
 
 const redis = new Redis.default(6379, process.env.REDIS_URL);
 const redisSub = new Redis.default(6379, process.env.REDIS_URL);

@@ -1,6 +1,6 @@
 import { Server } from "http";
 import { Server as SocketIOServer, Socket } from "socket.io";
-import { logger } from "./Logger";
+import { logger } from "./Instances";
 import xss from "xss";
 import * as Redis from "ioredis";
 import * as path from "path";

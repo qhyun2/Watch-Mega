@@ -4,7 +4,7 @@
   "description": "Upload any video file and watch it in sync with your friends!",
   "main": "index.js",
   "scripts": {
-    "start": "node -r ts-node/register ./src/server.ts",
+    "start": "node -r ts-node/register ./src/index.ts",
     "dev": "nodemon",
     "ts:build": "tsc --build tsconfig.server.json",
     "next:build": "next build",
@@ -105,9 +105,7 @@
       "plugin:@typescript-eslint/recommended"
     ],
     "ignorePatterns": [
-      "node_modules",
-      "dist",
-      "src/public/js"
+      "node_modules"
     ]
   }
 }

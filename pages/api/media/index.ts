@@ -2,7 +2,7 @@ import { Request, Response } from "express";
 import * as fs from "fs";
 import * as Redis from "ioredis";
 import * as RC from "../../../src/RedisConstants";
-import { logger } from "../../../src/Logger";
+import { logger } from "../../../src/Instances";
 
 const redis = new Redis.default(6379, process.env.REDIS_URL);
 

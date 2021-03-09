@@ -32,4 +32,4 @@ COPY --from=builder /app/.next ./.next
 
 # run
 EXPOSE 3000
-CMD ["node", "./server.js"]
+CMD ["node", "./index.js"]
