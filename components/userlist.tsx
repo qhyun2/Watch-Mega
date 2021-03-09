@@ -46,13 +46,11 @@ export default function renderWatching(props: UserList): JSX.Element {
               className="btn bg-c-secondary w-100 h-100"
               onClick={() => {
                 if (anon != count) setOpen(!open);
-              }}
-            >
+              }}>
               <FontAwesomeIcon
                 icon={faAngleRight}
                 rotation={open ? 90 : undefined}
-                className={style.animate}
-              ></FontAwesomeIcon>{" "}
+                className={style.animate}></FontAwesomeIcon>{" "}
               <span className="text-white">{count + ` user${count == 1 ? "" : "s"} currently watching`}</span>
             </button>
           </Card.Header>

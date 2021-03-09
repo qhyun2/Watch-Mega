@@ -33,8 +33,7 @@ class UsernameInput extends React.Component<
             this.setState({ isInputing: true });
             setTimeout(() => this.input.current.focus(), 100);
           }}
-          disabled={this.state.isInputing}
-        >
+          disabled={this.state.isInputing}>
           <h5 className="my-0 text-truncate">
             {this.state.isInputing ? "" : this.state.username ? this.state.username : "Set username"}
           </h5>
@@ -62,8 +61,7 @@ class UsernameInput extends React.Component<
           onChange={(e) => {
             this.setState({ username: e.target.value });
           }}
-          value={this.state.isInputing ? this.state.username : ""}
-        ></input>
+          value={this.state.isInputing ? this.state.username : ""}></input>
       </Col>
     );
   }
