@@ -191,7 +191,6 @@ export default class Index extends React.Component<unknown, state> {
             break;
           case "k":
           case " ":
-            console.log("bork");
             this.vjs.paused() ? this.vjs.play() : this.vjs.pause();
             e.preventDefault();
             break;
