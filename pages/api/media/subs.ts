@@ -6,7 +6,7 @@ import { logger } from "../../../src/Instances";
 
 const redis = new Redis.default(6379, process.env.REDIS_URL);
 
-export async function serveSubs(req: Request, res: Response): Promise<void> {
+export default async function handler(req, res): Promise<void> {
   const videoPath = await redis.get(RC.REDIS_VIDEO_PATH);
   const subsPath = videoPath + ".vtt";
   res.contentType("text/vtt");
@@ -14,8 +14,8 @@ export async function serveSubs(req: Request, res: Response): Promise<void> {
     logger.warn(`Subs not found: ${subsPath}`);
     res.send("WEBVTT");
     res.status(200);
-    return;
+  } else {
+    logger.info(`Serving subs file ${subsPath}`);
+    fs.createReadStream(subsPath).pipe(res);
   }
-  logger.info(`Serving subs file ${subsPath}`);
-  fs.createReadStream(subsPath).pipe(res);
 }

@@ -286,7 +286,7 @@ export default class Index extends React.Component<unknown, state> {
   // set video src to have a new t param to avoid caching
   newVideo(): void {
     this.vjs.src({ type: "video/mp4", src: `/api/media?t=${Math.random()}` });
-    this.vjs.addRemoteTextTrack({ src: "subs", kind: "subtitles", srclang: "en", label: "English" }, false);
+    this.vjs.addRemoteTextTrack({ src: "api/media/subs", kind: "subtitles", srclang: "en", label: "English" }, false);
     this.vjs.textTracks()[0].mode = "showing";
   }
 
