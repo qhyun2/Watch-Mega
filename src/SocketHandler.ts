@@ -5,7 +5,6 @@ import xss from "xss";
 import * as Redis from "ioredis";
 import * as path from "path";
 import * as RC from "./RedisConstants";
-import { getPath } from "./VideoServer";
 
 export class SocketServer {
   io: SocketIOServer;
@@ -18,10 +17,8 @@ export class SocketServer {
     this.redis = new Redis.default(6379, process.env.REDIS_URL);
     this.redisSub = new Redis.default(6379, process.env.REDIS_URL);
     this.redis.set(RC.REDIS_CONNECTIONS, 0);
-    this.redis.set(RC.REDIS_POSITION, 0);
-    this.redis.set(RC.REDIS_VIDEO_LENGTH, 10);
-    this.redis.set(RC.REDIS_PLAYING, RC.RFALSE);
-    this.redis.set(RC.REDIS_VIDEO_PATH, getPath(""));
+    this.redis.set(RC.REDIS_VIDEO_PATH, "public/default.mp4");
+    this.redis.publish(RC.VIDEO_EVENT, RC.VE_NEWVID);
 
     setInterval(() => {
       Promise.all([

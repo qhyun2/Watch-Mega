@@ -165,7 +165,7 @@ export default class Index extends React.Component<unknown, state> {
           <Row>
             <Col xs="9" className="m-auto pt-4">
               <video id="video" className="video-js vjs-fluid vjs-lime" controls preload="auto">
-                <source src="video" type="video/mp4"></source>
+                <source src="api/media" type="video/mp4"></source>
               </video>
             </Col>
           </Row>
@@ -286,7 +286,7 @@ export default class Index extends React.Component<unknown, state> {
 
   // set video src to have a new t param to avoid caching
   newVideo(): void {
-    this.vjs.src({ type: "video/mp4", src: `video?t=${Math.random()}` });
+    this.vjs.src({ type: "video/mp4", src: `/api/media?t=${Math.random()}` });
     this.vjs.addRemoteTextTrack({ src: "subs", kind: "subtitles", srclang: "en", label: "English" }, false);
     this.vjs.textTracks()[0].mode = "showing";
   }

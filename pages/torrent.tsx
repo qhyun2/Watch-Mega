@@ -39,7 +39,7 @@ export default class Torrent extends React.Component<unknown, state> {
 
   getData(): void {
     axios
-      .request({ url: "/api/torrent/status" })
+      .request({ url: "/oldapi/torrent/status" })
       .then((res) => {
         this.setState({ progress: res.data });
       })
@@ -49,7 +49,7 @@ export default class Torrent extends React.Component<unknown, state> {
   }
 
   deleteTorrent(magnet: string): void {
-    axios.request({ url: "/api/torrent/stop", method: "POST", data: { magnet } }).catch((e) => {
+    axios.request({ url: "/oldapi/torrent/stop", method: "POST", data: { magnet } }).catch((e) => {
       console.log(e);
     });
   }
@@ -67,7 +67,7 @@ export default class Torrent extends React.Component<unknown, state> {
         <Container>
           <Row>
             <Col xs="4" className="m-auto py-4 justify-content-center">
-              <form action="/api/torrent/start" method="post" className="form-inline d-flex flex-nowrap">
+              <form action="/oldapi/torrent/start" method="post" className="form-inline d-flex flex-nowrap">
                 <input className="form-control" type="text" name="magnet" placeholder="magnet:?xt=urn:btih:"></input>
                 <button className="btn bg-c-secondary ml-4 text-white" type="submit">
                   {" "}
