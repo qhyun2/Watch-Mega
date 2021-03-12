@@ -14,10 +14,9 @@ interface state {
   progress: { name: string; value: number }[];
 }
 
-export async function getServerSideProps({ req, res, next }) {
-  auth(req, res);
-  return { props: {} };
-}
+// authentication
+import { defaultAuth } from "../src/Auth";
+export { defaultAuth as getServerSideProps };
 
 export default class Torrent extends React.Component<unknown, state> {
   interval: NodeJS.Timeout;

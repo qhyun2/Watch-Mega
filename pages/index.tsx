@@ -18,12 +18,10 @@ import "video.js/dist/video-js.min.css";
 
 import socketIOClient from "socket.io-client";
 import Toastify from "toastify-js";
-import { auth } from "../src/Auth";
 
-export async function getServerSideProps({ req, res }) {
-  auth(req, res);
-  return { props: {} };
-}
+// authentication
+import { defaultAuth } from "../src/Auth";
+export { defaultAuth as getServerSideProps };
 
 interface state {
   playingPopup: boolean;

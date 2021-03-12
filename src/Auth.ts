@@ -1,13 +1,25 @@
+import { GetServerSideProps } from "next";
+import { NextApiRequestCookies } from "next/dist/next-server/server/api-utils";
 import jwt from "jsonwebtoken";
-import { Request, Response } from "express";
 
-export function auth(req: Request, res: Response): void {
+export function auth(cookies: NextApiRequestCookies): boolean {
   try {
-    if (jwt.verify(req.cookies.jwt, process.env.TOKEN_SECRET) == process.env.ACCESS_CODE) {
-      return;
+    if (jwt.verify(cookies.jwt, process.env.TOKEN_SECRET) == process.env.ACCESS_CODE) {
+      return true;
     }
-  } catch {
-    return res.redirect("/login");
-  }
-  return res.redirect("/login");
+  } catch {}
+  return false;
 }
+
+export const defaultAuth: GetServerSideProps = async (context) => {
+  if (!auth(context.req.cookies)) {
+    return {
+      redirect: {
+        destination: "/login",
+        permanent: false,
+      },
+    };
+  } else {
+    return { props: {} };
+  }
+};
