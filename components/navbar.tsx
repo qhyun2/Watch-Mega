@@ -1,6 +1,7 @@
 import React from "react";
 import { createRef } from "react";
 import Col from "react-bootstrap/Col";
+import "bootstrap/dist/css/bootstrap.css";
 
 import style from "../styles/custom.module.css";
 
@@ -87,7 +88,7 @@ export default function Navbar(props): JSX.Element {
       </div>
       <ul className="navbar-nav mr-auto">
         {navItem("/", "Watch", props.page == "watch")}
-        {navItem("/api/media/select", "Select", props.page == "select")}
+        {navItem("/select", "Select", props.page == "select")}
         {navItem("/torrent", "Torrent", props.page == "torrent")}
       </ul>
       {props.socket && <UsernameInput socket={props.socket}></UsernameInput>}

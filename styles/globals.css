@@ -4,7 +4,6 @@ body {
   margin: 0;
   font-family: "Roboto", sans-serif;
   font-weight: 400;
-  background: #212529;
 }
 
 a {
@@ -25,11 +24,11 @@ a {
 }
 
 .bg-c-secondary {
-  background: #65008c !important;
+  background: #680e8b !important;
 }
 
 .text-highlight {
-  color: #ebc82d;
+  color: #34a3a3;
 }
 
 .btn:focus {
