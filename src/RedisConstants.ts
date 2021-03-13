@@ -10,5 +10,8 @@ export const VE_NEXTEP = "NEXTEP";
 export const VE_PREVEP = "PREVEP";
 export const VE_NEWVID = "newvideo";
 
+export const VIDEO_HISTORY = "videohistory";
+export const VIDEO_HISTORY_SIZE = 200;
+
 export const RTRUE = "true";
 export const RFALSE = "false";

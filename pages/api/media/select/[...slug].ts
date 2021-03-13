@@ -19,10 +19,14 @@ function getPath(name: string): string {
   return videoPath;
 }
 
-export default async function select(req: Request, res: Response) {
+export default async function select(req: Request, res: Response): Promise<void> {
   const videoName = getPath(path.join(...(<string[]>req.query.slug)));
   logger.info(`New video selected: ${videoName}`);
   redis.set(RC.REDIS_VIDEO_PATH, videoName);
+  redis.zcard(RC.VIDEO_HISTORY).then((size) => {
+    if (size > RC.VIDEO_HISTORY_SIZE) redis.zpopmin(RC.VIDEO_HISTORY);
+  });
+  redis.zadd(RC.VIDEO_HISTORY, Date.now(), videoName);
   redis.publish(RC.VIDEO_EVENT, RC.VE_NEWVID);
   res.status(303).redirect("/");
 }
