@@ -8,7 +8,6 @@ import Head from "next/head";
 import Navbar from "../components/navbar";
 
 import axios from "axios";
-import { auth } from "../src/Auth";
 
 interface state {
   progress: { name: string; value: number }[];

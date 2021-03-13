@@ -26,7 +26,7 @@ export default async function select(req: Request, res: Response): Promise<void>
   redis.zcard(RC.VIDEO_HISTORY).then((size) => {
     if (size > RC.VIDEO_HISTORY_SIZE) redis.zpopmin(RC.VIDEO_HISTORY);
   });
-  redis.zadd(RC.VIDEO_HISTORY, Date.now(), videoName);
+  redis.zadd(RC.VIDEO_HISTORY, Date.now(), videoName.replace("data/", ""));
   redis.publish(RC.VIDEO_EVENT, RC.VE_NEWVID);
   res.status(303).redirect("/");
 }

@@ -12,5 +12,4 @@ export default async function handle(req: NextApiRequest, res: NextApiResponse) 
     response.push({ name: history[i], timestamp: parseInt(history[i + 1]) });
   }
   res.send({ history: response });
-  res.writeHead(200, { "Content-Type": "application/json" });
 }
