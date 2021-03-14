@@ -89,6 +89,7 @@ export default function Navbar(props): JSX.Element {
       <ul className="navbar-nav mr-auto">
         {navItem("/", "Watch", props.page == "watch")}
         {navItem("/select", "Select", props.page == "select")}
+        {navItem("/browse", "Browse", props.page == "browse")}
         {navItem("/torrent", "Torrent", props.page == "torrent")}
       </ul>
       {props.socket && <UsernameInput socket={props.socket}></UsernameInput>}
