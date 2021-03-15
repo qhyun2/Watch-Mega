@@ -42,6 +42,7 @@
     "mediainfo.js": "^0.1.4",
     "moment": "^2.29.1",
     "next": "^10.0.8",
+    "nprogress": "^0.2.0",
     "opensubtitles-api": "^5.1.2",
     "pino": "^6.7.0",
     "pino-pretty": "^4.3.0",

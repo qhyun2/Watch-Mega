@@ -10,6 +10,10 @@ import { config } from "@fortawesome/fontawesome-svg-core";
 import "@fortawesome/fontawesome-svg-core/styles.css";
 config.autoAddCss = false;
 
+// loading bar
+import { useRouter } from "next/router";
+import NProgress from "nprogress";
+
 import CssBaseline from "@material-ui/core/CssBaseline";
 import { createMuiTheme } from "@material-ui/core/styles";
 import { ThemeProvider } from "@material-ui/core/styles";
@@ -39,6 +43,25 @@ const theme = createMuiTheme({
 });
 
 function App({ Component, pageProps }: AppProps) {
+  // loading bar
+  NProgress.configure({ trickleSpeed: 50 });
+  NProgress.configure({ showSpinner: false });
+
+  const router = useRouter();
+  React.useEffect(() => {
+    const routeChangeStart = () => NProgress.start();
+    const routeChangeComplete = () => NProgress.done();
+
+    router.events.on("routeChangeStart", routeChangeStart);
+    router.events.on("routeChangeComplete", routeChangeComplete);
+    router.events.on("routeChangeError", routeChangeComplete);
+    return () => {
+      router.events.off("routeChangeStart", routeChangeStart);
+      router.events.off("routeChangeComplete", routeChangeComplete);
+      router.events.off("routeChangeError", routeChangeComplete);
+    };
+  }, []);
+
   React.useEffect(() => {
     // Remove the server-side injected CSS.
     const jssStyles = document.querySelector("#jss-server-side");
