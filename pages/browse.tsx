@@ -162,7 +162,7 @@ export default class Browse extends React.Component<unknown, State> {
     return (
       <div>
         <header>
-          <Navbar page="select"></Navbar>
+          <Navbar page="Browse" />
         </header>
         <MUI.Box display="flex">
           <MUI.Box margin="auto" paddingTop={8}>

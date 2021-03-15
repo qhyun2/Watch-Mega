@@ -132,7 +132,7 @@ export default class Index extends React.Component<unknown, state> {
           <link rel="icon" href="/favicon.ico" />
         </Head>
         <header>
-          <Navbar page="watch" socket={this.socket}></Navbar>
+          <Navbar page="Watch" socket={this.socket} />
         </header>
         <Container>
           <Row className="pt-4 justify-content-center">

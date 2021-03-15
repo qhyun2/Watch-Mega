@@ -31,6 +31,11 @@ const theme = createMuiTheme({
       default: "#212529",
     },
   },
+  typography: {
+    button: {
+      textTransform: "none",
+    },
+  },
 });
 
 function App({ Component, pageProps }: AppProps) {

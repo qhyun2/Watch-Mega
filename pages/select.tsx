@@ -81,7 +81,7 @@ export default class Select extends React.Component<unknown, state> {
           <title>Watch Mega | Select</title>
         </Head>
         <header>
-          <Navbar page="select"></Navbar>
+          <Navbar page="Select" />
         </header>
         <Box pt={4}>
           <Container>

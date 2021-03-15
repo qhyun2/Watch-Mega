@@ -60,7 +60,7 @@ export default class Torrent extends React.Component<unknown, state> {
           <link rel="icon" href="/favicon.ico" />
         </Head>
         <header>
-          <Navbar page="torrent"></Navbar>
+          <Navbar page="Torrent" />
         </header>
         <Container>
           <Row>

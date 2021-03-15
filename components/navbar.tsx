@@ -1,22 +1,17 @@
 import React from "react";
-import { createRef } from "react";
-import Col from "react-bootstrap/Col";
-import "bootstrap/dist/css/bootstrap.css";
-
+import Link from "next/link";
+import { AppBar, Box, Button, Toolbar, Typography, List, ListItem } from "@material-ui/core";
 import style from "../styles/custom.module.css";
 
 class UsernameInput extends React.Component<
   { socket: SocketIOClient.Socket },
   { username: string; isInputing: boolean }
 > {
-  input = createRef<HTMLInputElement>();
+  input = React.createRef<HTMLInputElement>();
 
   constructor(props) {
     super(props);
-    this.state = {
-      username: "",
-      isInputing: false,
-    };
+    this.state = { username: "", isInputing: false };
   }
 
   submit(name) {
@@ -26,27 +21,22 @@ class UsernameInput extends React.Component<
 
   render() {
     return (
-      <Col xs="6" lg="5" xl="4" className={style.username}>
+      <div className={style.username}>
         <button
-          style={{ visibility: this.state.isInputing ? "hidden" : "visible" }}
-          className={"px-4 bg-dark text-light " + style.usernameField + " " + style.usernameBtn}
+          style={{ background: "#32383e", visibility: this.state.isInputing ? "hidden" : "visible" }}
+          className={style.usernameField + " " + style.usernameBtn}
           onClick={() => {
             this.setState({ isInputing: true });
             setTimeout(() => this.input.current.focus(), 100);
           }}
           disabled={this.state.isInputing}>
-          <h5 className="my-0 text-truncate">
+          <Typography variant="h5" color="textPrimary" noWrap>
             {this.state.isInputing ? "" : this.state.username ? this.state.username : "Set username"}
-          </h5>
+          </Typography>
         </button>
         <input
           className={
-            "px-4 text-light " +
-            style.usernameField +
-            " " +
-            style.usernameInput +
-            " " +
-            (this.state.isInputing ? style.usernameShown : "")
+            style.usernameField + " " + style.usernameInput + " " + (this.state.isInputing ? style.usernameShown : "")
           }
           maxLength={30}
           disabled={!this.state.isInputing}
@@ -62,37 +52,46 @@ class UsernameInput extends React.Component<
           onChange={(e) => {
             this.setState({ username: e.target.value });
           }}
-          value={this.state.isInputing ? this.state.username : ""}></input>
-      </Col>
+          value={this.state.isInputing ? this.state.username : ""}
+          style={{ color: "#FFFFFF", paddingLeft: "20px" }}></input>
+      </div>
     );
   }
 }
 
-function navItem(link, text, active) {
-  return (
-    <li className={"nav-item" + (active ? " active" : "")}>
-      <a className="nav-link text-white" href={link}>
-        <h5 className={"my-0" + (active ? " text-highlight" : "")}>{text}</h5>
-      </a>
-    </li>
-  );
-}
+const NAVITEMS = [
+  { title: "Watch", path: "/" },
+  { title: "Select", path: "/select" },
+  { title: "Browse", path: "/browse" },
+  { title: "Torrent", path: "/torrent" },
+];
 
-export default function Navbar(props): JSX.Element {
+export default function Navbar(props: { page: string; socket?: SocketIOClient.Socket }): JSX.Element {
   return (
-    <nav className="navbar navbar-expand navbar-dark bg-c-secondary">
-      <div className="navbar-brand mb-0">
-        <b>
-          <h3 className="my-0">Watch Mega</h3>
-        </b>
-      </div>
-      <ul className="navbar-nav mr-auto">
-        {navItem("/", "Watch", props.page == "watch")}
-        {navItem("/select", "Select", props.page == "select")}
-        {navItem("/browse", "Browse", props.page == "browse")}
-        {navItem("/torrent", "Torrent", props.page == "torrent")}
-      </ul>
-      {props.socket && <UsernameInput socket={props.socket}></UsernameInput>}
-    </nav>
+    <AppBar position="static">
+      <Toolbar>
+        <Box pr={2}>
+          <Typography variant="h4" style={{ fontWeight: "bold" }}>
+            Watch Mega
+          </Typography>
+        </Box>
+        <List component="nav" style={{ display: "flex" }} disablePadding>
+          {NAVITEMS.map(({ title, path }) => (
+            <ListItem key={title} disableGutters>
+              <Link href={path}>
+                <Button>
+                  <Typography variant="h6" color={title === props.page ? "textSecondary" : "textPrimary"}>
+                    {title}
+                  </Typography>
+                </Button>
+              </Link>
+            </ListItem>
+          ))}
+        </List>
+        <Box width="40%" ml="auto">
+          {props.socket && <UsernameInput socket={props.socket}></UsernameInput>}
+        </Box>
+      </Toolbar>
+    </AppBar>
   );
 }
