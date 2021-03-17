@@ -60,15 +60,14 @@ function getEpisodes(): Promise<string[]> {
     });
 }
 
-function setVideo(path: string): Promise<void> {
-  return redis
-    .set(RC.REDIS_VIDEO_PATH, path)
-    .then(() => {
-      redis.publish(RC.VIDEO_EVENT, RC.VE_NEWVID);
-    })
-    .then(() => {
-      logger.info(`Loaded video: ${path}`);
-    });
+export function setVideo(path: string): void {
+  logger.info(`New video selected: ${path}`);
+  redis.set(RC.REDIS_VIDEO_PATH, path);
+  redis.zcard(RC.VIDEO_HISTORY).then((size) => {
+    if (size > RC.VIDEO_HISTORY_SIZE) redis.zpopmin(RC.VIDEO_HISTORY);
+  });
+  redis.zadd(RC.VIDEO_HISTORY, Date.now(), path.replace("data/", ""));
+  redis.publish(RC.VIDEO_EVENT, RC.VE_NEWVID);
 }
 
 async function seekEpisode(n: number): Promise<void> {
