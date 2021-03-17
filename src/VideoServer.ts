@@ -7,7 +7,15 @@ import { path as ffprobePath } from "ffprobe-static";
 import { logger } from "./Instances";
 
 const redis = new Redis.default(6379, process.env.REDIS_URL);
+redis.on("error", (e) => {
+  console.log(e);
+  console.log(e.trace());
+});
 const redisSub = new Redis.default(6379, process.env.REDIS_URL);
+redisSub.on("error", (e) => {
+  console.log(e);
+  console.log(e.trace());
+});
 
 export function subscribeRedis(): void {
   redisSub.subscribe(RC.VIDEO_EVENT);

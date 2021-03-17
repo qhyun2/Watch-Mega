@@ -15,7 +15,16 @@ export class SocketServer {
   constructor(http: Server) {
     this.io = new SocketIOServer(http);
     this.redis = new Redis.default(6379, process.env.REDIS_URL);
+    this.redis.on("error", (e) => {
+      console.log(e);
+      console.log(e.trace());
+    });
     this.redisSub = new Redis.default(6379, process.env.REDIS_URL);
+
+    this.redisSub.on("error", (e) => {
+      console.log(e);
+      console.log(e.trace());
+    });
     this.redis.set(RC.REDIS_CONNECTIONS, 0);
     this.redis.set(RC.REDIS_VIDEO_PATH, "public/default.mp4");
     this.redis.publish(RC.VIDEO_EVENT, RC.VE_NEWVID);
