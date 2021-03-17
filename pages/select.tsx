@@ -5,6 +5,7 @@ import { defaultAuth } from "../src/Auth";
 export { defaultAuth as getServerSideProps };
 
 import Head from "next/head";
+import Link from "next/link";
 import Navbar from "../components/navbar";
 import moment from "moment";
 import axios from "axios";
@@ -102,11 +103,11 @@ export default class Select extends React.Component<unknown, state> {
               <Grid item container xs={4} spacing={2} direction="column">
                 <Grid item>
                   <Box>
-                    <a href="/api/media/select">
+                    <Link href="/browse">
                       <Button variant="contained" color="primary" size="large" fullWidth>
                         Open file bowser
                       </Button>
-                    </a>
+                    </Link>
                   </Box>
                 </Grid>
                 <Grid item>
