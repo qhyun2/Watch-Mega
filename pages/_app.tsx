@@ -1,22 +1,16 @@
 import React from "react";
+import Head from "next/head";
 import type { AppProps } from "next/app";
+import { createMuiTheme, ThemeProvider } from "@material-ui/core/styles";
+import CssBaseline from "@material-ui/core/CssBaseline";
 
 import "../styles/globals.css";
 import "../styles/toastify.css";
 import "../styles/vjs-lime.css";
 
-// fix font awesome icons flashing huge
-import { config } from "@fortawesome/fontawesome-svg-core";
-import "@fortawesome/fontawesome-svg-core/styles.css";
-config.autoAddCss = false;
-
 // loading bar
 import { useRouter } from "next/router";
 import NProgress from "nprogress";
-
-import CssBaseline from "@material-ui/core/CssBaseline";
-import { createMuiTheme } from "@material-ui/core/styles";
-import { ThemeProvider } from "@material-ui/core/styles";
 
 const theme = createMuiTheme({
   palette: {
@@ -43,7 +37,7 @@ const theme = createMuiTheme({
   },
 });
 
-function App({ Component, pageProps }: AppProps) {
+function App({ Component, pageProps }: AppProps): JSX.Element {
   // loading bar
   NProgress.configure({ trickleSpeed: 50 });
   NProgress.configure({ showSpinner: false });
@@ -71,10 +65,15 @@ function App({ Component, pageProps }: AppProps) {
     }
   }, []);
   return (
-    <ThemeProvider theme={theme}>
-      <CssBaseline />
-      <Component {...pageProps} />
-    </ThemeProvider>
+    <React.Fragment>
+      <Head>
+        <title>Watch Mega</title>
+      </Head>
+      <ThemeProvider theme={theme}>
+        <CssBaseline />
+        <Component {...pageProps} />
+      </ThemeProvider>
+    </React.Fragment>
   );
 }
 
