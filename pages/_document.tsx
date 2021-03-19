@@ -7,6 +7,7 @@ export default class CustomDocument extends Document {
     return (
       <Html>
         <Head>
+          <title>Watch Mega</title>
           <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap" />
           <link rel="stylesheet" href="/loadingbar.css" />
         </Head>

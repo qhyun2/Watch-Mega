@@ -62,10 +62,6 @@
   backdrop-filter: blur(4px);
 }
 
-.video-js.vjs-lime video {
-  border-radius: 0.5em;
-}
-
 .video-js.vjs-lime video:focus {
   outline: none;
 }

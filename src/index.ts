@@ -1,14 +1,13 @@
 import { config } from "dotenv";
 config();
+import Next from "next";
 import express from "express";
 import { createServer as createHTTPServer } from "http";
-import serveIndex from "serve-index";
 import { SocketServer } from "./SocketHandler";
 import { subscribeRedis } from "./VideoServer";
 import { logger } from "./Instances";
 
 const dev = process.env.NODE_ENV !== "production";
-import Next from "next";
 const next = Next({ dev: dev });
 next.prepare().then(() => {
   const app = express();
@@ -18,7 +17,6 @@ next.prepare().then(() => {
   ss.subscribeRedis();
   subscribeRedis();
 
-  app.use("/api/media/select", serveIndex("data", { icons: true, stylesheet: "public/fileselect.css" }));
   app.all("*", (req, res) => next.getRequestHandler()(req, res));
 
   const PORT = process.env.PORT || 3000;

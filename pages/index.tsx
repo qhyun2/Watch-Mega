@@ -1,17 +1,8 @@
 import React from "react";
-import Container from "react-bootstrap/Container";
-import Row from "react-bootstrap/Row";
-import Col from "react-bootstrap/Col";
-import Modal from "react-bootstrap/Modal";
 import "bootstrap/dist/css/bootstrap.css";
 
-import Head from "next/head";
 import Navbar from "../components/navbar";
 import UserList from "../components/userlist";
-import style from "../styles/custom.module.css";
-
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faArrowRight, faArrowLeft } from "@fortawesome/free-solid-svg-icons";
 
 import videojs, { VideoJsPlayer } from "video.js";
 import "video.js/dist/video-js.min.css";
@@ -22,6 +13,20 @@ import Toastify from "toastify-js";
 // authentication
 import { defaultAuth } from "../src/Auth";
 export { defaultAuth as getServerSideProps };
+
+import {
+  Box,
+  Grid,
+  TextField,
+  Dialog,
+  DialogContent,
+  Typography,
+  Button,
+  Fade,
+  Container,
+  Paper,
+} from "@material-ui/core";
+import { NavigateBefore, NavigateNext } from "@material-ui/icons";
 
 interface state {
   playingPopup: boolean;
@@ -75,103 +80,130 @@ export default class Index extends React.Component<unknown, state> {
     this.socket.close();
   }
 
-  renderSubOffset(): JSX.Element {
+  renderPlayingPopup(): JSX.Element {
     return (
-      <Row>
-        <Col xs="2" className="m-auto pt-4 d-flex justify-content-center">
-          <div className="form-outline">
-            <label className="form-label text-white" htmlFor="suboffset">
-              Subtitle delay
-            </label>
-            <div className="input-group">
-              <input
-                className={"form-control " + style.blackBorderSolid}
-                id="suboffset"
-                type="number"
-                step="50"
-                value={this.state.subtitleDelay}
-                onChange={(e) => {
-                  this.setState({ subtitleDelay: e.target.valueAsNumber });
-                  this.setOffset(e.target.valueAsNumber);
-                }}></input>
-              <div className="input-group-append ">
-                <span className={"bg-c-secondary text-white input-group-text " + style.blackBorderSolid}>ms</span>
-              </div>
-            </div>
-          </div>
-        </Col>
-      </Row>
+      <Fade in={this.state.playingPopup}>
+        <Dialog open={true}>
+          <DialogContent>
+            <Box pb={2} px={2} display="flex" flexDirection="column" alignItems="center">
+              <Typography variant="h4">Welcome to WatchMega</Typography>
+              <Box p={2}>
+                <Typography variant="subtitle1" align="center">
+                  The video is already playing
+                </Typography>
+              </Box>
+              <Button
+                variant="contained"
+                color="primary"
+                onClick={() => {
+                  this.setState({ playingPopup: false });
+                  this.socket.emit("ready");
+                }}>
+                Start watching
+              </Button>
+            </Box>
+          </DialogContent>
+        </Dialog>
+      </Fade>
     );
   }
 
-  renderPlayingPopup(): JSX.Element {
+  renderVideoBar(): JSX.Element {
     return (
-      <Modal show={this.state.playingPopup} className="fade text-white" backdrop="static" centered>
-        <div className="bg-c-secondary modal-body d-flex flex-column justify-content-center">
-          <h2 className="text-center p-3">Welcome to WatchMega</h2>
-          <p className="text-center">The video is already playing</p>
-          <button
-            className="btn btn-success p-2"
-            type="button"
-            onClick={() => {
-              this.setState({ playingPopup: false });
-              this.socket.emit("ready");
-            }}>
-            <h5 className="mb-0">Start watching</h5>
-          </button>
-        </div>
-      </Modal>
+      <Box pt={4}>
+        <Container maxWidth="lg">
+          <Grid container justify="space-evenly" spacing={2}>
+            <Grid item xs={1} container justify="flex-end">
+              <Button
+                variant="contained"
+                color="primary"
+                onClick={() => this.socket.emit("prev")}
+                style={{ padding: "5px" }}>
+                <NavigateBefore fontSize="large" />
+              </Button>
+            </Grid>
+            <Grid item xs={10} container justify="center">
+              <Paper
+                style={{
+                  width: "100%",
+                  height: "100%",
+                  background: "#680e8b",
+                  display: "flex",
+                  flexDirection: "column",
+                  justifyContent: "center",
+                }}>
+                <Box mx={3}>
+                  <Typography variant="h6" align="center" noWrap>
+                    {this.state.videoName}
+                  </Typography>
+                </Box>
+              </Paper>
+            </Grid>
+            <Grid item xs={1} container justify="flex-start">
+              <Box>
+                <Button
+                  variant="contained"
+                  color="primary"
+                  onClick={() => this.socket.emit("next")}
+                  style={{ padding: "5px" }}>
+                  <NavigateNext fontSize="large" />
+                </Button>
+              </Box>
+            </Grid>
+          </Grid>
+        </Container>
+      </Box>
+    );
+  }
+
+  renderPlayer(): JSX.Element {
+    return (
+      <Box pt={4}>
+        <Container maxWidth="md">
+          <Paper elevation={12}>
+            <video id="video" className="video-js vjs-fluid vjs-lime" controls preload="auto">
+              <source src="api/media" type="video/mp4"></source>
+            </video>
+          </Paper>
+        </Container>
+      </Box>
+    );
+  }
+
+  renderSubOffset(): JSX.Element {
+    return (
+      <Box pt={2}>
+        <Container maxWidth="md">
+          <Grid container justify="center">
+            <Grid item xs={2}>
+              <TextField
+                id="standard-number"
+                label="Subtitle delay (ms)"
+                type="number"
+                inputProps={{ step: "50" }}
+                onChange={(e) => this.setOffset(parseInt(e.target.value))}
+              />
+            </Grid>
+          </Grid>
+        </Container>
+      </Box>
     );
   }
 
   render(): JSX.Element {
     return (
-      <div className="bg">
-        <Head>
-          <title>Watch Mega</title>
-          <link rel="icon" href="/favicon.ico" />
-        </Head>
+      <React.Fragment>
         <header>
           <Navbar page="Watch" socket={this.socket} />
         </header>
-        <Container>
-          <Row className="pt-4 justify-content-center">
-            <Col xs="1">
-              <button
-                className="btn bg-c-secondary text-white h-100 w-100"
-                id="prevep"
-                onClick={() => this.socket.emit("prev")}>
-                <FontAwesomeIcon icon={faArrowLeft}></FontAwesomeIcon>
-              </button>
-            </Col>
-            <Col xs="10" className="m-auto">
-              <div className="alert alert-dark bg-c-secondary mb-0" role="alert" style={{ borderStyle: "none" }}>
-                <h5 className="text-center text-highlight mb-0" id="videoname" style={{ minHeight: "1em" }}>
-                  {this.state.videoName}
-                </h5>
-              </div>
-            </Col>
-            <Col xs="1">
-              <button
-                className="btn bg-c-secondary text-white h-100 w-100"
-                id="nextep"
-                onClick={() => this.socket.emit("next")}>
-                <FontAwesomeIcon icon={faArrowRight}></FontAwesomeIcon>
-              </button>
-            </Col>
-          </Row>
-          <Row>
-            <Col xs="9" className="m-auto pt-4">
-              <video id="video" className="video-js vjs-fluid vjs-lime" controls preload="auto">
-                <source src="api/media" type="video/mp4"></source>
-              </video>
-            </Col>
-          </Row>
+        {this.renderVideoBar()}
+        {this.renderPlayer()}
+        <Container maxWidth="md">
           <UserList usernames={this.state.usernames} count={this.state.count}></UserList>
-          {this.renderSubOffset()}
         </Container>
+        {this.renderSubOffset()}
         {this.renderPlayingPopup()}
-      </div>
+      </React.Fragment>
     );
   }
 

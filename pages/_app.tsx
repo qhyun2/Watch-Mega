@@ -33,6 +33,7 @@ const theme = createMuiTheme({
     },
     background: {
       default: "#212529",
+      paper: "#353535",
     },
   },
   typography: {
