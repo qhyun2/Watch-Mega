@@ -80,7 +80,7 @@ export default function Navbar(props: { page: string; socket?: SocketIOClient.So
             <ListItem key={title} disableGutters>
               <Link href={path}>
                 <Button>
-                  <Typography variant="h6" color={title === props.page ? "textSecondary" : "textPrimary"}>
+                  <Typography variant="h6" color={title === props.page ? "secondary" : "textPrimary"}>
                     {title}
                   </Typography>
                 </Button>

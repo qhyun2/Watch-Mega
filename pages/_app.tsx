@@ -15,15 +15,15 @@ import NProgress from "nprogress";
 const theme = createMuiTheme({
   palette: {
     type: "dark",
-    text: {
-      primary: "#FFFFFF",
-      secondary: "#34a3a3",
-    },
     primary: {
       main: "#680e8b",
     },
     secondary: {
-      main: "#680e8b",
+      main: "#34a3a3",
+    },
+    text: {
+      primary: "#FFFFFF",
+      secondary: "rgba(255, 255, 255, 0.7)",
     },
     background: {
       default: "#212529",

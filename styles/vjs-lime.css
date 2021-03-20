@@ -6,24 +6,26 @@
   }
 }
 
-.video-js.vjs-lime .vjs-big-play-button {
-  width: 2.25em;
+.video-js.vjs-lime .vjs-big-play-button,
+.video-js.vjs-lime .vjs-big-play-button:focus,
+.video-js.vjs-lime:hover .vjs-big-play-button {
+  width: 3.2em;
   height: 2em;
   line-height: 1.9em;
   border-radius: 0.7em;
-  left: calc(50% - 1em);
-  top: calc(50% - 0.75em);
   backdrop-filter: blur(3px);
   background-color: rgba(0, 0, 0, 0.5);
   border: 2px solid black;
   color: #fff;
   transition: background 0.2s ease-in;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
 }
 
 .video-js.vjs-lime .vjs-big-play-button:hover,
 .video-js.vjs-lime .vjs-big-play-button:focus {
   background-color: #64008cc4;
-  color: #fff;
 }
 
 .video-js.vjs-lime .vjs-loading-spinner {
