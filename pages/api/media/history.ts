@@ -7,9 +7,10 @@ export default async function handle(req: NextApiRequest, res: NextApiResponse) 
   const end = parseInt(<string>req.query.end) || 5;
   if (end <= start) return res.status(400).send("");
   const history = await redis.zrevrange(RC.VIDEO_HISTORY, start, end, "WITHSCORES");
+  const maxPages = Math.ceil((await redis.zcard(RC.VIDEO_HISTORY)) / 5);
   const response = [];
   for (let i = 0; i < history.length; i += 2) {
     response.push({ name: history[i], timestamp: parseInt(history[i + 1]) });
   }
-  res.send({ history: response });
+  res.send({ history: response, maxPages });
 }

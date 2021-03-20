@@ -4,7 +4,6 @@ import React from "react";
 import { defaultAuth } from "../src/Auth";
 export { defaultAuth as getServerSideProps };
 
-import Head from "next/head";
 import Link from "next/link";
 import Navbar from "../components/navbar";
 import moment from "moment";
@@ -26,61 +25,82 @@ import {
   Typography,
 } from "@material-ui/core";
 import { Pagination, Skeleton } from "@material-ui/lab";
-import { makeStyles } from "@material-ui/core/styles";
+
+interface HistoryItem {
+  name: string;
+  timestamp: number;
+}
 
 interface state {
   historyLoading: boolean;
-  history: { name: string; timestamp: number }[];
+  history: Map<number, HistoryItem>;
+  maxPages: number;
   page: number;
 }
 
 export default class Select extends React.Component<unknown, state> {
+  loadedPages: Set<number>;
+
   constructor(props) {
     super(props);
 
+    this.loadedPages = new Set<number>();
     this.state = {
       historyLoading: true,
-      history: [],
-      page: 0,
+      history: new Map<number, HistoryItem>(),
+      maxPages: 1,
+      page: 1,
     };
   }
 
-  loadHistory(): void {
-    axios
-      .get("/api/media/history", { params: { start: this.state.page * 5, end: (this.state.page + 1) * 5 - 1 } })
-      .then((response) => {
-        this.setState({ historyLoading: false, history: response.data.history });
+  loadHistory(page: number): void {
+    if (this.loadedPages.has(page)) return;
+    this.setState({ historyLoading: true });
+    axios.get("/api/media/history", { params: { start: (page - 1) * 5, end: page * 5 - 1 } }).then((response) => {
+      this.setState((state) => {
+        const newState = { ...state, historyLoading: false, maxPages: response.data.maxPages };
+        Array.from<HistoryItem>(response.data.history).forEach((item, index) =>
+          newState.history.set(page * 5 + index, item)
+        );
+        this.loadedPages.add(page);
+        return newState;
       });
+    });
   }
 
   componentDidMount(): void {
-    this.loadHistory();
+    this.loadHistory(1);
   }
 
   renderHistoryItems(): JSX.Element[] {
     if (this.state.historyLoading) {
-      return Array(5).fill(
-        <GridListTile>
-          <Skeleton variant="rect" height={108} animation="wave" />
-        </GridListTile>
-      );
-    } else {
-      return this.state.history.map((data) => {
-        return (
-          <GridListTile key={data.name}>
-            <HistoryItem {...data}></HistoryItem>
+      return Array(5)
+        .fill(0)
+        .map((_, i) => (
+          <GridListTile key={i}>
+            <Skeleton variant="rect" height={108} animation="wave" />
           </GridListTile>
-        );
-      });
+        ));
+    } else {
+      const index = this.state.page * 5;
+      const data: HistoryItem[] = [];
+      for (let i = index; i < index + 5; i++) {
+        data.push(this.state.history.get(i));
+      }
+
+      return data.map((item) =>
+        item ? (
+          <GridListTile key={item.name}>
+            <HistoryItem {...item}></HistoryItem>
+          </GridListTile>
+        ) : null
+      );
     }
   }
 
   render(): JSX.Element {
     return (
-      <div>
-        <Head>
-          <title>Watch Mega | Select</title>
-        </Head>
+      <React.Fragment>
         <header>
           <Navbar page="Select" />
         </header>
@@ -92,12 +112,21 @@ export default class Select extends React.Component<unknown, state> {
               </Typography>
             </Box>
             <Grid container spacing={8}>
-              <Grid item xs={8}>
+              <Grid item xs={8} style={{ minHeight: 1000 }}>
                 <GridList cellHeight={120} cols={1}>
                   {this.renderHistoryItems()}
                 </GridList>
                 <Box display="flex" justifyContent="center">
-                  <Pagination count={3} color="primary" disabled />
+                  <Pagination
+                    count={this.state.maxPages}
+                    page={this.state.page}
+                    onChange={(_, page) => {
+                      this.loadHistory(page);
+                      this.setState({ page });
+                      this.forceUpdate();
+                    }}
+                    color="primary"
+                  />
                 </Box>
               </Grid>
               <Grid item container xs={4} spacing={2} direction="column">
@@ -127,7 +156,7 @@ export default class Select extends React.Component<unknown, state> {
             </Grid>
           </Container>
         </Box>
-      </div>
+      </React.Fragment>
     );
   }
 }
@@ -139,22 +168,11 @@ function selectHistory(name: string): void {
 }
 
 const HistoryItem = (props: { name: string; timestamp: number }) => {
-  const useStyles = makeStyles(() => ({
-    cover: {
-      width: 192,
-      height: 108,
-    },
-    fill: {
-      width: "100%",
-    },
-  }));
-  const classes = useStyles();
-
   return (
-    <ButtonBase className={classes.fill} onClick={() => selectHistory(props.name)}>
-      <Card className={classes.fill} raised={true}>
+    <ButtonBase onClick={() => selectHistory(props.name)} style={{ width: "100%" }}>
+      <Card style={{ width: "100%" }} raised={true}>
         <Grid container wrap="nowrap">
-          <CardMedia className={classes.cover} image={"/api/media/thumb/" + props.name} />
+          <CardMedia style={{ width: 192, height: 108 }} image={"/api/media/thumb/" + props.name} />
           <CardContent>
             <Typography component="h6" variant="subtitle1" align="left" noWrap>
               {props.name.split("/").pop()}
