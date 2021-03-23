@@ -53,23 +53,25 @@ export default class Select extends React.Component<unknown, state> {
     };
   }
 
-  loadHistory(page: number): void {
+  loadHistory(page: number): Promise<void> {
     if (this.loadedPages.has(page)) return;
     this.setState({ historyLoading: true });
-    axios.get("/api/media/history", { params: { start: (page - 1) * 5, end: page * 5 - 1 } }).then((response) => {
-      this.setState((state) => {
-        const newState = { ...state, historyLoading: false, maxPages: response.data.maxPages };
-        Array.from<HistoryItem>(response.data.history).forEach((item, index) =>
-          newState.history.set(page * 5 + index, item)
-        );
-        this.loadedPages.add(page);
-        return newState;
+    return axios
+      .get("/api/media/history", { params: { start: (page - 1) * 5, end: page * 5 - 1 } })
+      .then((response) => {
+        this.setState((state) => {
+          const newState = { ...state, historyLoading: false, maxPages: response.data.maxPages };
+          Array.from<HistoryItem>(response.data.history).forEach((item, index) =>
+            newState.history.set(page * 5 + index, item)
+          );
+          this.loadedPages.add(page);
+          return newState;
+        });
       });
-    });
   }
 
-  componentDidMount(): void {
-    this.loadHistory(1);
+  async componentDidMount(): Promise<void> {
+    await this.loadHistory(1);
   }
 
   renderHistoryItems(): JSX.Element[] {
@@ -112,22 +114,30 @@ export default class Select extends React.Component<unknown, state> {
               </Typography>
             </Box>
             <Grid container spacing={8}>
-              <Grid item xs={8} style={{ minHeight: 1000 }}>
-                <GridList cellHeight={120} cols={1}>
-                  {this.renderHistoryItems()}
-                </GridList>
-                <Box display="flex" justifyContent="center">
-                  <Pagination
-                    count={this.state.maxPages}
-                    page={this.state.page}
-                    onChange={(_, page) => {
-                      this.loadHistory(page);
-                      this.setState({ page });
-                      this.forceUpdate();
-                    }}
-                    color="primary"
-                  />
-                </Box>
+              <Grid item xs={8}>
+                {this.state.maxPages !== 0 ? (
+                  <>
+                    <GridList cellHeight={120} cols={1} style={{ minHeight: 640, alignContent: "flex-start" }}>
+                      {this.renderHistoryItems()}
+                    </GridList>
+                    <Box display="flex" justifyContent="center">
+                      <Pagination
+                        count={this.state.maxPages}
+                        page={this.state.page}
+                        onChange={(_, page) => {
+                          this.loadHistory(page);
+                          this.setState({ page });
+                          this.forceUpdate();
+                        }}
+                        color="primary"
+                      />
+                    </Box>
+                  </>
+                ) : (
+                  <Typography variant="h6" color="textSecondary">
+                    No history yet :/
+                  </Typography>
+                )}
               </Grid>
               <Grid item container xs={4} spacing={2} direction="column">
                 <Grid item>
@@ -172,8 +182,8 @@ const HistoryItem = (props: { name: string; timestamp: number }) => {
     <ButtonBase onClick={() => selectHistory(props.name)} style={{ width: "100%" }}>
       <Card style={{ width: "100%" }} raised={true}>
         <Grid container wrap="nowrap">
-          <CardMedia style={{ width: 192, height: 108 }} image={"/api/media/thumb/" + props.name} />
-          <CardContent>
+          <CardMedia style={{ width: 192, height: 108, flexShrink: 0 }} image={"/api/media/thumb/" + props.name} />
+          <CardContent style={{ minWidth: 0 }}>
             <Typography component="h6" variant="subtitle1" align="left" noWrap>
               {props.name.split("/").pop()}
             </Typography>
