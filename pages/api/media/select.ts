@@ -1,7 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import * as path from "path";
 import * as fs from "fs";
-import { setVideo } from "../../../../src/VideoServer";
+import { setVideo } from "../../../src/VideoServer";
 
 function getPath(name: string): string {
   let videoPath = path.join("data", name);

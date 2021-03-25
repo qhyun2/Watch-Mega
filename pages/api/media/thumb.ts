@@ -4,15 +4,23 @@ import { path as ffprobePath } from "ffprobe-static";
 import { join } from "path";
 import { existsSync } from "fs";
 import { spawn } from "child_process";
-import { logger } from "../../../../src/Instances";
+import { logger } from "../../../src/Instances";
 
 export default async function select(req: NextApiRequest, res: NextApiResponse): Promise<void> {
-  const videoPath = join("data", ...(<string[]>req.query.slug));
-
-  if (!existsSync(videoPath)) {
+  if (!req.query || !req.query.src) return res.status(404).send("");
+  const url = (req.query.src as string).split(":");
+  if (url[0] === "file") {
+    return fileThumbnail(res, url);
+  } else if (url[0] === "youtube") {
+    res.redirect("/youtube.png");
+  } else {
     res.status(404).send("");
-    return;
   }
+}
+
+async function fileThumbnail(res: NextApiResponse, url: string[]): Promise<void> {
+  const videoPath = join("data", url[1]);
+  if (!existsSync(videoPath)) return res.status(404).send("");
 
   res.writeHead(200, { "Content-Type": "image/jpeg" });
 

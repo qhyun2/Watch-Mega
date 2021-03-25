@@ -9,6 +9,7 @@ import Link from "next/link";
 import Navbar from "../components/navbar";
 import moment from "moment";
 import axios from "axios";
+import { stringify } from "qs";
 
 import {
   Box,
@@ -211,7 +212,10 @@ const HistoryItem = (props: { name: string; timestamp: number }) => {
       style={{ width: "100%" }}>
       <Card style={{ width: "100%" }} raised={true}>
         <Grid container wrap="nowrap">
-          <CardMedia style={{ width: 192, height: 108, flexShrink: 0 }} image={"/api/media/thumb/" + props.name} />
+          <CardMedia
+            style={{ width: 192, height: 108, flexShrink: 0 }}
+            image={"/api/media/thumb?" + stringify({ src: props.name })}
+          />
           <CardContent style={{ minWidth: 0 }}>
             <Typography component="h6" variant="subtitle1" align="left" noWrap>
               {props.name.split(":").pop().split("/").pop()}
