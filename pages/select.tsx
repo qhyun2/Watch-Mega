@@ -1,4 +1,5 @@
 import React from "react";
+import { useRouter, withRouter, NextRouter } from "next/router";
 
 // authentication
 import { defaultAuth } from "../src/Auth";
@@ -36,9 +37,14 @@ interface state {
   history: Map<number, HistoryItem>;
   maxPages: number;
   page: number;
+  textFieldYoutube: string;
 }
 
-export default class Select extends React.Component<unknown, state> {
+interface props {
+  router: NextRouter;
+}
+
+class Select extends React.Component<props, state> {
   loadedPages: Set<number>;
 
   constructor(props) {
@@ -50,6 +56,7 @@ export default class Select extends React.Component<unknown, state> {
       history: new Map<number, HistoryItem>(),
       maxPages: 1,
       page: 1,
+      textFieldYoutube: "",
     };
   }
 
@@ -154,10 +161,31 @@ export default class Select extends React.Component<unknown, state> {
                 </Grid>
                 <Grid item container spacing={1}>
                   <Grid item xs={9}>
-                    <TextField id="outlined-basic" label="Youtube Link" fullWidth disabled />
+                    <TextField
+                      id="outlined-basic"
+                      label="Youtube Link"
+                      fullWidth
+                      value={this.state.textFieldYoutube}
+                      onChange={(e) => this.setState({ textFieldYoutube: e.target.value })}
+                    />
                   </Grid>
                   <Grid item xs={3}>
-                    <Button variant="contained" color="primary" style={{ height: "100%" }} disabled>
+                    <Button
+                      variant="contained"
+                      color="primary"
+                      style={{ height: "100%" }}
+                      onClick={() => {
+                        if (!this.state.textFieldYoutube) return;
+                        const regex = this.state.textFieldYoutube.match(
+                          /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/
+                        );
+                        const id = regex ? regex.pop() : null;
+                        if (id) {
+                          axios.post("/api/media/select", { src: "youtube:" + id }).then(() => {
+                            this.props.router.push("/");
+                          });
+                        }
+                      }}>
                       Select
                     </Button>
                   </Grid>
@@ -171,21 +199,22 @@ export default class Select extends React.Component<unknown, state> {
   }
 }
 
-function selectHistory(name: string): void {
-  axios.get("/api/media/select/" + name).then(() => {
-    window.location.assign("/");
-  });
-}
-
 const HistoryItem = (props: { name: string; timestamp: number }) => {
+  const router = useRouter();
   return (
-    <ButtonBase onClick={() => selectHistory(props.name)} style={{ width: "100%" }}>
+    <ButtonBase
+      onClick={() => {
+        axios.post("/api/media/select", { src: props.name }).then(() => {
+          router.push("/");
+        });
+      }}
+      style={{ width: "100%" }}>
       <Card style={{ width: "100%" }} raised={true}>
         <Grid container wrap="nowrap">
           <CardMedia style={{ width: 192, height: 108, flexShrink: 0 }} image={"/api/media/thumb/" + props.name} />
           <CardContent style={{ minWidth: 0 }}>
             <Typography component="h6" variant="subtitle1" align="left" noWrap>
-              {props.name.split("/").pop()}
+              {props.name.split(":").pop().split("/").pop()}
             </Typography>
             <Typography variant="body1" color="textSecondary" align="left" noWrap>
               {moment(props.timestamp).fromNow()}
@@ -196,3 +225,5 @@ const HistoryItem = (props: { name: string; timestamp: number }) => {
     </ButtonBase>
   );
 };
+
+export default withRouter(Select);

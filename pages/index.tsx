@@ -5,6 +5,7 @@ import Navbar from "../components/navbar";
 import UserList from "../components/userlist";
 
 import videojs, { VideoJsPlayer } from "video.js";
+import "videojs-youtube";
 import "video.js/dist/video-js.min.css";
 
 import socketIOClient from "socket.io-client";
@@ -60,19 +61,24 @@ export default class Index extends React.Component<unknown, state> {
   }
 
   componentDidMount(): void {
-    this.vjs = videojs("video", {}, async () => {
-      this.vjs.volume(0.8);
-      this.newVideo();
-      this.initHotkeys();
-      this.initSocket();
-      this.initVideoListeners();
-      await new Promise<void>((resolve, _) => {
+    this.vjs = videojs(
+      "video",
+      {
+        techOrder: ["youtube", "html5"],
+        sources: [{ type: "video/mp4", src: "/default.mp4" }],
+      },
+      () => {
+        this.vjs.volume(0.8);
+        this.initHotkeys();
+        this.initSocket();
+        this.initVideoListeners();
         this.socket.on("info", (info) => {
-          this.setState({ playingPopup: info.playing, videoName: info.videoName });
-          resolve();
+          this.setState({ playingPopup: info.playing, videoName: info.videoName }, () => {
+            this.newVideo();
+          });
         });
-      });
-    });
+      }
+    );
   }
 
   componentWillUnmount(): void {
@@ -134,7 +140,7 @@ export default class Index extends React.Component<unknown, state> {
                 }}>
                 <Box mx={3}>
                   <Typography variant="h6" align="center" noWrap>
-                    {this.state.videoName}
+                    {this.state.videoName.split(":").pop().split("/").pop()}
                   </Typography>
                 </Box>
               </Paper>
@@ -161,9 +167,7 @@ export default class Index extends React.Component<unknown, state> {
       <Box pt={4}>
         <Container maxWidth="md">
           <Paper elevation={12}>
-            <video id="video" className="video-js vjs-fluid vjs-lime" controls preload="auto">
-              <source src="api/media" type="video/mp4"></source>
-            </video>
+            <video id="video" className="video-js vjs-fluid vjs-lime" controls preload="auto" />
           </Paper>
         </Container>
       </Box>
@@ -279,8 +283,7 @@ export default class Index extends React.Component<unknown, state> {
       if (user) this.sendNotif(`${user} paused the video`);
     });
     this.socket.on("newvideo", (name) => {
-      this.setState({ videoName: name });
-      this.newVideo();
+      this.setState({ videoName: name }, () => this.newVideo());
     });
 
     // users watching
@@ -315,9 +318,20 @@ export default class Index extends React.Component<unknown, state> {
 
   // set video src to have a new t param to avoid caching
   newVideo(): void {
-    this.vjs.src({ type: "video/mp4", src: `/api/media?t=${Math.random()}` });
-    this.vjs.addRemoteTextTrack({ src: "api/media/subs", kind: "subtitles", srclang: "en", label: "English" }, false);
-    this.vjs.textTracks()[0].mode = "showing";
+    if (!this.state.videoName) return;
+    const url = new URL(this.state.videoName);
+
+    if (url.protocol === "file:") {
+      this.vjs.src({ type: "video/mp4", src: `/api/media?t=${Math.random()}` });
+      this.vjs.addRemoteTextTrack({ src: "api/media/subs", kind: "subtitles", srclang: "en", label: "English" }, false);
+      this.vjs.textTracks()[0].mode = "showing";
+    } else if (url.protocol === "youtube:") {
+      let videoID = url.pathname;
+      while (videoID[0] === "/") videoID = videoID.substr(1);
+      this.vjs.src({ type: "video/youtube", src: `http://www.youtube.com/watch?v=${videoID}&rel=0` });
+    } else {
+      throw "Unknown protocol: " + url.protocol;
+    }
   }
 
   sendNotif(msg): void {

@@ -1,24 +1,22 @@
 import React from "react";
+import { useRouter } from "next/router";
 
-import * as MUI from "@material-ui/core";
-
-// authentication
-import { defaultAuth } from "../src/Auth";
-export { defaultAuth as getServerSideProps };
-
-import Head from "next/head";
-import Navbar from "../components/navbar";
-
+import { Box, Typography } from "@material-ui/core";
+import { TreeItem, TreeView } from "@material-ui/lab";
 import { makeStyles, Theme, createStyles } from "@material-ui/core/styles";
-import TreeView from "@material-ui/lab/TreeView";
-import TreeItem from "@material-ui/lab/TreeItem";
-import Typography from "@material-ui/core/Typography";
+
+import Navbar from "../components/navbar";
+import axios from "axios";
+
 import ArrowForwardIosIcon from "@material-ui/icons/ArrowForwardIos";
 import FolderIcon from "@material-ui/icons/Folder";
 import FolderOpenIcon from "@material-ui/icons/FolderOpen";
 import MovieIcon from "@material-ui/icons/Movie";
 import DescriptionIcon from "@material-ui/icons/Description";
-import axios from "axios";
+
+// authentication
+import { defaultAuth } from "../src/Auth";
+export { defaultAuth as getServerSideProps };
 
 const useTreeItemStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -79,6 +77,7 @@ function renderChildren(
 function Item(props): JSX.Element {
   const classes = useTreeItemStyles();
   const Icon = ICONLOOKUP[props.type];
+  const router = useRouter();
 
   return (
     <TreeItem
@@ -87,13 +86,11 @@ function Item(props): JSX.Element {
         <div
           className={classes.labelRoot}
           onClick={() => {
-            console.log(props.parent + "/" + props.name);
             if (props.type === "folder") {
-              console.log("is folding");
               props.callback(props.parent + "/" + props.name);
             } else if (props.type === "media") {
-              axios.get("/api/media/select" + props.parent + "/" + props.name).then(() => {
-                window.location.assign("/");
+              axios.post("/api/media/select", { src: "file:" + props.parent.substr(1) + "/" + props.name }).then(() => {
+                router.push("/");
               });
             }
           }}>
@@ -139,10 +136,8 @@ export default class Browse extends React.Component<unknown, State> {
         let root = state.files;
         for (const folder of path.split("/")) {
           if (!folder) continue;
-          console.log(folder);
           root = root.get(folder).children;
         }
-        console.log(root);
 
         response.data.files.map((file) => {
           root.set(file.name, {
@@ -164,8 +159,8 @@ export default class Browse extends React.Component<unknown, State> {
         <header>
           <Navbar page="Browse" />
         </header>
-        <MUI.Box display="flex">
-          <MUI.Box margin="auto" paddingTop={8}>
+        <Box display="flex">
+          <Box margin="auto" paddingTop={8}>
             <TreeView
               defaultCollapseIcon={
                 <ArrowForwardIosIcon
@@ -193,8 +188,8 @@ export default class Browse extends React.Component<unknown, State> {
                 );
               })}
             </TreeView>
-          </MUI.Box>
-        </MUI.Box>
+          </Box>
+        </Box>
       </div>
     );
   }

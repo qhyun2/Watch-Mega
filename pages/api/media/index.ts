@@ -1,10 +1,13 @@
-import { Request, Response } from "express";
+import type { NextApiRequest, NextApiResponse } from "next";
 import * as fs from "fs";
 import * as RC from "../../../src/RedisConstants";
 import { logger, redis } from "../../../src/Instances";
 
-export default async function serve(req: Request, res: Response): Promise<void> {
-  const videoPath = await redis.get(RC.REDIS_VIDEO_PATH);
+export default async function serve(req: NextApiRequest, res: NextApiResponse): Promise<void> {
+  const url = (await redis.get(RC.REDIS_VIDEO_PATH)).split(":");
+  if (url[0] != "file") return res.status(404).send("Not currently watching file");
+
+  const videoPath = url[1];
 
   await new Promise<void>((resolve) => {
     fs.stat(videoPath, (err, stat) => {

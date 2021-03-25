@@ -3,7 +3,6 @@ import { Server as SocketIOServer, Socket } from "socket.io";
 import { logger } from "./Instances";
 import xss from "xss";
 import * as Redis from "ioredis";
-import * as path from "path";
 import * as RC from "./RedisConstants";
 
 export class SocketServer {
@@ -26,7 +25,7 @@ export class SocketServer {
       console.log(e.trace());
     });
     this.redis.set(RC.REDIS_CONNECTIONS, 0);
-    this.redis.set(RC.REDIS_VIDEO_PATH, "public/default.mp4");
+    this.redis.set(RC.REDIS_VIDEO_PATH, "file:public/default.mp4");
     this.redis.publish(RC.VIDEO_EVENT, RC.VE_NEWVID);
 
     setInterval(() => {
@@ -52,7 +51,7 @@ export class SocketServer {
       this.updateWatching();
       Promise.all([this.redis.get(RC.REDIS_PLAYING), this.redis.get(RC.REDIS_VIDEO_PATH)]).then(
         ([playing, videoName]) => {
-          socket.emit("info", { playing: playing == RC.RTRUE, videoName: path.basename(videoName) });
+          socket.emit("info", { playing: playing == RC.RTRUE, videoName });
         }
       );
       socket.emit("seek", null, await this.redis.get(RC.REDIS_POSITION));
@@ -88,7 +87,7 @@ export class SocketServer {
         logger.info(`${socket.id} played the video at ${pos}`);
       });
       socket.on("pause", (msg) => {
-        const pos = parseInt(msg);
+        const pos = parseFloat(msg);
         if (isNaN(pos)) return;
         this.redis.set(RC.REDIS_PLAYING, RC.RFALSE);
         this.redis.set(RC.REDIS_POSITION, pos);
@@ -132,7 +131,7 @@ export class SocketServer {
 
   newVideo(): void {
     this.redis.get(RC.REDIS_VIDEO_PATH).then((videoname) => {
-      this.io.sockets.emit("newvideo", path.basename(videoname));
+      this.io.sockets.emit("newvideo", videoname);
     });
   }
 
