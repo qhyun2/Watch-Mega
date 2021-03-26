@@ -1,10 +1,8 @@
 import React from "react";
-import "bootstrap/dist/css/bootstrap.css";
 
 import Navbar from "../components/navbar";
-import UserList from "../components/userlist";
 
-import videojs, { VideoJsPlayer } from "video.js";
+import videojs, { VideoJsPlayer, VideoJsPlayerOptions } from "video.js";
 import "videojs-youtube";
 import "video.js/dist/video-js.min.css";
 
@@ -17,20 +15,27 @@ export { defaultAuth as getServerSideProps };
 
 import {
   Box,
-  Grid,
-  TextField,
+  Button,
+  Container,
   Dialog,
   DialogContent,
-  Typography,
-  Button,
   Fade,
-  Container,
+  FormControl,
+  FormControlLabel,
+  FormGroup,
+  Grid,
+  IconButton,
   Paper,
+  Slider,
+  Switch,
+  TextField,
+  Typography,
 } from "@material-ui/core";
-import { NavigateBefore, NavigateNext } from "@material-ui/icons";
+import { NavigateBefore, NavigateNext, PlayArrow, SkipPrevious, SkipNext, Pause } from "@material-ui/icons";
 
 interface state {
   playingPopup: boolean;
+  playing: boolean;
   subtitleDelay: number;
   usernames: string[];
   count: number;
@@ -51,6 +56,7 @@ export default class Index extends React.Component<unknown, state> {
 
     this.state = {
       playingPopup: false,
+      playing: false,
       subtitleDelay: 0,
       usernames: [],
       count: 0,
@@ -176,19 +182,101 @@ export default class Index extends React.Component<unknown, state> {
 
   renderSubOffset(): JSX.Element {
     return (
-      <Box pt={2}>
+      <TextField
+        id="standard-number"
+        label="Subtitle delay (ms)"
+        type="number"
+        inputProps={{ step: "50" }}
+        onChange={(e) => this.setOffset(parseInt(e.target.value))}
+      />
+    );
+  }
+
+  renderControls(): JSX.Element {
+    return (
+      <Box pt={4}>
         <Container maxWidth="md">
-          <Grid container justify="center">
-            <Grid item xs={2}>
-              <TextField
-                id="standard-number"
-                label="Subtitle delay (ms)"
-                type="number"
-                inputProps={{ step: "50" }}
-                onChange={(e) => this.setOffset(parseInt(e.target.value))}
-              />
-            </Grid>
-          </Grid>
+          <Paper>
+            <Box p={4}>
+              <FormControl style={{ width: "100%" }}>
+                <Grid container justify="center" alignContent="center" spacing={2}>
+                  <Grid item lg={3} md={6} xs={12}>
+                    <FormGroup>
+                      <FormControlLabel control={<Switch disabled />} label="Disable Mouse" />
+                      <FormControlLabel control={<Switch disabled />} label="Ready Check" />
+                      <FormControlLabel control={<Switch disabled />} label="Autoplay" />
+                    </FormGroup>
+                  </Grid>
+                  <Grid item lg={3} md={6} xs={12}>
+                    <Typography>Volume</Typography>
+                    <Slider
+                      min={0}
+                      max={100}
+                      defaultValue={80}
+                      onChange={(_, value) => this.vjs.volume((value as number) / 100)}
+                      valueLabelDisplay="auto"
+                    />
+                    <Typography>Playback Speed</Typography>
+                    <Slider
+                      min={0.25}
+                      max={3}
+                      defaultValue={1}
+                      step={null}
+                      marks={[
+                        { value: 0.25, label: "0.25x" },
+                        { value: 0.5 },
+                        { value: 0.75 },
+                        { value: 1, label: "1x" },
+                        { value: 1.1 },
+                        { value: 1.2 },
+                        { value: 1.3 },
+                        { value: 1.4 },
+                        { value: 1.5 },
+                        { value: 1.75 },
+                        { value: 2, label: "2x" },
+                        { value: 2.5 },
+                        { value: 3, label: "3x" },
+                      ]}
+                      valueLabelDisplay="auto"
+                      valueLabelFormat={(v) => v + "x"}
+                      onChange={(_, value) => this.vjs.playbackRate(value as number)}
+                      onBlur={(e) => this.socket.emit("playbackrate", e.target.nodeValue)}
+                    />
+                  </Grid>
+                  <Grid item container justify="center" md={6} xs={12}>
+                    <Grid item container justify="center" wrap="nowrap">
+                      <IconButton onClick={() => this.socket.emit("prev")}>
+                        <SkipPrevious fontSize="large" />
+                      </IconButton>
+                      <IconButton
+                        onClick={() => {
+                          this.vjs.paused() ? this.vjs.play() : this.vjs.pause();
+                        }}>
+                        {this.state.playing ? <Pause fontSize="large" /> : <PlayArrow fontSize="large" />}
+                      </IconButton>
+                      <IconButton onClick={() => this.socket.emit("next")}>
+                        <SkipNext fontSize="large" />
+                      </IconButton>
+                    </Grid>
+                    <Grid item>
+                      <Container maxWidth="xs">
+                        <TextField
+                          id="standard-number"
+                          label="Subtitle delay (ms)"
+                          InputLabelProps={{
+                            shrink: true,
+                          }}
+                          type="number"
+                          inputProps={{ step: "50" }}
+                          onChange={(e) => this.setOffset(parseInt(e.target.value))}
+                        />
+                      </Container>
+                    </Grid>
+                  </Grid>
+                </Grid>
+              </FormControl>
+            </Box>
+          </Paper>
         </Container>
       </Box>
     );
@@ -198,14 +286,11 @@ export default class Index extends React.Component<unknown, state> {
     return (
       <React.Fragment>
         <header>
-          <Navbar page="Watch" socket={this.socket} />
+          <Navbar page="Watch" />
         </header>
         {this.renderVideoBar()}
         {this.renderPlayer()}
-        <Container maxWidth="md">
-          <UserList usernames={this.state.usernames} count={this.state.count}></UserList>
-        </Container>
-        {this.renderSubOffset()}
+        {this.renderControls()}
         {this.renderPlayingPopup()}
       </React.Fragment>
     );
@@ -272,6 +357,7 @@ export default class Index extends React.Component<unknown, state> {
       this.ignorePlay = true;
       this.ignoreSeek = true;
       this.vjs.currentTime(time);
+      this.setState({ playing: true });
       this.vjs.play();
       if (user) this.sendNotif(`${user} played the video`);
     });
@@ -279,11 +365,12 @@ export default class Index extends React.Component<unknown, state> {
       this.ignorePause = true;
       this.ignoreSeek = true;
       this.vjs.pause();
+      this.setState({ playing: false });
       this.vjs.currentTime(time);
       if (user) this.sendNotif(`${user} paused the video`);
     });
     this.socket.on("newvideo", (name) => {
-      this.setState({ videoName: name }, () => this.newVideo());
+      this.setState({ videoName: name, playing: false }, () => this.newVideo());
     });
 
     // users watching
@@ -306,6 +393,7 @@ export default class Index extends React.Component<unknown, state> {
         return;
       }
       this.socket.emit("play", this.vjs.currentTime());
+      this.setState({ playing: true });
     });
     this.vjs.on("pause", () => {
       if (this.ignorePause) {
@@ -313,6 +401,7 @@ export default class Index extends React.Component<unknown, state> {
         return;
       }
       this.socket.emit("pause", this.vjs.currentTime());
+      this.setState({ playing: false });
     });
   }
 
