@@ -15,7 +15,7 @@ RUN npm run next:build
 RUN npm run ts:build
 
 # production container
-FROM node:12-alpine
+FROM node:15-alpine
 WORKDIR /app
 ENV NODE_ENV=production
 # git needed by unknown npm library
