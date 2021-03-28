@@ -1,7 +1,7 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { useRouter } from "next/router";
 
-import { Box, Typography } from "@material-ui/core";
+import { Box, Typography, Menu, MenuItem } from "@material-ui/core";
 import { TreeItem, TreeView } from "@material-ui/lab";
 import { makeStyles, Theme, createStyles } from "@material-ui/core/styles";
 
@@ -54,13 +54,15 @@ function renderChildren(
   type: string,
   children: Map<string, File>,
   parent: string,
-  callback: any
+  callback: any,
+  contextCallback: any
 ): JSX.Element[] {
   if (children.size != 0) {
     return Array.from(children).map((props) => {
       return (
         <Item
           callback={callback}
+          contextCallback={contextCallback}
           key={parent + "/" + name + "/" + props[0]}
           name={props[0]}
           parent={parent + "/" + name}
@@ -74,7 +76,7 @@ function renderChildren(
   }
 }
 
-function Item(props): JSX.Element {
+const Item: React.FC = (props: any) => {
   const classes = useTreeItemStyles();
   const Icon = ICONLOOKUP[props.type];
   const router = useRouter();
@@ -82,17 +84,21 @@ function Item(props): JSX.Element {
   return (
     <TreeItem
       nodeId={props.parent + "/" + props.name}
+      onClick={() => {
+        if (props.type === "folder") {
+          props.callback(props.parent + "/" + props.name);
+        } else if (props.type === "media") {
+          axios.post("/api/media/select", { src: "file:" + props.parent.substr(1) + "/" + props.name }).then(() => {
+            router.push("/");
+          });
+        }
+      }}
       label={
         <div
           className={classes.labelRoot}
-          onClick={() => {
-            if (props.type === "folder") {
-              props.callback(props.parent + "/" + props.name);
-            } else if (props.type === "media") {
-              axios.post("/api/media/select", { src: "file:" + props.parent.substr(1) + "/" + props.name }).then(() => {
-                router.push("/");
-              });
-            }
+          onContextMenu={(e) => {
+            props.contextCallback(props.parent + "/" + props.name, e.clientX, e.clientY);
+            e.preventDefault();
           }}>
           <Icon color="primary" className={classes.labelIcon} />
           <Typography color="textPrimary">{props.name}</Typography>
@@ -102,10 +108,10 @@ function Item(props): JSX.Element {
         content: classes.content,
         group: classes.group,
       }}>
-      {renderChildren(props.name, props.type, props.children, props.parent, props.callback)}
+      {renderChildren(props.name, props.type, props.children, props.parent, props.callback, props.contextCallback)}
     </TreeItem>
   );
-}
+};
 
 interface File {
   size: number;
@@ -115,25 +121,23 @@ interface File {
   children: Map<string, File>;
 }
 
-interface State {
-  files: Map<string, File>;
-}
+const Browse: React.FC = () => {
+  const [files, setFiles] = useState<Map<string, File>>(new Map<string, File>());
+  const [menuTarget, setMenuTarget] = useState<string>(null);
+  const [menuMouseX, setMenuMouseX] = useState<number>(0);
+  const [menuMouseY, setMenuMouseY] = useState<number>(0);
+  useEffect(() => {
+    console.log("using effect");
+    loadFiles("/");
+  }, []);
 
-export default class Browse extends React.Component<unknown, State> {
-  constructor(props) {
-    super(props);
-    this.state = { files: new Map<string, File>() };
-  }
-
-  async componentDidMount(): Promise<void> {
-    await this.loadFiles("/");
-    this.forceUpdate();
-  }
-
-  async loadFiles(path: string): Promise<void> {
+  async function loadFiles(path: string): Promise<void> {
+    console.log("loading:" + path);
     return axios("/api/media/info" + path).then((response) => {
-      this.setState((state) => {
-        let root = state.files;
+      setFiles((prev) => {
+        const ans = new Map(prev);
+        let root = ans;
+
         for (const folder of path.split("/")) {
           if (!folder) continue;
           root = root.get(folder).children;
@@ -148,49 +152,69 @@ export default class Browse extends React.Component<unknown, State> {
           });
         });
 
-        this.forceUpdate();
+        return ans;
       });
     });
   }
 
-  render(): JSX.Element {
-    return (
-      <div>
-        <header>
-          <Navbar page="Browse" />
-        </header>
-        <Box display="flex">
-          <Box margin="auto" paddingTop={8}>
-            <TreeView
-              defaultCollapseIcon={
-                <ArrowForwardIosIcon
-                  style={{
-                    transform: "rotate(90deg)",
-                  }}
-                />
-              }
-              defaultExpandIcon={<ArrowForwardIosIcon />}
-              defaultEndIcon={
-                <div
-                  style={{
-                    width: 24,
-                  }}
-                />
-              }>
-              {Array.from(this.state.files).map((props) => {
+  function handleClose(): void {
+    setMenuTarget(null);
+  }
+
+  return (
+    <React.Fragment>
+      <header>
+        <Navbar page="Browse" />
+      </header>
+      <Box display="flex">
+        <Box margin="auto" paddingTop={8}>
+          <TreeView
+            defaultCollapseIcon={
+              <ArrowForwardIosIcon
+                style={{
+                  transform: "rotate(90deg)",
+                }}
+              />
+            }
+            defaultExpandIcon={<ArrowForwardIosIcon />}
+            defaultEndIcon={
+              <div
+                style={{
+                  width: 24,
+                }}
+              />
+            }>
+            {files &&
+              Array.from(files).map((props) => {
                 return (
                   <Item
-                    callback={(path) => this.loadFiles(path)}
+                    callback={(path) => loadFiles(path)}
+                    contextCallback={(v, x, y) => {
+                      setMenuTarget(v);
+                      setMenuMouseX(x);
+                      setMenuMouseY(y);
+                    }}
                     key={props[0]}
                     parent=""
                     name={props[0]}
                     {...props[1]}></Item>
                 );
               })}
-            </TreeView>
-          </Box>
+          </TreeView>
         </Box>
-      </div>
-    );
-  }
-}
+      </Box>
+      <Menu
+        keepMounted
+        open={menuTarget !== null}
+        onClose={() => handleClose()}
+        anchorReference="anchorPosition"
+        anchorPosition={menuMouseY !== null && menuMouseX !== null ? { top: menuMouseY, left: menuMouseX } : undefined}>
+        <MenuItem onClick={() => handleClose()}>Select</MenuItem>
+        <MenuItem onClick={() => handleClose()}>Delete</MenuItem>
+        <MenuItem onClick={() => handleClose()}>Rename</MenuItem>
+      </Menu>
+    </React.Fragment>
+  );
+};
+
+export default Browse;
