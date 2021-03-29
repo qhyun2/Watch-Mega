@@ -6,6 +6,11 @@ body {
   font-weight: 400;
 }
 
+html {
+  overflow-y: scroll;
+  overflow-x: hidden;
+}
+
 a {
   color: inherit;
   text-decoration: none;

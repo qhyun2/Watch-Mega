@@ -2,7 +2,7 @@ import React from "react";
 
 import Navbar from "../components/navbar";
 
-import videojs, { VideoJsPlayer, VideoJsPlayerOptions } from "video.js";
+import videojs, { VideoJsPlayer } from "video.js";
 import "videojs-youtube";
 import "video.js/dist/video-js.min.css";
 
@@ -19,7 +19,6 @@ import {
   Container,
   Dialog,
   DialogContent,
-  Fade,
   FormControl,
   FormControlLabel,
   FormGroup,
@@ -94,29 +93,27 @@ export default class Index extends React.Component<unknown, state> {
 
   renderPlayingPopup(): JSX.Element {
     return (
-      <Fade in={this.state.playingPopup}>
-        <Dialog open={true}>
-          <DialogContent>
-            <Box pb={2} px={2} display="flex" flexDirection="column" alignItems="center">
-              <Typography variant="h4">Welcome to WatchMega</Typography>
-              <Box p={2}>
-                <Typography variant="subtitle1" align="center">
-                  The video is already playing
-                </Typography>
-              </Box>
-              <Button
-                variant="contained"
-                color="primary"
-                onClick={() => {
-                  this.setState({ playingPopup: false });
-                  this.socket.emit("ready");
-                }}>
-                Start watching
-              </Button>
+      <Dialog open={this.state.playingPopup}>
+        <DialogContent>
+          <Box pb={2} px={2} display="flex" flexDirection="column" alignItems="center">
+            <Typography variant="h4">Welcome to WatchMega</Typography>
+            <Box p={2}>
+              <Typography variant="subtitle1" align="center">
+                The video is already playing
+              </Typography>
             </Box>
-          </DialogContent>
-        </Dialog>
-      </Fade>
+            <Button
+              variant="contained"
+              color="primary"
+              onClick={() => {
+                this.setState({ playingPopup: false });
+                this.socket.emit("ready");
+              }}>
+              Start watching
+            </Button>
+          </Box>
+        </DialogContent>
+      </Dialog>
     );
   }
 
@@ -288,9 +285,11 @@ export default class Index extends React.Component<unknown, state> {
         <header>
           <Navbar page="Watch" />
         </header>
-        {this.renderVideoBar()}
-        {this.renderPlayer()}
-        {this.renderControls()}
+        <Box>
+          {this.renderVideoBar()}
+          {this.renderPlayer()}
+          {this.renderControls()}
+        </Box>
         {this.renderPlayingPopup()}
       </React.Fragment>
     );
