@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/router";
 
-import { Box, Typography, Menu, MenuItem, SvgIconTypeMap, Container } from "@material-ui/core";
+import { Box, Typography, Menu, MenuItem, SvgIconTypeMap, Container, Grid } from "@material-ui/core";
 import { OverridableComponent } from "@material-ui/core/OverridableComponent";
-import { TreeItem, TreeView } from "@material-ui/lab";
+import { Skeleton, TreeItem, TreeView } from "@material-ui/lab";
 import { useTheme } from "@material-ui/core/styles";
 
 import Navbar from "../components/navbar";
@@ -48,7 +48,7 @@ const TreeNode: React.FC<TreeNodeProps> = (props) => {
       </React.Fragment>
     );
   } else if (props.node.type == "folder") {
-    children = <TreeItem key={props.node.name} nodeId={props.node.name + "child"}></TreeItem>;
+    children = <Skeleton variant="rect" height={32} style={{ margin: "4px 4px" }} />;
   } else {
     children = null;
   }
@@ -73,14 +73,9 @@ const TreeNode: React.FC<TreeNodeProps> = (props) => {
       label={
         <div style={{ display: "flex", alignItems: "center", padding: theme.spacing(0.5, 0) }}>
           <Icon color="primary" style={{ marginRight: theme.spacing(1) }} />
-          <Typography color="textPrimary">{props.node.name}</Typography>
+          <Typography color={props.node.name == "[empty]" ? "error" : "textPrimary"}>{props.node.name}</Typography>
         </div>
-      }
-      style={{
-        borderTopRightRadius: theme.spacing(2),
-        borderBottomRightRadius: theme.spacing(2),
-        paddingRight: theme.spacing(1),
-      }}>
+      }>
       {children}
     </TreeItem>
   );
@@ -92,8 +87,16 @@ interface FileTree {
   size: number;
   added: number;
   type: "folder" | "media" | "other";
-  loaded?: boolean;
+  isLoaded?: boolean;
   children: Map<string, FileTree>;
+}
+
+function traverseTree(path: string, root: FileTree): FileTree {
+  for (const folder of path.split("/")) {
+    if (!folder) continue;
+    root = root.children.get(folder);
+  }
+  return root;
 }
 
 const Browse: React.FC = () => {
@@ -103,6 +106,7 @@ const Browse: React.FC = () => {
     size: 0,
     added: 0,
     type: "folder",
+    isLoaded: false,
     children: new Map<string, FileTree>(),
   });
   const [menuTarget, setMenuTarget] = useState<string>(null);
@@ -119,29 +123,40 @@ const Browse: React.FC = () => {
   }
 
   async function loadFiles(path: string): Promise<void> {
-    console.log("loading:" + "/api/media/info?" + stringify({ src: "file:" + path }));
+    const root = traverseTree(path, files);
+    if (root.isLoaded) return;
     return axios("/api/media/info?" + stringify({ src: "file:" + path }))
       .then((response) => {
         if (response.status != 200) return;
         setFiles((prev) => {
           const ans = { ...prev };
-          let root = ans;
-
-          for (const folder of path.split("/")) {
-            if (!folder) continue;
-            root = root.children.get(folder);
-          }
-
-          response.data.files.map((file) => {
-            root.children.set(file.name, {
-              name: file.name,
-              path: root.path + "/" + file.name,
-              size: file.size,
-              added: file.added,
-              type: file.type,
+          const root = traverseTree(path, ans);
+          if (response.data.files.length === 0) {
+            const empty = "[empty]";
+            root.children.set(empty, {
+              name: empty,
+              path: root.path + "/" + empty,
+              size: 0,
+              added: 0,
+              type: "other",
+              isLoaded: false,
               children: new Map<string, FileTree>(),
             });
-          });
+          } else {
+            response.data.files.map((file) => {
+              root.children.set(file.name, {
+                name: file.name,
+                path: root.path + "/" + file.name,
+                size: file.size,
+                added: file.added,
+                type: file.type,
+                isLoaded: false,
+                children: new Map<string, FileTree>(),
+              });
+            });
+          }
+
+          root.isLoaded = true;
           return ans;
         });
       })
@@ -169,8 +184,6 @@ const Browse: React.FC = () => {
     setMenuTarget(null);
   }
 
-  console.clear();
-
   return (
     <React.Fragment>
       <header>
@@ -184,17 +197,21 @@ const Browse: React.FC = () => {
             defaultEndIcon={<div style={{ width: 24 }} />}
             onNodeToggle={handleToggle}
             expanded={expanded}>
-            {Array.from(files.children).map(([name, node]) => {
-              return (
-                <TreeNode
-                  key={name}
-                  node={node}
-                  expanded={expanded}
-                  loadCallback={loadCallback}
-                  contextCallback={contextCallback}
-                />
-              );
-            })}
+            {files.isLoaded ? (
+              Array.from(files.children).map(([name, node]) => {
+                return (
+                  <TreeNode
+                    key={name}
+                    node={node}
+                    expanded={expanded}
+                    loadCallback={loadCallback}
+                    contextCallback={contextCallback}
+                  />
+                );
+              })
+            ) : (
+              <Skeleton variant="rect" height={420} />
+            )}
           </TreeView>
         </Container>
       </Box>
