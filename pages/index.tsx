@@ -1,6 +1,7 @@
 import React from "react";
 
 import Navbar from "../components/navbar";
+import ThickSlider from "../components/ThickSlider";
 
 import videojs, { VideoJsPlayer } from "video.js";
 import "videojs-youtube";
@@ -25,12 +26,12 @@ import {
   Grid,
   IconButton,
   Paper,
-  Slider,
   Switch,
   TextField,
   Typography,
+  useTheme,
 } from "@material-ui/core";
-import { NavigateBefore, NavigateNext, PlayArrow, SkipPrevious, SkipNext, Pause } from "@material-ui/icons";
+import { PlayArrow, SkipPrevious, SkipNext, Pause } from "@material-ui/icons";
 
 interface state {
   playingPopup: boolean;
@@ -40,6 +41,32 @@ interface state {
   count: number;
   videoName: string;
 }
+
+const VideoBar: React.FC<{ name: string }> = (props) => {
+  const theme = useTheme();
+  const isLoading = !props.name;
+  return (
+    <Box pt={3}>
+      <Container maxWidth="lg">
+        <Paper
+          style={{
+            width: "100%",
+            height: "100%",
+            background: theme.palette.primary.main,
+            display: "flex",
+            flexDirection: "column",
+            justifyContent: "center",
+          }}>
+          <Box mx={3} my={1}>
+            <Typography variant="h6" align="center" noWrap>
+              {isLoading ? "Loading..." : props.name.split(":").pop().split("/").pop()}
+            </Typography>
+          </Box>
+        </Paper>
+      </Container>
+    </Box>
+  );
+};
 
 export default class Index extends React.Component<unknown, state> {
   vjs: VideoJsPlayer;
@@ -71,6 +98,9 @@ export default class Index extends React.Component<unknown, state> {
       {
         techOrder: ["youtube", "html5"],
         sources: [{ type: "video/mp4", src: "/default.mp4" }],
+        controlBar: {
+          volumePanel: false,
+        },
       },
       () => {
         this.vjs.volume(0.8);
@@ -117,57 +147,9 @@ export default class Index extends React.Component<unknown, state> {
     );
   }
 
-  renderVideoBar(): JSX.Element {
-    return (
-      <Box pt={4}>
-        <Container maxWidth="lg">
-          <Grid container justify="space-evenly" spacing={2}>
-            <Grid item xs={1} container justify="flex-end">
-              <Button
-                variant="contained"
-                color="primary"
-                onClick={() => this.socket.emit("prev")}
-                style={{ padding: "5px" }}>
-                <NavigateBefore fontSize="large" />
-              </Button>
-            </Grid>
-            <Grid item xs={10} container justify="center">
-              <Paper
-                style={{
-                  width: "100%",
-                  height: "100%",
-                  background: "#680e8b",
-                  display: "flex",
-                  flexDirection: "column",
-                  justifyContent: "center",
-                }}>
-                <Box mx={3}>
-                  <Typography variant="h6" align="center" noWrap>
-                    {this.state.videoName.split(":").pop().split("/").pop()}
-                  </Typography>
-                </Box>
-              </Paper>
-            </Grid>
-            <Grid item xs={1} container justify="flex-start">
-              <Box>
-                <Button
-                  variant="contained"
-                  color="primary"
-                  onClick={() => this.socket.emit("next")}
-                  style={{ padding: "5px" }}>
-                  <NavigateNext fontSize="large" />
-                </Button>
-              </Box>
-            </Grid>
-          </Grid>
-        </Container>
-      </Box>
-    );
-  }
-
   renderPlayer(): JSX.Element {
     return (
-      <Box pt={4}>
+      <Box pt={3}>
         <Container maxWidth="md">
           <Paper elevation={12}>
             <video id="video" className="video-js vjs-fluid vjs-lime" controls preload="auto" />
@@ -206,7 +188,7 @@ export default class Index extends React.Component<unknown, state> {
                   </Grid>
                   <Grid item lg={3} md={6} xs={12}>
                     <Typography>Volume</Typography>
-                    <Slider
+                    <ThickSlider
                       min={0}
                       max={100}
                       defaultValue={80}
@@ -214,9 +196,9 @@ export default class Index extends React.Component<unknown, state> {
                       valueLabelDisplay="auto"
                     />
                     <Typography>Playback Speed</Typography>
-                    <Slider
+                    <ThickSlider
                       min={0.25}
-                      max={3}
+                      max={3.05}
                       defaultValue={1}
                       step={null}
                       marks={[
@@ -286,7 +268,7 @@ export default class Index extends React.Component<unknown, state> {
           <Navbar page="Watch" />
         </header>
         <Box>
-          {this.renderVideoBar()}
+          <VideoBar name={this.state.videoName} />
           {this.renderPlayer()}
           {this.renderControls()}
         </Box>
@@ -416,7 +398,7 @@ export default class Index extends React.Component<unknown, state> {
     } else if (url.protocol === "youtube:") {
       let videoID = url.pathname;
       while (videoID[0] === "/") videoID = videoID.substr(1);
-      this.vjs.src({ type: "video/youtube", src: `http://www.youtube.com/watch?v=${videoID}&rel=0` });
+      this.vjs.src({ type: "video/youtube", src: `http://www.youtube.com/watch?v=${videoID}&rel=0&modestbranding=1` });
     } else {
       throw "Unknown protocol: " + url.protocol;
     }
