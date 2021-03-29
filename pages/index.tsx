@@ -2,6 +2,7 @@ import React from "react";
 
 import Navbar from "../components/navbar";
 import ThickSlider from "../components/ThickSlider";
+import ChatBox from "../components/Chat";
 
 import videojs, { VideoJsPlayer } from "video.js";
 import "videojs-youtube";
@@ -59,6 +60,26 @@ const VideoBar: React.FC<{ name: string }> = (props) => {
   );
 };
 
+const PlayingPopup: React.FC<{ open: boolean; cb: () => void }> = (props) => {
+  return (
+    <Dialog open={props.open}>
+      <DialogContent>
+        <Box pb={2} px={2} display="flex" flexDirection="column" alignItems="center">
+          <Typography variant="h4">Welcome to WatchMega</Typography>
+          <Box p={2}>
+            <Typography variant="subtitle1" align="center">
+              The video is already playing
+            </Typography>
+          </Box>
+          <Button variant="contained" color="primary" onClick={() => props.cb()}>
+            Start watching
+          </Button>
+        </Box>
+      </DialogContent>
+    </Dialog>
+  );
+};
+
 interface state {
   playingPopup: boolean;
   playing: boolean;
@@ -113,10 +134,6 @@ export default class Index extends React.Component<unknown, state> {
             this.newVideo();
           });
         });
-
-        this.vjs.on("click", () => {
-          console.log("upp");
-        });
       }
     );
   }
@@ -124,32 +141,6 @@ export default class Index extends React.Component<unknown, state> {
   componentWillUnmount(): void {
     this.vjs.dispose();
     this.socket.close();
-  }
-
-  renderPlayingPopup(): JSX.Element {
-    return (
-      <Dialog open={this.state.playingPopup}>
-        <DialogContent>
-          <Box pb={2} px={2} display="flex" flexDirection="column" alignItems="center">
-            <Typography variant="h4">Welcome to WatchMega</Typography>
-            <Box p={2}>
-              <Typography variant="subtitle1" align="center">
-                The video is already playing
-              </Typography>
-            </Box>
-            <Button
-              variant="contained"
-              color="primary"
-              onClick={() => {
-                this.setState({ playingPopup: false });
-                this.socket.emit("ready");
-              }}>
-              Start watching
-            </Button>
-          </Box>
-        </DialogContent>
-      </Dialog>
-    );
   }
 
   renderPlayer(): JSX.Element {
@@ -284,7 +275,14 @@ export default class Index extends React.Component<unknown, state> {
           {this.renderPlayer()}
           {this.renderControls()}
         </Box>
-        {this.renderPlayingPopup()}
+        <PlayingPopup
+          open={this.state.playingPopup}
+          cb={() => {
+            this.setState({ playingPopup: false });
+            this.socket.emit("ready");
+          }}
+        />
+        <ChatBox userlist={{ usernames: this.state.usernames, count: this.state.count }} />
       </React.Fragment>
     );
   }
