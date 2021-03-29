@@ -1,121 +1,168 @@
-import React from "react";
-import Container from "react-bootstrap/Container";
-import Row from "react-bootstrap/Row";
-import Col from "react-bootstrap/Col";
-import "bootstrap/dist/css/bootstrap.css";
+import React, { useState, useEffect } from "react";
 
-import Head from "next/head";
+import {
+  Box,
+  Button,
+  Container,
+  Grid,
+  LinearProgress,
+  LinearProgressProps,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableRow,
+  TextField,
+  Typography,
+} from "@material-ui/core";
+
 import Navbar from "../components/navbar";
 
 import axios from "axios";
-
-interface state {
-  progress: { name: string; value: number }[];
-}
 
 // authentication
 import { defaultAuth } from "../src/Auth";
 export { defaultAuth as getServerSideProps };
 
-export default class Torrent extends React.Component<unknown, state> {
-  interval: NodeJS.Timeout;
+interface TorrentProgress {
+  name: string;
+  value: number;
+  id: string;
+}
 
-  constructor(props) {
-    super(props);
+const Torrent: React.FC = () => {
+  const [progress, setProgress] = useState([]);
+  useEffect(() => {
+    getData();
+    const interval = setInterval(() => getData(), 1000);
+    return () => {
+      clearInterval(interval);
+    };
+  }, []);
 
-    this.state = { progress: [] };
-  }
-
-  componentDidMount(): void {
-    this.getData();
-    this.interval = setInterval(() => this.getData(), 1000);
-  }
-
-  componentWillUnmount(): void {
-    clearInterval(this.interval);
-  }
-
-  getData(): void {
+  function getData() {
     axios
-      .request({ url: "/api/torrent/status" })
+      .request({
+        url: "/api/torrent/status",
+      })
       .then((res) => {
-        this.setState({ progress: res.data });
+        setProgress(res.data);
       })
       .catch((e) => {
         console.log(e);
       });
   }
 
-  deleteTorrent(magnet: string): void {
-    axios.request({ url: "/api/torrent/stop", method: "POST", data: { magnet } }).catch((e) => {
-      console.log(e);
-    });
+  function deleteTorrent(magnet: string) {
+    axios
+      .request({
+        url: "/api/torrent/stop",
+        method: "POST",
+        data: {
+          magnet,
+        },
+      })
+      .catch((e) => {
+        console.log(e);
+      });
   }
 
-  render(): JSX.Element {
-    return (
-      <div className="bg">
-        <Head>
-          <title>Watch Mega</title>
-          <link rel="icon" href="/favicon.ico" />
-        </Head>
-        <header>
-          <Navbar page="Torrent" />
-        </header>
-        <Container>
-          <Row>
-            <Col xs="4" className="m-auto py-4 justify-content-center">
-              <form action="/api/torrent/start" method="post" className="form-inline d-flex flex-nowrap">
-                <input className="form-control" type="text" name="magnet" placeholder="magnet:?xt=urn:btih:"></input>
-                <button className="btn bg-c-secondary ml-4 text-white" type="submit">
-                  {" "}
-                  Download
-                </button>
+  return (
+    <React.Fragment>
+      <header>
+        <Navbar page="Torrent" />
+      </header>
+      <Box pt={4}>
+        <Container maxWidth="lg">
+          <Grid container justify="center">
+            <Grid item xs={4}>
+              <form
+                action="/api/torrent/start"
+                method="post"
+                style={{
+                  width: "100%",
+                  display: "flex",
+                  justifyContent: "center",
+                }}>
+                <Grid item container spacing={1}>
+                  <Grid item xs={9}>
+                    <TextField type="text" name="magnet" placeholder="magnet:?xt=urn:btih:" fullWidth />
+                  </Grid>
+                  <Grid item xs={3}>
+                    <Button
+                      variant="contained"
+                      color="primary"
+                      type="submit"
+                      style={{
+                        height: "100%",
+                      }}>
+                      Download
+                    </Button>
+                  </Grid>
+                </Grid>
               </form>
-            </Col>
-          </Row>
-          <Row>
-            <Col xs="10" className="m-auto">
-              <table className="table table-dark table-striped" style={{ tableLayout: "fixed" }}>
-                <thead>
-                  <tr>
-                    <th style={{ width: "55%" }}>
-                      <h3 className="my-0">Torrents</h3>
-                    </th>
-                    <th style={{ width: "35%" }}></th>
-                    <th style={{ width: "10%" }}></th>
-                  </tr>
-                </thead>
-                <tbody>{this.state.progress.map((r) => this.renderRow(r))}</tbody>
-              </table>
-            </Col>
-          </Row>
+            </Grid>
+          </Grid>
+          <Grid container justify="center">
+            <Grid item xs={10}>
+              <Table style={{ tableLayout: "fixed" }}>
+                <TableHead>
+                  <TableRow>
+                    <TableCell style={{ width: "50%" }}>
+                      <Typography variant="h4">Torrents</Typography>
+                    </TableCell>
+                    <TableCell style={{ width: "40%" }}></TableCell>
+                    <TableCell style={{ width: "10%" }}></TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {progress.map((r) => (
+                    <ProgressRow deleteCallback={(s) => deleteTorrent(s)} torrent={r}></ProgressRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </Grid>
+          </Grid>
         </Container>
-      </div>
-    );
-  }
+      </Box>
+    </React.Fragment>
+  );
+};
 
-  renderRow(row) {
-    const progressText = Math.ceil(row.value * 100) + "%";
-    return (
-      <tr key={row.id}>
-        <td className="align-middle text-truncate my-0">{row.name}</td>
-        <td className="align-middle">
-          <div className="progress align-self-center" style={{ height: "20px" }}>
-            <div
-              className="progress-bar progress-bar-striped progress-bar-animated bg-c-secondary"
-              role="progressbar"
-              style={{ width: progressText }}>
-              {progressText}
-            </div>
-          </div>
-        </td>
-        <td>
-          <button className="btn btn-sm btn-outline-danger m-1 x" onClick={() => this.deleteTorrent(row.id)}>
-            X
-          </button>
-        </td>
-      </tr>
-    );
-  }
+export default Torrent;
+
+const LinearProgressWithLabel: React.FC<LinearProgressProps & { value: number }> = (props) => {
+  return (
+    <Box display="flex" alignItems="center">
+      <Box width="100%" mr={1}>
+        <LinearProgress variant="determinate" {...props} />
+      </Box>
+      <Box minWidth={35}>
+        <Typography variant="body2" color="textSecondary">{`${Math.round(props.value)}%`}</Typography>
+      </Box>
+    </Box>
+  );
+};
+
+interface TableRowProps {
+  torrent: TorrentProgress;
+  deleteCallback: (string) => void;
 }
+
+const ProgressRow: React.FC<TableRowProps> = (props) => {
+  return (
+    <TableRow key={props.torrent.id}>
+      <TableCell>
+        <Typography variant="subtitle1">{props.torrent.name}</Typography>
+      </TableCell>
+      <TableCell align="center">
+        <LinearProgressWithLabel value={props.torrent.value * 100} />
+      </TableCell>
+      <TableCell>
+        <Button variant="outlined" onClick={() => props.deleteCallback(props.torrent.id)}>
+          X
+        </Button>
+      </TableCell>
+    </TableRow>
+  );
+};
