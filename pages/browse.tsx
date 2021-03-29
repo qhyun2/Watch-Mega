@@ -24,7 +24,7 @@ interface TreeNodeProps {
   node: FileTree;
   expanded: string[];
   loadCallback: (node: FileTree) => void;
-  contextCallback: (target: string, e: MouseEvent) => void;
+  contextCallback: (target: FileTree, e: MouseEvent) => void;
 }
 
 const TreeNode: React.FC<TreeNodeProps> = (props) => {
@@ -70,6 +70,10 @@ const TreeNode: React.FC<TreeNodeProps> = (props) => {
       nodeId={props.node.path}
       key={props.node.path}
       onClick={() => props.loadCallback(props.node)}
+      onContextMenu={(e) => {
+        props.contextCallback(props.node, (e as unknown) as MouseEvent);
+        e.stopPropagation();
+      }}
       label={
         <div style={{ display: "flex", alignItems: "center", padding: theme.spacing(0.5, 0) }}>
           <Icon color="primary" style={{ marginRight: theme.spacing(1) }} />
@@ -99,6 +103,10 @@ function traverseTree(path: string, root: FileTree): FileTree {
   return root;
 }
 
+function climbTree(root: FileTree): string {
+  return root.path.split("/").slice(0, -1).join("/");
+}
+
 const Browse: React.FC = () => {
   const [files, setFiles] = useState<FileTree>({
     name: "root",
@@ -109,7 +117,7 @@ const Browse: React.FC = () => {
     isLoaded: false,
     children: new Map<string, FileTree>(),
   });
-  const [menuTarget, setMenuTarget] = useState<string>(null);
+  const [menuTarget, setMenuTarget] = useState<FileTree>(null);
   const [menuMouseX, setMenuMouseX] = useState<number>(0);
   const [menuMouseY, setMenuMouseY] = useState<number>(0);
   const [expanded, setExpanded] = React.useState<string[]>([]);
@@ -131,6 +139,7 @@ const Browse: React.FC = () => {
         setFiles((prev) => {
           const ans = { ...prev };
           const root = traverseTree(path, ans);
+          root.children.clear();
           if (response.data.files.length === 0) {
             const empty = "[empty]";
             root.children.set(empty, {
@@ -167,17 +176,30 @@ const Browse: React.FC = () => {
     if (node.type === "folder") {
       loadFiles(node.path);
     } else if (node.type === "media") {
-      axios.post("/api/media/select", { src: "file:" + node.path }).then(() => {
-        router.push("/");
-      });
+      selectNode(node);
     }
   }
 
-  function contextCallback(target: string, e: MouseEvent): void {
+  function contextCallback(target: FileTree, e: MouseEvent): void {
     e.preventDefault();
     setMenuTarget(target);
     setMenuMouseX(e.clientX);
     setMenuMouseY(e.clientY);
+  }
+
+  function selectNode(node: FileTree): void {
+    axios.post("/api/media/select", { src: "file:" + node.path }).then(() => {
+      router.push("/");
+    });
+  }
+
+  function deleteNode(node: FileTree): void {
+    axios.post("/api/media/delete", { src: "file:" + node.path }).then(() => {
+      const path = climbTree(node);
+      const changed = traverseTree(path, files);
+      changed.isLoaded = false;
+      loadFiles(climbTree(node));
+    });
   }
 
   function handleClose(): void {
@@ -221,8 +243,20 @@ const Browse: React.FC = () => {
         onClose={() => handleClose()}
         anchorReference="anchorPosition"
         anchorPosition={menuMouseY !== null && menuMouseX !== null ? { top: menuMouseY, left: menuMouseX } : undefined}>
-        <MenuItem onClick={() => handleClose()}>Select</MenuItem>
-        <MenuItem onClick={() => handleClose()}>Delete</MenuItem>
+        <MenuItem
+          onClick={() => {
+            selectNode(menuTarget);
+            handleClose();
+          }}>
+          Select
+        </MenuItem>
+        <MenuItem
+          onClick={() => {
+            deleteNode(menuTarget);
+            handleClose();
+          }}>
+          Delete
+        </MenuItem>
         <MenuItem onClick={() => handleClose()}>Rename</MenuItem>
       </Menu>
     </React.Fragment>

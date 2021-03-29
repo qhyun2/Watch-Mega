@@ -24,7 +24,7 @@ export default async function select(req: NextApiRequest, res: NextApiResponse):
   if (url[0] == "youtube") {
     if (url[1].length > 11) return res.status(400).send("Invalid youtube video id");
     if (/[#&?]/.test(url[1])) return res.status(400).send("Invalid youtube video id");
-    setVideo(req.body.src);
+    setVideo(req.body.src as string);
   } else if (url[0] == "file") {
     console.log(url[1]);
     setVideo("file:" + getPath(url[1]));
