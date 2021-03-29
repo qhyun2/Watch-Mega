@@ -33,15 +33,6 @@ import {
 } from "@material-ui/core";
 import { PlayArrow, SkipPrevious, SkipNext, Pause } from "@material-ui/icons";
 
-interface state {
-  playingPopup: boolean;
-  playing: boolean;
-  subtitleDelay: number;
-  usernames: string[];
-  count: number;
-  videoName: string;
-}
-
 const VideoBar: React.FC<{ name: string }> = (props) => {
   const theme = useTheme();
   const isLoading = !props.name;
@@ -68,6 +59,16 @@ const VideoBar: React.FC<{ name: string }> = (props) => {
   );
 };
 
+interface state {
+  playingPopup: boolean;
+  playing: boolean;
+  subtitleDelay: number;
+  usernames: string[];
+  count: number;
+  videoName: string;
+  disableControls: boolean;
+}
+
 export default class Index extends React.Component<unknown, state> {
   vjs: VideoJsPlayer;
   isInputing;
@@ -79,7 +80,6 @@ export default class Index extends React.Component<unknown, state> {
 
   constructor(props) {
     super(props);
-
     this.state = {
       playingPopup: false,
       playing: false,
@@ -87,6 +87,7 @@ export default class Index extends React.Component<unknown, state> {
       usernames: [],
       count: 0,
       videoName: "",
+      disableControls: false,
     };
 
     if (!this.socket) this.socket = socketIOClient();
@@ -111,6 +112,10 @@ export default class Index extends React.Component<unknown, state> {
           this.setState({ playingPopup: info.playing, videoName: info.videoName }, () => {
             this.newVideo();
           });
+        });
+
+        this.vjs.on("click", () => {
+          console.log("upp");
         });
       }
     );
@@ -149,25 +154,13 @@ export default class Index extends React.Component<unknown, state> {
 
   renderPlayer(): JSX.Element {
     return (
-      <Box pt={3}>
+      <Box pt={3} style={{ pointerEvents: this.state.disableControls ? "none" : "auto" }}>
         <Container maxWidth="md">
           <Paper elevation={12}>
             <video id="video" className="video-js vjs-fluid vjs-lime" controls preload="auto" />
           </Paper>
         </Container>
       </Box>
-    );
-  }
-
-  renderSubOffset(): JSX.Element {
-    return (
-      <TextField
-        id="standard-number"
-        label="Subtitle delay (ms)"
-        type="number"
-        inputProps={{ step: "50" }}
-        onChange={(e) => this.setOffset(parseInt(e.target.value))}
-      />
     );
   }
 
@@ -181,9 +174,24 @@ export default class Index extends React.Component<unknown, state> {
                 <Grid container justify="center" alignContent="center" spacing={2}>
                   <Grid item lg={3} md={6} xs={12}>
                     <FormGroup>
-                      <FormControlLabel control={<Switch disabled />} label="Disable Mouse" />
-                      <FormControlLabel control={<Switch disabled />} label="Ready Check" />
-                      <FormControlLabel control={<Switch disabled />} label="Autoplay" />
+                      <FormControlLabel
+                        control={
+                          <Switch
+                            color="primary"
+                            checked={this.state.disableControls}
+                            onChange={(e) => this.setState({ disableControls: e.target.checked })}
+                          />
+                        }
+                        label="Disable Controls"
+                      />
+                      <FormControlLabel
+                        control={<Switch color="primary" disabled={this.state.disableControls || true} />}
+                        label="Ready Check"
+                      />
+                      <FormControlLabel
+                        control={<Switch color="primary" disabled={this.state.disableControls || true} />}
+                        label="Autoplay"
+                      />
                     </FormGroup>
                   </Grid>
                   <Grid item lg={3} md={6} xs={12}>
@@ -194,6 +202,7 @@ export default class Index extends React.Component<unknown, state> {
                       defaultValue={80}
                       onChange={(_, value) => this.vjs.volume((value as number) / 100)}
                       valueLabelDisplay="auto"
+                      disabled={this.state.disableControls}
                     />
                     <Typography>Playback Speed</Typography>
                     <ThickSlider
@@ -220,20 +229,22 @@ export default class Index extends React.Component<unknown, state> {
                       valueLabelFormat={(v) => v + "x"}
                       onChange={(_, value) => this.vjs.playbackRate(value as number)}
                       onBlur={(e) => this.socket.emit("playbackrate", e.target.nodeValue)}
+                      disabled={this.state.disableControls}
                     />
                   </Grid>
                   <Grid item container justify="center" md={6} xs={12}>
                     <Grid item container justify="center" wrap="nowrap">
-                      <IconButton onClick={() => this.socket.emit("prev")}>
+                      <IconButton onClick={() => this.socket.emit("prev")} disabled={this.state.disableControls}>
                         <SkipPrevious fontSize="large" />
                       </IconButton>
                       <IconButton
                         onClick={() => {
                           this.vjs.paused() ? this.vjs.play() : this.vjs.pause();
-                        }}>
+                        }}
+                        disabled={this.state.disableControls}>
                         {this.state.playing ? <Pause fontSize="large" /> : <PlayArrow fontSize="large" />}
                       </IconButton>
-                      <IconButton onClick={() => this.socket.emit("next")}>
+                      <IconButton onClick={() => this.socket.emit("next")} disabled={this.state.disableControls}>
                         <SkipNext fontSize="large" />
                       </IconButton>
                     </Grid>
@@ -248,6 +259,7 @@ export default class Index extends React.Component<unknown, state> {
                           type="number"
                           inputProps={{ step: "50" }}
                           onChange={(e) => this.setOffset(parseInt(e.target.value))}
+                          disabled={this.state.disableControls}
                         />
                       </Container>
                     </Grid>
@@ -282,6 +294,7 @@ export default class Index extends React.Component<unknown, state> {
     document.addEventListener("keydown", (e) => {
       // user is typing into text box
       if (this.isInputing) return;
+      if (this.state.disableControls) return;
 
       if (!e.shiftKey && !e.ctrlKey && !e.altKey && !e.metaKey) {
         switch (e.key) {

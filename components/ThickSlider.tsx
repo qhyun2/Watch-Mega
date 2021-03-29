@@ -13,11 +13,11 @@ const ThickSlider = withStyles({
     borderRadius: 3,
   },
   thumb: {
-    height: 25,
-    width: 25,
+    height: "25px !important",
+    width: "25px !important",
+    marginTop: "-7px !important",
+    marginLeft: "-12px !important",
     backgroundColor: "#fff",
-    marginTop: -7,
-    marginLeft: -12,
   },
   valueLabel: {
     left: "calc(-50% + 8px)",
