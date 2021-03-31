@@ -79,6 +79,8 @@ const PlayingPopup: React.FC<{ open: boolean; cb: () => void }> = (props) => {
     </Dialog>
   );
 };
+const PLAYBACK_SPEEDS = [0.25, 0.5, 0.75, 1, 1.1, 1.2, 1.3, 1.4, 1.5, 1.75, 2, 2.5, 3];
+const PLAYBACK_LABELS = [0.25, 1, 2, 3];
 
 interface state {
   playingPopup: boolean;
@@ -87,12 +89,12 @@ interface state {
   usernames: string[];
   count: number;
   videoName: string;
+  playbackSpeed: number;
   disableControls: boolean;
 }
 
 export default class Index extends React.Component<unknown, state> {
   vjs: VideoJsPlayer;
-  isInputing;
   socket: SocketIOClient.Socket;
   currentOffset = 0;
   ignoreSeek = false;
@@ -108,6 +110,7 @@ export default class Index extends React.Component<unknown, state> {
       usernames: [],
       count: 0,
       videoName: "",
+      playbackSpeed: PLAYBACK_SPEEDS.indexOf(1),
       disableControls: false,
     };
 
@@ -197,30 +200,18 @@ export default class Index extends React.Component<unknown, state> {
                     />
                     <Typography>Playback Speed</Typography>
                     <ThickSlider
-                      min={0.25}
-                      max={3.05}
-                      defaultValue={1}
-                      step={null}
-                      marks={[
-                        { value: 0.25, label: "0.25x" },
-                        { value: 0.5 },
-                        { value: 0.75 },
-                        { value: 1, label: "1x" },
-                        { value: 1.1 },
-                        { value: 1.2 },
-                        { value: 1.3 },
-                        { value: 1.4 },
-                        { value: 1.5 },
-                        { value: 1.75 },
-                        { value: 2, label: "2x" },
-                        { value: 2.5 },
-                        { value: 3, label: "3x" },
-                      ]}
-                      valueLabelDisplay="auto"
-                      valueLabelFormat={(v) => v + "x"}
-                      onChange={(_, value) => this.vjs.playbackRate(value as number)}
-                      onBlur={(e) => this.socket.emit("playbackrate", e.target.nodeValue)}
                       disabled={this.state.disableControls}
+                      marks={PLAYBACK_LABELS.map((v) => ({ value: PLAYBACK_SPEEDS.indexOf(v), label: v + "x" }))}
+                      max={PLAYBACK_SPEEDS.length - 1}
+                      min={0}
+                      onChange={(_, value) => {
+                        this.setState({ playbackSpeed: value as number });
+                        this.vjs.playbackRate(PLAYBACK_SPEEDS[value as number]);
+                      }}
+                      onChangeCommitted={(_, value) => this.socket.emit("playbackrate", value as number)}
+                      value={this.state.playbackSpeed}
+                      valueLabelDisplay="auto"
+                      valueLabelFormat={(v) => PLAYBACK_SPEEDS[v] + "x"}
                     />
                   </Grid>
                   <Grid item container justify="center" md={6} xs={12}>
@@ -287,11 +278,8 @@ export default class Index extends React.Component<unknown, state> {
     );
   }
 
-  // adapted from https://gist.github.com/buzamahmooza/b940c84b16f0b5719fa994d54c785cab
   initHotkeys(): void {
     document.addEventListener("keydown", (e) => {
-      // user is typing into text box
-      if (this.isInputing) return;
       if (this.state.disableControls) return;
 
       if (!e.shiftKey && !e.ctrlKey && !e.altKey && !e.metaKey) {
@@ -328,6 +316,14 @@ export default class Index extends React.Component<unknown, state> {
           case "ArrowDown":
             this.vjs.volume(Math.max(this.vjs.volume() - 0.1, 0));
             e.preventDefault();
+            break;
+          case "[":
+            this.setState((state) => ({ playbackSpeed: Math.max(0, state.playbackSpeed - 1) }));
+            break;
+          case "]":
+            this.setState((state) => ({
+              playbackSpeed: Math.min(PLAYBACK_SPEEDS.length - 1, state.playbackSpeed + 1),
+            }));
             break;
         }
       }
@@ -421,7 +417,7 @@ export default class Index extends React.Component<unknown, state> {
       duration: 4000,
       newWindow: true,
       gravity: "bottom",
-      position: "right",
+      position: "left",
       stopOnFocus: true,
       backgroundColor: "#6c757d",
     }).showToast();
