@@ -1,9 +1,10 @@
-import type { NextApiRequest, NextApiResponse } from "next";
+import withSession from "../../../lib/session";
 import * as fs from "fs";
 import { redis } from "../../../src/Instances";
 import * as RC from "../../../src/RedisConstants";
 
-export default async function handler(req: NextApiRequest, res: NextApiResponse): Promise<void> {
+export default withSession(async (req, res) => {
+  if (!req.session.get("user")) return res.status(401).end();
   const url = (await redis.get(RC.REDIS_VIDEO_PATH)).split(":");
 
   if (url[0] != "file") {
@@ -17,9 +18,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   }
 
   fs.createReadStream(subsPath).pipe(res);
-}
+});
 
-async function sendEmpty(res: NextApiResponse): Promise<void> {
+async function sendEmpty(res): Promise<void> {
   res.send("WEBVTT");
   res.status(200);
 }

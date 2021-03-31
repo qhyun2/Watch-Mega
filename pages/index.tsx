@@ -12,7 +12,7 @@ import socketIOClient from "socket.io-client";
 import Toastify from "toastify-js";
 
 // authentication
-import { defaultAuth } from "../src/Auth";
+import { defaultAuth } from "../lib/Auth";
 export { defaultAuth as getServerSideProps };
 
 import {
@@ -167,28 +167,6 @@ export default class Index extends React.Component<unknown, state> {
               <FormControl style={{ width: "100%" }}>
                 <Grid container justify="center" alignContent="center" spacing={2}>
                   <Grid item lg={3} md={6} xs={12}>
-                    <FormGroup>
-                      <FormControlLabel
-                        control={
-                          <Switch
-                            color="primary"
-                            checked={this.state.disableControls}
-                            onChange={(e) => this.setState({ disableControls: e.target.checked })}
-                          />
-                        }
-                        label="Disable Controls"
-                      />
-                      <FormControlLabel
-                        control={<Switch color="primary" disabled={this.state.disableControls || true} />}
-                        label="Ready Check"
-                      />
-                      <FormControlLabel
-                        control={<Switch color="primary" disabled={this.state.disableControls || true} />}
-                        label="Autoplay"
-                      />
-                    </FormGroup>
-                  </Grid>
-                  <Grid item lg={3} md={6} xs={12}>
                     <Typography>Volume</Typography>
                     <ThickSlider
                       min={0}
@@ -245,6 +223,28 @@ export default class Index extends React.Component<unknown, state> {
                         />
                       </Container>
                     </Grid>
+                  </Grid>
+                  <Grid item lg={3} md={6} xs={12}>
+                    <FormGroup>
+                      <FormControlLabel
+                        control={
+                          <Switch
+                            color="primary"
+                            checked={this.state.disableControls}
+                            onChange={(e) => this.setState({ disableControls: e.target.checked })}
+                          />
+                        }
+                        label="Disable Controls"
+                      />
+                      <FormControlLabel
+                        control={<Switch color="primary" disabled={this.state.disableControls || true} />}
+                        label="Ready Check"
+                      />
+                      <FormControlLabel
+                        control={<Switch color="primary" disabled={this.state.disableControls || true} />}
+                        label="Autoplay"
+                      />
+                    </FormGroup>
                   </Grid>
                 </Grid>
               </FormControl>

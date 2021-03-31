@@ -7,8 +7,11 @@ import { SocketServer } from "./SocketHandler";
 import { subscribeRedis } from "./VideoServer";
 import { logger } from "./Instances";
 
-const dev = process.env.NODE_ENV !== "production";
-const next = Next({ dev: dev });
+const next = Next({
+  dev: process.env.NODE_ENV !== "production",
+  conf: { future: { webpack5: true }, experimental: {} },
+});
+
 next.prepare().then(() => {
   const app = express();
   const http = createHTTPServer(app);

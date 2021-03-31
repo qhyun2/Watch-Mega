@@ -1,8 +1,9 @@
-import type { NextApiRequest, NextApiResponse } from "next";
+import withSession from "../../../lib/session";
 import { redis } from "../../../src/Instances";
 import * as RC from "../../../src/RedisConstants";
 
-export default async function handle(req: NextApiRequest, res: NextApiResponse) {
+export default withSession(async (req, res) => {
+  if (!req.session.get("user")) return res.status(401).end();
   const start = parseInt(<string>req.query.start) || 0;
   const end = parseInt(<string>req.query.end) || 5;
   if (end <= start) return res.status(400).send("");
@@ -13,4 +14,4 @@ export default async function handle(req: NextApiRequest, res: NextApiResponse) 
     response.push({ name: history[i], timestamp: parseInt(history[i + 1]) });
   }
   res.send({ history: response, maxPages });
-}
+});

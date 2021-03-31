@@ -2,7 +2,7 @@ import React from "react";
 import { useRouter, withRouter, NextRouter } from "next/router";
 
 // authentication
-import { defaultAuth } from "../src/Auth";
+import { defaultAuth } from "../lib/Auth";
 export { defaultAuth as getServerSideProps };
 
 import Link from "next/link";

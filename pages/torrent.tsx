@@ -20,8 +20,7 @@ import Navbar from "../components/navbar";
 
 import axios from "axios";
 
-// authentication
-import { defaultAuth } from "../src/Auth";
+import { defaultAuth } from "../lib/Auth";
 export { defaultAuth as getServerSideProps };
 
 interface TorrentProgress {
@@ -29,6 +28,42 @@ interface TorrentProgress {
   value: number;
   id: string;
 }
+
+const LinearProgressWithLabel: React.FC<LinearProgressProps & { value: number }> = (props) => {
+  return (
+    <Box display="flex" alignItems="center">
+      <Box width="100%" mr={1}>
+        <LinearProgress variant="determinate" {...props} />
+      </Box>
+      <Box minWidth={35}>
+        <Typography variant="body2" color="textSecondary">{`${Math.round(props.value)}%`}</Typography>
+      </Box>
+    </Box>
+  );
+};
+
+interface TableRowProps {
+  torrent: TorrentProgress;
+  deleteCallback: (string) => void;
+}
+
+const ProgressRow: React.FC<TableRowProps> = (props) => {
+  return (
+    <TableRow key={props.torrent.id}>
+      <TableCell>
+        <Typography variant="subtitle1">{props.torrent.name}</Typography>
+      </TableCell>
+      <TableCell align="center">
+        <LinearProgressWithLabel value={props.torrent.value * 100} />
+      </TableCell>
+      <TableCell>
+        <Button variant="outlined" onClick={() => props.deleteCallback(props.torrent.id)}>
+          X
+        </Button>
+      </TableCell>
+    </TableRow>
+  );
+};
 
 const Torrent: React.FC = () => {
   const [progress, setProgress] = useState([]);
@@ -130,39 +165,3 @@ const Torrent: React.FC = () => {
 };
 
 export default Torrent;
-
-const LinearProgressWithLabel: React.FC<LinearProgressProps & { value: number }> = (props) => {
-  return (
-    <Box display="flex" alignItems="center">
-      <Box width="100%" mr={1}>
-        <LinearProgress variant="determinate" {...props} />
-      </Box>
-      <Box minWidth={35}>
-        <Typography variant="body2" color="textSecondary">{`${Math.round(props.value)}%`}</Typography>
-      </Box>
-    </Box>
-  );
-};
-
-interface TableRowProps {
-  torrent: TorrentProgress;
-  deleteCallback: (string) => void;
-}
-
-const ProgressRow: React.FC<TableRowProps> = (props) => {
-  return (
-    <TableRow key={props.torrent.id}>
-      <TableCell>
-        <Typography variant="subtitle1">{props.torrent.name}</Typography>
-      </TableCell>
-      <TableCell align="center">
-        <LinearProgressWithLabel value={props.torrent.value * 100} />
-      </TableCell>
-      <TableCell>
-        <Button variant="outlined" onClick={() => props.deleteCallback(props.torrent.id)}>
-          X
-        </Button>
-      </TableCell>
-    </TableRow>
-  );
-};

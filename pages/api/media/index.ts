@@ -1,9 +1,10 @@
-import type { NextApiRequest, NextApiResponse } from "next";
+import withSession from "../../../lib/session";
 import * as fs from "fs";
 import * as RC from "../../../src/RedisConstants";
 import { logger, redis } from "../../../src/Instances";
 
-export default async function serve(req: NextApiRequest, res: NextApiResponse): Promise<void> {
+export default withSession(async (req, res) => {
+  if (!req.session.get("user")) return res.status(401).end();
   const url = (await redis.get(RC.REDIS_VIDEO_PATH)).split(":");
   if (url[0] != "file") return res.status(404).send("Not currently watching file");
 
@@ -54,4 +55,4 @@ export default async function serve(req: NextApiRequest, res: NextApiResponse): 
       }
     });
   });
-}
+});

@@ -1,7 +1,8 @@
-import type { NextApiRequest, NextApiResponse } from "next";
+import withSession from "../../../lib/session";
 import { tc } from "../../../src/Instances";
 
-export default function handle(req: NextApiRequest, res: NextApiResponse) {
+export default withSession((req, res) => {
+  if (!req.session.get("user")) return res.status(401).end();
   if (req.method != "POST") return res.status(405).send("");
   tc.torrents.forEach((t) => {
     if (t.magnetURI == req.body.magnet) {
@@ -9,4 +10,4 @@ export default function handle(req: NextApiRequest, res: NextApiResponse) {
     }
   });
   res.status(303).redirect("/torrent");
-}
+});

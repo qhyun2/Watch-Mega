@@ -1,10 +1,11 @@
-import type { NextApiRequest, NextApiResponse } from "next";
+import withSession from "../../../lib/session";
 import { join } from "path";
 import * as fs from "fs";
 
 const root = "data";
 
-export default async function select(req: NextApiRequest, res: NextApiResponse): Promise<void> {
+export default withSession(async (req, res) => {
+  if (!req.session.get("user")) return res.status(401).end();
   if (!req.query || !req.query.src) return res.status(404).send("");
   const url = (req.query.src as string).split(":");
   if (url.length != 2) return res.status(404).send("");
@@ -37,4 +38,4 @@ export default async function select(req: NextApiRequest, res: NextApiResponse):
 
   res.setHeader("Content-Type", "application/json");
   res.send({ files: response });
-}
+});

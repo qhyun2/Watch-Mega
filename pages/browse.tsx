@@ -17,7 +17,7 @@ import MovieIcon from "@material-ui/icons/Movie";
 import DescriptionIcon from "@material-ui/icons/Description";
 
 // authentication
-import { defaultAuth } from "../src/Auth";
+import { defaultAuth } from "../lib/Auth";
 export { defaultAuth as getServerSideProps };
 
 interface TreeNodeProps {

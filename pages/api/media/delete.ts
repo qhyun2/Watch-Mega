@@ -1,11 +1,12 @@
-import type { NextApiRequest, NextApiResponse } from "next";
+import withSession from "../../../lib/session";
 import { join } from "path";
 import * as fs from "fs";
 import { logger } from "../../../src/Instances";
 
 const root = "data";
 
-export default async function (req: NextApiRequest, res: NextApiResponse): Promise<void> {
+export default withSession(async (req, res) => {
+  if (!req.session.get("user")) return res.status(401).end();
   if (req.method != "POST") return res.status(405).send("");
   console.log(typeof req.body);
   if (!req.body || !req.body.src) return res.status(404).send("");
@@ -25,4 +26,4 @@ export default async function (req: NextApiRequest, res: NextApiResponse): Promi
     .catch((e) => {
       res.status(400).send(e);
     });
-}
+});

@@ -1,4 +1,4 @@
-import type { NextApiRequest, NextApiResponse } from "next";
+import withSession from "../../../lib/session";
 import getInfo from "ffprobe";
 import { path as ffprobePath } from "ffprobe-static";
 import { join } from "path";
@@ -6,7 +6,8 @@ import { existsSync } from "fs";
 import { spawn } from "child_process";
 import { logger } from "../../../src/Instances";
 
-export default async function select(req: NextApiRequest, res: NextApiResponse): Promise<void> {
+export default withSession(async (req, res) => {
+  if (!req.session.get("user")) return res.status(401).end();
   if (!req.query || !req.query.src) return res.status(404).send("");
   const url = (req.query.src as string).split(":");
   if (url[0] === "file") {
@@ -16,9 +17,9 @@ export default async function select(req: NextApiRequest, res: NextApiResponse):
   } else {
     res.status(404).send("");
   }
-}
+});
 
-async function fileThumbnail(res: NextApiResponse, url: string[]): Promise<void> {
+async function fileThumbnail(res, url: string[]): Promise<void> {
   const videoPath = join("data", url[1]);
   if (!existsSync(videoPath)) return res.status(404).send("");
 

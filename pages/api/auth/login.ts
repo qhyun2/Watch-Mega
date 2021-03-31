@@ -1,21 +1,18 @@
-import jwt from "jsonwebtoken";
-import { Request, Response } from "express";
+import withSession from "../../../lib/session";
 
-export default async function login(req: Request, res: Response) {
-  if (req.method != "POST") {
-    res.setHeader("Allow", "POST");
-    res.status(405).end(`Method ${req.method} Not Allowed`);
-    return;
-  }
+export default withSession(async (req, res) => {
+  if (req.method != "POST") res.status(405).end();
+  if (!req.body.password) res.status(400).end();
 
   // security theater
   await new Promise((resolve) => setTimeout(resolve, 500));
 
-  if (req.body.password == process.env.ACCESS_CODE) {
-    const token = jwt.sign(process.env.ACCESS_CODE, process.env.TOKEN_SECRET);
-    res.cookie("jwt", token, { sameSite: "strict", maxAge: 20 * 24 * 60 * 60 * 1000 });
+  if (req.body.password === process.env.ACCESS_CODE) {
+    const user = { isAdmin: true };
+    req.session.set("user", user);
+    await req.session.save();
     res.send({ status: "accepted" });
   } else {
     res.send({ status: "rejected" });
   }
-}
+});
