@@ -43,7 +43,7 @@ export class SocketServer {
     this.io.on("connection", async (socket: Socket) => {
       this.redis.incr(RC.REDIS_CONNECTIONS);
       logger.info(
-        `${socket.id} from ${socket.handshake.address} has connected. Total ${await this.redis.get(
+        `${socket.handshake.address} has connected. Total ${await this.redis.get(
           RC.REDIS_CONNECTIONS
         )} user(s) connected`
       );
@@ -71,9 +71,9 @@ export class SocketServer {
         if (isNaN(pos)) return;
         this.redis.set(RC.REDIS_POSITION, pos);
         this.redis.get(RC.REDIS_POSITION).then((pos) => {
-          socket.broadcast.emit("seek", this.getName(socket.id), pos);
+          socket.broadcast.emit("seek", socket.handshake.address, pos);
         });
-        logger.info(`${socket.id} seeked the video to ${pos}`);
+        logger.info(`${socket.handshake.address} seeked the video to ${pos}`);
       });
 
       socket.on("play", async (msg) => {
@@ -82,9 +82,9 @@ export class SocketServer {
         this.redis.set(RC.REDIS_PLAYING, RC.RTRUE);
         this.redis.set(RC.REDIS_POSITION, pos);
         this.redis.get(RC.REDIS_POSITION).then((pos) => {
-          socket.broadcast.emit("play", this.getName(socket.id), pos);
+          socket.broadcast.emit("play", socket.handshake.address, pos);
         });
-        logger.info(`${socket.id} played the video at ${pos}`);
+        logger.info(`${socket.handshake.address} played the video at ${pos}`);
       });
       socket.on("pause", (msg) => {
         const pos = parseFloat(msg);
@@ -92,9 +92,9 @@ export class SocketServer {
         this.redis.set(RC.REDIS_PLAYING, RC.RFALSE);
         this.redis.set(RC.REDIS_POSITION, pos);
         this.redis.get(RC.REDIS_POSITION).then((pos) => {
-          socket.broadcast.emit("pause", this.getName(socket.id), pos);
+          socket.broadcast.emit("pause", socket.handshake.address, pos);
         });
-        logger.info(`${socket.id} paused the video at ${pos}`);
+        logger.info(`${socket.handshake.address} paused the video at ${pos}`);
       });
 
       socket.on("next", () => {
@@ -113,7 +113,7 @@ export class SocketServer {
       // received username
       socket.on("name", (msg) => {
         msg = xss(String(msg).slice(0, 30)); // cap at 20 chars
-        logger.info(`${socket.id} set their username to ${msg}`);
+        logger.info(`${socket.handshake.address} set their username to ${msg}`);
         this.idToUserName.set(socket.id, msg);
         this.updateWatching();
       });
