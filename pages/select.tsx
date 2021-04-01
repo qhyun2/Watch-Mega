@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { useRouter, withRouter, NextRouter } from "next/router";
 
 // authentication
@@ -201,7 +201,18 @@ class Select extends React.Component<props, state> {
 }
 
 const HistoryItem = (props: { name: string; timestamp: number }) => {
+  const [videoName, setVideoName] = useState(null);
   const router = useRouter();
+  const url = props.name.split(":");
+
+  useEffect(() => {
+    if (url[0] === "file") {
+      setVideoName(url[1].split("/").pop());
+    } else {
+      axios.get("/api/media/youtube/?" + stringify({ id: url[1] })).then((res) => setVideoName(res.data));
+    }
+  }, [props.name]);
+
   return (
     <ButtonBase
       onClick={() => {
@@ -218,7 +229,7 @@ const HistoryItem = (props: { name: string; timestamp: number }) => {
           />
           <CardContent style={{ minWidth: 0 }}>
             <Typography component="h6" variant="subtitle1" align="left" noWrap>
-              {props.name.split(":").pop().split("/").pop()}
+              {videoName ? videoName : "Loading..."}
             </Typography>
             <Typography variant="body1" color="textSecondary" align="left" noWrap>
               {moment(props.timestamp).fromNow()}

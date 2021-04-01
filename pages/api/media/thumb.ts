@@ -13,7 +13,7 @@ export default withSession(async (req, res) => {
   if (url[0] === "file") {
     return fileThumbnail(res, url);
   } else if (url[0] === "youtube") {
-    res.redirect("/youtube.png");
+    res.redirect(`https://img.youtube.com/vi/${url[1]}/hqdefault.jpg`);
   } else {
     res.status(404).send("");
   }
