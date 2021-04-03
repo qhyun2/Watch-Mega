@@ -1,7 +1,7 @@
-import { withIronSession } from "next-iron-session";
+import { Session, withIronSession } from "next-iron-session";
 import type { NextApiRequest, NextApiResponse } from "next";
 
-type Handler = (req: NextApiRequest & { session: any }, res: NextApiResponse) => any;
+type Handler = (req: NextApiRequest & { session: Session }, res: NextApiResponse) => any;
 
 export default function withSession(handler: Handler) {
   return withIronSession(handler, {
