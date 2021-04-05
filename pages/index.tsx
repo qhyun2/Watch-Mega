@@ -5,10 +5,9 @@ import ThickSlider from "../components/ThickSlider";
 import ChatBox from "../components/Chat";
 import VideoBar from "../components/VideoBar";
 import PlayingPopup from "../components/PlayingPopup";
+import VJSPlayer from "../components/VJSPlayer";
 
-import videojs, { VideoJsPlayer } from "video.js";
-import "videojs-youtube";
-import "video.js/dist/video-js.min.css";
+import { VideoJsPlayer } from "video.js";
 
 import socketIOClient from "socket.io-client";
 import Toastify from "toastify-js";
@@ -47,7 +46,7 @@ interface state {
 }
 
 export default class Index extends React.Component<unknown, state> {
-  vjs: VideoJsPlayer;
+  vjs: { current: VideoJsPlayer };
   socket: SocketIOClient.Socket;
   currentOffset = 0;
   ignoreSeek = false;
@@ -66,49 +65,26 @@ export default class Index extends React.Component<unknown, state> {
       playbackSpeed: PLAYBACK_SPEEDS.indexOf(1),
       disableControls: false,
     };
+    this.vjs = { current: undefined };
 
     if (!this.socket) this.socket = socketIOClient();
   }
 
-  componentDidMount(): void {
-    this.vjs = videojs(
-      "video",
-      {
-        techOrder: ["youtube", "html5"],
-        sources: [{ type: "video/mp4", src: "/default.mp4" }],
-        controlBar: {
-          volumePanel: false,
-        },
-      },
-      () => {
-        this.vjs.volume(0.8);
-        this.initHotkeys();
-        this.initSocket();
-        this.initVideoListeners();
-        this.socket.on("info", (info) => {
-          this.setState({ playingPopup: info.playing, videoName: info.videoName }, () => {
-            this.newVideo();
-          });
-        });
-      }
-    );
+  onPlayerReady(): void {
+    this.vjs.current.volume(0.8);
+    this.initHotkeys();
+    this.initSocket();
+    this.initVideoListeners();
+    this.socket.on("info", (info) => {
+      this.setState({ playingPopup: info.playing, videoName: info.videoName }, () => {
+        this.newVideo();
+      });
+    });
   }
 
   componentWillUnmount(): void {
-    this.vjs.dispose();
+    this.vjs.current.dispose();
     this.socket.close();
-  }
-
-  renderPlayer(): JSX.Element {
-    return (
-      <Box pt={3} style={{ pointerEvents: this.state.disableControls ? "none" : "auto" }}>
-        <Container maxWidth="md">
-          <Paper elevation={12}>
-            <video id="video" className="video-js vjs-fluid vjs-lime" controls preload="auto" />
-          </Paper>
-        </Container>
-      </Box>
-    );
   }
 
   renderControls(): JSX.Element {
@@ -125,7 +101,7 @@ export default class Index extends React.Component<unknown, state> {
                       min={0}
                       max={100}
                       defaultValue={80}
-                      onChange={(_, value) => this.vjs.volume((value as number) / 100)}
+                      onChange={(_, value) => this.vjs.current.volume((value as number) / 100)}
                       valueLabelDisplay="auto"
                       disabled={this.state.disableControls}
                     />
@@ -137,7 +113,7 @@ export default class Index extends React.Component<unknown, state> {
                       min={0}
                       onChange={(_, value) => {
                         this.setState({ playbackSpeed: value as number });
-                        this.vjs.playbackRate(PLAYBACK_SPEEDS[value as number]);
+                        this.vjs.current.playbackRate(PLAYBACK_SPEEDS[value as number]);
                       }}
                       onChangeCommitted={(_, value) => this.socket.emit("playbackrate", value as number)}
                       value={this.state.playbackSpeed}
@@ -152,7 +128,7 @@ export default class Index extends React.Component<unknown, state> {
                       </IconButton>
                       <IconButton
                         onClick={() => {
-                          this.vjs.paused() ? this.vjs.play() : this.vjs.pause();
+                          this.vjs.current.paused() ? this.vjs.current.play() : this.vjs.current.pause();
                         }}
                         disabled={this.state.disableControls}>
                         {this.state.playing ? <Pause fontSize="large" /> : <PlayArrow fontSize="large" />}
@@ -216,7 +192,9 @@ export default class Index extends React.Component<unknown, state> {
         </header>
         <Box>
           <VideoBar name={this.state.videoName} />
-          {this.renderPlayer()}
+          <Box pt={3} style={{ pointerEvents: this.state.disableControls ? "none" : "auto" }}>
+            <VJSPlayer vjs={this.vjs} cb={() => this.onPlayerReady()} />
+          </Box>
           {this.renderControls()}
         </Box>
         <PlayingPopup
@@ -238,12 +216,12 @@ export default class Index extends React.Component<unknown, state> {
       if (!e.shiftKey && !e.ctrlKey && !e.altKey && !e.metaKey) {
         switch (e.key) {
           case "f":
-            this.vjs.isFullscreen() ? this.vjs.exitFullscreen() : this.vjs.requestFullscreen();
+            this.vjs.current.isFullscreen() ? this.vjs.current.exitFullscreen() : this.vjs.current.requestFullscreen();
             e.preventDefault();
             break;
           case "k":
           case " ":
-            this.vjs.paused() ? this.vjs.play() : this.vjs.pause();
+            this.vjs.current.paused() ? this.vjs.current.play() : this.vjs.current.pause();
             e.preventDefault();
             break;
           case "l":
@@ -263,11 +241,11 @@ export default class Index extends React.Component<unknown, state> {
             e.preventDefault();
             break;
           case "ArrowUp":
-            this.vjs.volume(Math.min(this.vjs.volume() + 0.1, 1));
+            this.vjs.current.volume(Math.min(this.vjs.current.volume() + 0.1, 1));
             e.preventDefault();
             break;
           case "ArrowDown":
-            this.vjs.volume(Math.max(this.vjs.volume() - 0.1, 0));
+            this.vjs.current.volume(Math.max(this.vjs.current.volume() - 0.1, 0));
             e.preventDefault();
             break;
           case "[":
@@ -284,30 +262,30 @@ export default class Index extends React.Component<unknown, state> {
   }
 
   seek(amount: number): void {
-    this.vjs.currentTime(this.vjs.currentTime() + amount);
+    this.vjs.current.currentTime(this.vjs.current.currentTime() + amount);
   }
 
   initSocket(): void {
     // video events from server
     this.socket.on("seek", (user, time) => {
       this.ignoreSeek = true;
-      this.vjs.currentTime(time);
+      this.vjs.current.currentTime(time);
       if (user) this.sendNotif(`${user} seeked the video`);
     });
     this.socket.on("play", (user, time) => {
       this.ignorePlay = true;
       this.ignoreSeek = true;
-      this.vjs.currentTime(time);
+      this.vjs.current.currentTime(time);
       this.setState({ playing: true });
-      this.vjs.play();
+      this.vjs.current.play();
       if (user) this.sendNotif(`${user} played the video`);
     });
     this.socket.on("pause", (user, time) => {
       this.ignorePause = true;
       this.ignoreSeek = true;
-      this.vjs.pause();
+      this.vjs.current.pause();
       this.setState({ playing: false });
-      this.vjs.currentTime(time);
+      this.vjs.current.currentTime(time);
       if (user) this.sendNotif(`${user} paused the video`);
     });
     this.socket.on("newvideo", (name) => {
@@ -321,27 +299,27 @@ export default class Index extends React.Component<unknown, state> {
   }
 
   initVideoListeners(): void {
-    this.vjs.on("seeked", () => {
+    this.vjs.current.on("seeked", () => {
       if (this.ignoreSeek) {
         this.ignoreSeek = false;
         return;
       }
-      this.socket.emit("seek", this.vjs.currentTime());
+      this.socket.emit("seek", this.vjs.current.currentTime());
     });
-    this.vjs.on("play", () => {
+    this.vjs.current.on("play", () => {
       if (this.ignorePlay) {
         this.ignorePlay = false;
         return;
       }
-      this.socket.emit("play", this.vjs.currentTime());
+      this.socket.emit("play", this.vjs.current.currentTime());
       this.setState({ playing: true });
     });
-    this.vjs.on("pause", () => {
+    this.vjs.current.on("pause", () => {
       if (this.ignorePause) {
         this.ignorePause = false;
         return;
       }
-      this.socket.emit("pause", this.vjs.currentTime());
+      this.socket.emit("pause", this.vjs.current.currentTime());
       this.setState({ playing: false });
     });
   }
@@ -352,13 +330,19 @@ export default class Index extends React.Component<unknown, state> {
     const url = new URL(this.state.videoName);
 
     if (url.protocol === "file:") {
-      this.vjs.src({ type: "video/mp4", src: `/api/media?t=${Math.random()}` });
-      this.vjs.addRemoteTextTrack({ src: "api/media/subs", kind: "subtitles", srclang: "en", label: "English" }, false);
-      this.vjs.textTracks()[0].mode = "showing";
+      this.vjs.current.src({ type: "video/mp4", src: `/api/media?t=${Math.random()}` });
+      this.vjs.current.addRemoteTextTrack(
+        { src: "api/media/subs", kind: "subtitles", srclang: "en", label: "English" },
+        false
+      );
+      this.vjs.current.textTracks()[0].mode = "showing";
     } else if (url.protocol === "youtube:") {
       let videoID = url.pathname;
       while (videoID[0] === "/") videoID = videoID.substr(1);
-      this.vjs.src({ type: "video/youtube", src: `http://www.youtube.com/watch?v=${videoID}&rel=0&modestbranding=1` });
+      this.vjs.current.src({
+        type: "video/youtube",
+        src: `http://www.youtube.com/watch?v=${videoID}&rel=0&modestbranding=1`,
+      });
     } else {
       throw "Unknown protocol: " + url.protocol;
     }
@@ -385,7 +369,7 @@ export default class Index extends React.Component<unknown, state> {
   }
 
   offsetSubs(offset: number): void {
-    Array.from(this.vjs.textTracks()).forEach((track) => {
+    Array.from(this.vjs.current.textTracks()).forEach((track) => {
       if (track.mode === "showing") {
         Array.from(track.cues).forEach((cue) => {
           cue.startTime += offset;
