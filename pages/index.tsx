@@ -4,6 +4,7 @@ import Navbar from "../components/navbar";
 import ThickSlider from "../components/ThickSlider";
 import ChatBox from "../components/Chat";
 import VideoBar from "../components/VideoBar";
+import PlayingPopup from "../components/PlayingPopup";
 
 import videojs, { VideoJsPlayer } from "video.js";
 import "videojs-youtube";
@@ -18,10 +19,7 @@ export { defaultAuth as getServerSideProps };
 
 import {
   Box,
-  Button,
   Container,
-  Dialog,
-  DialogContent,
   FormControl,
   FormControlLabel,
   FormGroup,
@@ -31,29 +29,9 @@ import {
   Switch,
   TextField,
   Typography,
-  useTheme,
 } from "@material-ui/core";
 import { PlayArrow, SkipPrevious, SkipNext, Pause } from "@material-ui/icons";
 
-const PlayingPopup: React.FC<{ open: boolean; cb: () => void }> = (props) => {
-  return (
-    <Dialog open={props.open}>
-      <DialogContent>
-        <Box pb={2} px={2} display="flex" flexDirection="column" alignItems="center">
-          <Typography variant="h4">Welcome to WatchMega</Typography>
-          <Box p={2}>
-            <Typography variant="subtitle1" align="center">
-              The video is already playing
-            </Typography>
-          </Box>
-          <Button variant="contained" color="primary" onClick={() => props.cb()}>
-            Start watching
-          </Button>
-        </Box>
-      </DialogContent>
-    </Dialog>
-  );
-};
 const PLAYBACK_SPEEDS = [0.25, 0.5, 0.75, 1, 1.1, 1.2, 1.3, 1.4, 1.5, 1.75, 2, 2.5, 3];
 const PLAYBACK_LABELS = [0.25, 1, 2, 3];
 
