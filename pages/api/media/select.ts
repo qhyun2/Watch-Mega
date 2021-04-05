@@ -27,7 +27,6 @@ export default withSession(async (req, res) => {
     if (/[#&?]/.test(url[1])) return res.status(400).send("Invalid youtube video id");
     setVideo(req.body.src as string);
   } else if (url[0] == "file") {
-    console.log(url[1]);
     setVideo("file:" + getPath(url[1]));
   } else {
     return res.status(400).send("Unknown format");

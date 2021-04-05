@@ -118,9 +118,7 @@ interface HistoryItemsProps {
 }
 
 const HistoryItems: React.FC<HistoryItemsProps> = (props) => {
-  console.log(props);
   if (props.isHistoryLoading) {
-    console.log("spooky scary skeletons");
     return (
       <React.Fragment>
         {Array(5)
