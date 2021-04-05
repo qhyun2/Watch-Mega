@@ -3,6 +3,7 @@ import React, { useState, useEffect } from "react";
 import Navbar from "../components/navbar";
 import ThickSlider from "../components/ThickSlider";
 import ChatBox from "../components/Chat";
+import VideoBar from "../components/VideoBar";
 
 import videojs, { VideoJsPlayer } from "video.js";
 import "videojs-youtube";
@@ -10,8 +11,6 @@ import "video.js/dist/video-js.min.css";
 
 import socketIOClient from "socket.io-client";
 import Toastify from "toastify-js";
-import axios from "axios";
-import { stringify } from "qs";
 
 // authentication
 import { defaultAuth } from "../lib/Auth";
@@ -35,43 +34,6 @@ import {
   useTheme,
 } from "@material-ui/core";
 import { PlayArrow, SkipPrevious, SkipNext, Pause } from "@material-ui/icons";
-
-const VideoBar: React.FC<{ name: string }> = (props) => {
-  const [videoName, setVideoName] = useState(null);
-  const theme = useTheme();
-
-  useEffect(() => {
-    if (!props.name) return;
-
-    const url = props.name.split(":");
-    if (url[0] === "file") {
-      setVideoName(url[1].split("/").pop());
-    } else {
-      axios.get("/api/media/youtube/?" + stringify({ id: url[1] })).then((res) => setVideoName(res.data));
-    }
-  }, [props.name]);
-  return (
-    <Box pt={3}>
-      <Container maxWidth="lg">
-        <Paper
-          style={{
-            width: "100%",
-            height: "100%",
-            background: theme.palette.primary.main,
-            display: "flex",
-            flexDirection: "column",
-            justifyContent: "center",
-          }}>
-          <Box mx={3} my={1}>
-            <Typography variant="h6" align="center" noWrap>
-              {videoName ? videoName : "Loading..."}
-            </Typography>
-          </Box>
-        </Paper>
-      </Container>
-    </Box>
-  );
-};
 
 const PlayingPopup: React.FC<{ open: boolean; cb: () => void }> = (props) => {
   return (
