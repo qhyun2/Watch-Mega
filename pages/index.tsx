@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 
 import Navbar from "../components/navbar";
 import ThickSlider from "../components/ThickSlider";
@@ -34,60 +34,190 @@ import { PlayArrow, SkipPrevious, SkipNext, Pause } from "@material-ui/icons";
 const PLAYBACK_SPEEDS = [0.25, 0.5, 0.75, 1, 1.1, 1.2, 1.3, 1.4, 1.5, 1.75, 2, 2.5, 3];
 const PLAYBACK_LABELS = [0.25, 1, 2, 3];
 
-interface state {
-  playingPopup: boolean;
-  playing: boolean;
-  subtitleDelay: number;
-  usernames: string[];
-  count: number;
-  videoName: string;
-  playbackSpeed: number;
-  disableControls: boolean;
-}
+const Index: React.FC = () => {
+  const socket = useSocket();
+  const vjs = useRef<VideoJsPlayer>();
 
-export default class Index extends React.Component<unknown, state> {
-  vjs: { current: VideoJsPlayer };
-  socket: SocketIOClient.Socket;
-  currentOffset = 0;
-  ignoreSeek = false;
-  ignorePlay = false;
-  ignorePause = false;
+  const currentOffset = useRef(0);
+  const ignoreSeek = useRef(false);
+  const ignorePlay = useRef(false);
+  const ignorePause = useRef(false);
 
-  constructor(props) {
-    super(props);
-    this.state = {
-      playingPopup: false,
-      playing: false,
-      subtitleDelay: 0,
-      usernames: [],
-      count: 0,
-      videoName: "",
-      playbackSpeed: PLAYBACK_SPEEDS.indexOf(1),
-      disableControls: false,
-    };
-    this.vjs = { current: undefined };
+  const [playingPopup, setplayingPopup] = useState(false);
+  const [playing, setPlaying] = useState(false);
+  const [subtitleDelay, setSubtitleDelay] = useState(0);
+  const [count, setCount] = useState(0);
+  const [videoName, setVideoName] = useState("");
+  const [playbackSpeed, setPlaybackSpeed] = useState(PLAYBACK_SPEEDS.indexOf(1));
+  const [disableControls, setDisableControls] = useState(false);
 
-    if (!this.socket) this.socket = socketIOClient();
-  }
+  useEffect(() => {
+    const offset = subtitleDelay / 1000;
+    if (isNaN(offset)) return;
+    const change = offset - currentOffset.current;
+    Array.from(vjs.current.textTracks()).forEach((track) => {
+      if (track.mode === "showing") {
+        Array.from(track.cues).forEach((cue) => {
+          cue.startTime += change;
+          cue.endTime += change;
+        });
+      }
+    });
+    currentOffset.current = offset;
+  }, [subtitleDelay]);
 
-  onPlayerReady(): void {
-    this.vjs.current.volume(0.8);
-    this.initHotkeys();
-    this.initSocket();
-    this.initVideoListeners();
-    this.socket.on("info", (info) => {
-      this.setState({ playingPopup: info.playing, videoName: info.videoName }, () => {
-        this.newVideo();
-      });
+  function onPlayerReady(): void {
+    vjs.current.volume(0.8);
+    initHotkeys();
+    initSocket();
+    initVideoListeners();
+    socket.current.on("info", (info) => {
+      setplayingPopup(info.playing);
+      setVideoName(info.videoname);
+      newVideo();
     });
   }
 
-  componentWillUnmount(): void {
-    this.vjs.current.dispose();
-    this.socket.close();
+  function initHotkeys(): void {
+    document.addEventListener("keydown", (e) => {
+      if (disableControls) return;
+
+      if (!e.shiftKey && !e.ctrlKey && !e.altKey && !e.metaKey) {
+        switch (e.key) {
+          case "f":
+            vjs.current.isFullscreen() ? vjs.current.exitFullscreen() : vjs.current.requestFullscreen();
+            e.preventDefault();
+            break;
+          case "k":
+          case " ":
+            vjs.current.paused() ? vjs.current.play() : vjs.current.pause();
+            e.preventDefault();
+            break;
+          case "l":
+            seek(10);
+            e.preventDefault();
+            break;
+          case "ArrowRight":
+            seek(5);
+            e.preventDefault();
+            break;
+          case "j":
+            seek(-10);
+            e.preventDefault();
+            break;
+          case "ArrowLeft":
+            seek(-5);
+            e.preventDefault();
+            break;
+          case "ArrowUp":
+            vjs.current.volume(Math.min(vjs.current.volume() + 0.1, 1));
+            e.preventDefault();
+            break;
+          case "ArrowDown":
+            vjs.current.volume(Math.max(vjs.current.volume() - 0.1, 0));
+            e.preventDefault();
+            break;
+          case "[":
+            setPlaybackSpeed(Math.max(0, playbackSpeed - 1));
+            break;
+          case "]":
+            setPlaybackSpeed(Math.min(PLAYBACK_SPEEDS.length - 1, playbackSpeed + 1));
+            break;
+        }
+      }
+    });
   }
 
-  renderControls(): JSX.Element {
+  function seek(amount: number): void {
+    vjs.current.currentTime(vjs.current.currentTime() + amount);
+  }
+
+  function initSocket(): void {
+    // video events from server
+    socket.current.on("seek", (user, time) => {
+      ignoreSeek.current = true;
+      vjs.current.currentTime(time);
+      if (user) sendNotif(`${user} seeked the video`);
+    });
+    socket.current.on("play", (user, time) => {
+      ignorePlay.current = true;
+      ignoreSeek.current = true;
+      vjs.current.currentTime(time);
+      setPlaying(true);
+      vjs.current.play();
+      if (user) sendNotif(`${user} played the video`);
+    });
+    socket.current.on("pause", (user, time) => {
+      ignorePause.current = true;
+      ignoreSeek.current = true;
+      vjs.current.pause();
+      setPlaying(false);
+      vjs.current.currentTime(time);
+      if (user) sendNotif(`${user} paused the video`);
+    });
+    socket.current.on("newvideo", (name) => {
+      setVideoName(name);
+      setPlaying(false);
+      newVideo();
+    });
+
+    // users watching
+    socket.current.on("watching", (msg) => {
+      setCount(msg.count);
+    });
+  }
+
+  function initVideoListeners(): void {
+    vjs.current.on("seeked", () => {
+      if (ignoreSeek.current) {
+        ignoreSeek.current = false;
+        return;
+      }
+      socket.current.emit("seek", vjs.current.currentTime());
+    });
+    vjs.current.on("play", () => {
+      if (ignorePlay.current) {
+        ignorePlay.current = false;
+        return;
+      }
+      socket.current.emit("play", vjs.current.currentTime());
+      setPlaying(true);
+    });
+    vjs.current.on("pause", () => {
+      if (ignorePause.current) {
+        ignorePause.current = false;
+        return;
+      }
+      socket.current.emit("pause", vjs.current.currentTime());
+      setPlaying(false);
+    });
+  }
+
+  // set video src to have a new t param to avoid caching
+  function newVideo(): void {
+    if (!videoName) return;
+    const url = new URL(videoName);
+
+    if (url.protocol === "file:") {
+      vjs.current.src({ type: "video/mp4", src: `/api/media?t=${Math.random()}` });
+      vjs.current.addRemoteTextTrack(
+        { src: "api/media/subs", kind: "subtitles", srclang: "en", label: "English" },
+        false
+      );
+      vjs.current.textTracks()[0].mode = "showing";
+    } else if (url.protocol === "youtube:") {
+      let videoID = url.pathname;
+      while (videoID[0] === "/") videoID = videoID.substr(1);
+      vjs.current.src({
+        type: "video/youtube",
+        src: `http://www.youtube.com/watch?v=${videoID}&rel=0&modestbranding=1`,
+      });
+    } else {
+      throw "Unknown protocol: " + url.protocol;
+    }
+  }
+
+  function renderControls(): JSX.Element {
     return (
       <Box pt={4}>
         <Container maxWidth="md">
@@ -101,39 +231,39 @@ export default class Index extends React.Component<unknown, state> {
                       min={0}
                       max={100}
                       defaultValue={80}
-                      onChange={(_, value) => this.vjs.current.volume((value as number) / 100)}
+                      onChange={(_, value) => vjs.current.volume((value as number) / 100)}
                       valueLabelDisplay="auto"
-                      disabled={this.state.disableControls}
+                      disabled={disableControls}
                     />
                     <Typography>Playback Speed</Typography>
                     <ThickSlider
-                      disabled={this.state.disableControls}
+                      disabled={disableControls}
                       marks={PLAYBACK_LABELS.map((v) => ({ value: PLAYBACK_SPEEDS.indexOf(v), label: v + "x" }))}
                       max={PLAYBACK_SPEEDS.length - 1}
                       min={0}
                       onChange={(_, value) => {
-                        this.setState({ playbackSpeed: value as number });
-                        this.vjs.current.playbackRate(PLAYBACK_SPEEDS[value as number]);
+                        setPlaybackSpeed(value as number);
+                        vjs.current.playbackRate(PLAYBACK_SPEEDS[value as number]);
                       }}
-                      onChangeCommitted={(_, value) => this.socket.emit("playbackrate", value as number)}
-                      value={this.state.playbackSpeed}
+                      onChangeCommitted={(_, value) => socket.current.emit("playbackrate", value as number)}
+                      value={playbackSpeed}
                       valueLabelDisplay="auto"
                       valueLabelFormat={(v) => PLAYBACK_SPEEDS[v] + "x"}
                     />
                   </Grid>
                   <Grid item container justify="center" md={6} xs={12}>
                     <Grid item container justify="center" wrap="nowrap">
-                      <IconButton onClick={() => this.socket.emit("prev")} disabled={this.state.disableControls}>
+                      <IconButton onClick={() => socket.current.emit("prev")} disabled={disableControls}>
                         <SkipPrevious fontSize="large" />
                       </IconButton>
                       <IconButton
                         onClick={() => {
-                          this.vjs.current.paused() ? this.vjs.current.play() : this.vjs.current.pause();
+                          vjs.current.paused() ? vjs.current.play() : vjs.current.pause();
                         }}
-                        disabled={this.state.disableControls}>
-                        {this.state.playing ? <Pause fontSize="large" /> : <PlayArrow fontSize="large" />}
+                        disabled={disableControls}>
+                        {playing ? <Pause fontSize="large" /> : <PlayArrow fontSize="large" />}
                       </IconButton>
-                      <IconButton onClick={() => this.socket.emit("next")} disabled={this.state.disableControls}>
+                      <IconButton onClick={() => socket.current.emit("next")} disabled={disableControls}>
                         <SkipNext fontSize="large" />
                       </IconButton>
                     </Grid>
@@ -147,8 +277,9 @@ export default class Index extends React.Component<unknown, state> {
                           }}
                           type="number"
                           inputProps={{ step: "50" }}
-                          onChange={(e) => this.setOffset(parseInt(e.target.value))}
-                          disabled={this.state.disableControls}
+                          value={subtitleDelay}
+                          onChange={(e) => setSubtitleDelay(parseInt(e.target.value))}
+                          disabled={disableControls}
                         />
                       </Container>
                     </Grid>
@@ -159,18 +290,18 @@ export default class Index extends React.Component<unknown, state> {
                         control={
                           <Switch
                             color="primary"
-                            checked={this.state.disableControls}
-                            onChange={(e) => this.setState({ disableControls: e.target.checked })}
+                            checked={disableControls}
+                            onChange={(e) => setDisableControls(e.target.checked)}
                           />
                         }
                         label="Disable Controls"
                       />
                       <FormControlLabel
-                        control={<Switch color="primary" disabled={this.state.disableControls || true} />}
+                        control={<Switch color="primary" disabled={disableControls || true} />}
                         label="Ready Check"
                       />
                       <FormControlLabel
-                        control={<Switch color="primary" disabled={this.state.disableControls || true} />}
+                        control={<Switch color="primary" disabled={disableControls || true} />}
                         label="Autoplay"
                       />
                     </FormGroup>
@@ -184,198 +315,51 @@ export default class Index extends React.Component<unknown, state> {
     );
   }
 
-  render(): JSX.Element {
-    return (
-      <React.Fragment>
-        <header>
-          <Navbar page="Watch" />
-        </header>
-        <Box>
-          <VideoBar name={this.state.videoName} />
-          <Box pt={3} style={{ pointerEvents: this.state.disableControls ? "none" : "auto" }}>
-            <VJSPlayer vjs={this.vjs} cb={() => this.onPlayerReady()} />
-          </Box>
-          {this.renderControls()}
+  return (
+    <React.Fragment>
+      <header>
+        <Navbar page="Watch" />
+      </header>
+      <Box>
+        <VideoBar name={videoName} />
+        <Box pt={3} style={{ pointerEvents: disableControls ? "none" : "auto" }}>
+          <VJSPlayer vjs={vjs} cb={() => onPlayerReady()} />
         </Box>
-        <PlayingPopup
-          open={this.state.playingPopup}
-          cb={() => {
-            this.setState({ playingPopup: false });
-            this.socket.emit("ready");
-          }}
-        />
-        <ChatBox userlist={{ usernames: this.state.usernames, count: this.state.count }} />
-      </React.Fragment>
-    );
-  }
+        {renderControls()}
+      </Box>
+      <PlayingPopup
+        open={playingPopup}
+        cb={() => {
+          setplayingPopup(false);
+          socket.current.emit("ready");
+        }}
+      />
+      <ChatBox userlist={{ count: count, usernames: [] }} />
+    </React.Fragment>
+  );
+};
 
-  initHotkeys(): void {
-    document.addEventListener("keydown", (e) => {
-      if (this.state.disableControls) return;
+export default Index;
 
-      if (!e.shiftKey && !e.ctrlKey && !e.altKey && !e.metaKey) {
-        switch (e.key) {
-          case "f":
-            this.vjs.current.isFullscreen() ? this.vjs.current.exitFullscreen() : this.vjs.current.requestFullscreen();
-            e.preventDefault();
-            break;
-          case "k":
-          case " ":
-            this.vjs.current.paused() ? this.vjs.current.play() : this.vjs.current.pause();
-            e.preventDefault();
-            break;
-          case "l":
-            this.seek(10);
-            e.preventDefault();
-            break;
-          case "ArrowRight":
-            this.seek(5);
-            e.preventDefault();
-            break;
-          case "j":
-            this.seek(-10);
-            e.preventDefault();
-            break;
-          case "ArrowLeft":
-            this.seek(-5);
-            e.preventDefault();
-            break;
-          case "ArrowUp":
-            this.vjs.current.volume(Math.min(this.vjs.current.volume() + 0.1, 1));
-            e.preventDefault();
-            break;
-          case "ArrowDown":
-            this.vjs.current.volume(Math.max(this.vjs.current.volume() - 0.1, 0));
-            e.preventDefault();
-            break;
-          case "[":
-            this.setState((state) => ({ playbackSpeed: Math.max(0, state.playbackSpeed - 1) }));
-            break;
-          case "]":
-            this.setState((state) => ({
-              playbackSpeed: Math.min(PLAYBACK_SPEEDS.length - 1, state.playbackSpeed + 1),
-            }));
-            break;
-        }
-      }
-    });
-  }
+function useSocket(): React.MutableRefObject<SocketIOClient.Socket> {
+  const socketRef = useRef<SocketIOClient.Socket>();
+  useEffect(() => {
+    socketRef.current = socketIOClient();
+    return () => {
+      socketRef.current.close();
+    };
+  }, []);
+  return socketRef;
+}
 
-  seek(amount: number): void {
-    this.vjs.current.currentTime(this.vjs.current.currentTime() + amount);
-  }
-
-  initSocket(): void {
-    // video events from server
-    this.socket.on("seek", (user, time) => {
-      this.ignoreSeek = true;
-      this.vjs.current.currentTime(time);
-      if (user) this.sendNotif(`${user} seeked the video`);
-    });
-    this.socket.on("play", (user, time) => {
-      this.ignorePlay = true;
-      this.ignoreSeek = true;
-      this.vjs.current.currentTime(time);
-      this.setState({ playing: true });
-      this.vjs.current.play();
-      if (user) this.sendNotif(`${user} played the video`);
-    });
-    this.socket.on("pause", (user, time) => {
-      this.ignorePause = true;
-      this.ignoreSeek = true;
-      this.vjs.current.pause();
-      this.setState({ playing: false });
-      this.vjs.current.currentTime(time);
-      if (user) this.sendNotif(`${user} paused the video`);
-    });
-    this.socket.on("newvideo", (name) => {
-      this.setState({ videoName: name, playing: false }, () => this.newVideo());
-    });
-
-    // users watching
-    this.socket.on("watching", (msg) => {
-      this.setState({ usernames: msg.usernames, count: msg.count });
-    });
-  }
-
-  initVideoListeners(): void {
-    this.vjs.current.on("seeked", () => {
-      if (this.ignoreSeek) {
-        this.ignoreSeek = false;
-        return;
-      }
-      this.socket.emit("seek", this.vjs.current.currentTime());
-    });
-    this.vjs.current.on("play", () => {
-      if (this.ignorePlay) {
-        this.ignorePlay = false;
-        return;
-      }
-      this.socket.emit("play", this.vjs.current.currentTime());
-      this.setState({ playing: true });
-    });
-    this.vjs.current.on("pause", () => {
-      if (this.ignorePause) {
-        this.ignorePause = false;
-        return;
-      }
-      this.socket.emit("pause", this.vjs.current.currentTime());
-      this.setState({ playing: false });
-    });
-  }
-
-  // set video src to have a new t param to avoid caching
-  newVideo(): void {
-    if (!this.state.videoName) return;
-    const url = new URL(this.state.videoName);
-
-    if (url.protocol === "file:") {
-      this.vjs.current.src({ type: "video/mp4", src: `/api/media?t=${Math.random()}` });
-      this.vjs.current.addRemoteTextTrack(
-        { src: "api/media/subs", kind: "subtitles", srclang: "en", label: "English" },
-        false
-      );
-      this.vjs.current.textTracks()[0].mode = "showing";
-    } else if (url.protocol === "youtube:") {
-      let videoID = url.pathname;
-      while (videoID[0] === "/") videoID = videoID.substr(1);
-      this.vjs.current.src({
-        type: "video/youtube",
-        src: `http://www.youtube.com/watch?v=${videoID}&rel=0&modestbranding=1`,
-      });
-    } else {
-      throw "Unknown protocol: " + url.protocol;
-    }
-  }
-
-  sendNotif(msg): void {
-    Toastify({
-      text: msg,
-      duration: 4000,
-      newWindow: true,
-      gravity: "bottom",
-      position: "left",
-      stopOnFocus: true,
-      backgroundColor: "#6c757d",
-    }).showToast();
-  }
-
-  setOffset(offset: number): void {
-    offset /= 1000;
-    if (isNaN(offset)) return;
-    const change = offset - this.currentOffset;
-    this.offsetSubs(change);
-    this.currentOffset = offset;
-  }
-
-  offsetSubs(offset: number): void {
-    Array.from(this.vjs.current.textTracks()).forEach((track) => {
-      if (track.mode === "showing") {
-        Array.from(track.cues).forEach((cue) => {
-          cue.startTime += offset;
-          cue.endTime += offset;
-        });
-      }
-    });
-  }
+function sendNotif(msg: string): void {
+  Toastify({
+    text: msg,
+    duration: 4000,
+    newWindow: true,
+    gravity: "bottom",
+    position: "left",
+    stopOnFocus: true,
+    backgroundColor: "#6c757d",
+  }).showToast();
 }
