@@ -7,9 +7,10 @@ import VideoBar from "../components/VideoBar";
 import PlayingPopup from "../components/PlayingPopup";
 import VJSPlayer from "../components/VJSPlayer";
 
+import { useSubtitleDelay, useSocket } from "../components/hooks";
+
 import { VideoJsPlayer } from "video.js";
 
-import socketIOClient from "socket.io-client";
 import Toastify from "toastify-js";
 
 // authentication
@@ -38,44 +39,47 @@ const Index: React.FC = () => {
   const socket = useSocket();
   const vjs = useRef<VideoJsPlayer>();
 
-  const currentOffset = useRef(0);
   const ignoreSeek = useRef(false);
   const ignorePlay = useRef(false);
   const ignorePause = useRef(false);
 
   const [playingPopup, setplayingPopup] = useState(false);
   const [playing, setPlaying] = useState(false);
-  const [subtitleDelay, setSubtitleDelay] = useState(0);
+  const [subtitleDelay, setSubtitleDelay] = useSubtitleDelay(vjs);
   const [count, setCount] = useState(0);
   const [videoName, setVideoName] = useState("");
   const [playbackSpeed, setPlaybackSpeed] = useState(PLAYBACK_SPEEDS.indexOf(1));
   const [disableControls, setDisableControls] = useState(false);
 
+  // new video
   useEffect(() => {
-    const offset = subtitleDelay / 1000;
-    if (isNaN(offset)) return;
-    const change = offset - currentOffset.current;
-    Array.from(vjs.current.textTracks()).forEach((track) => {
-      if (track.mode === "showing") {
-        Array.from(track.cues).forEach((cue) => {
-          cue.startTime += change;
-          cue.endTime += change;
-        });
-      }
-    });
-    currentOffset.current = offset;
-  }, [subtitleDelay]);
+    if (!videoName) return;
+    const url = new URL(videoName);
+
+    if (url.protocol === "file:") {
+      vjs.current.src({ type: "video/mp4", src: `/api/media?t=${Math.random()}` });
+      vjs.current.addRemoteTextTrack(
+        { src: "api/media/subs", kind: "subtitles", srclang: "en", label: "English" },
+        false
+      );
+      vjs.current.textTracks()[0].mode = "showing";
+    } else if (url.protocol === "youtube:") {
+      let videoID = url.pathname;
+      while (videoID[0] === "/") videoID = videoID.substr(1);
+      vjs.current.src({
+        type: "video/youtube",
+        src: `http://www.youtube.com/watch?v=${videoID}&rel=0&modestbranding=1`,
+      });
+    } else {
+      throw "Unknown protocol: " + url.protocol;
+    }
+  }, [videoName]);
 
   function onPlayerReady(): void {
     vjs.current.volume(0.8);
     initHotkeys();
     initSocket();
     initVideoListeners();
-    socket.current.on("info", (info) => {
-      setplayingPopup(info.playing);
-      setVideoName(info.videoname);
-      newVideo();
-    });
   }
 
   function initHotkeys(): void {
@@ -133,6 +137,11 @@ const Index: React.FC = () => {
   }
 
   function initSocket(): void {
+    socket.current.on("info", (info) => {
+      setplayingPopup(info.playing);
+      console.log(info);
+      setVideoName(info.videoName);
+    });
     // video events from server
     socket.current.on("seek", (user, time) => {
       ignoreSeek.current = true;
@@ -158,7 +167,6 @@ const Index: React.FC = () => {
     socket.current.on("newvideo", (name) => {
       setVideoName(name);
       setPlaying(false);
-      newVideo();
     });
 
     // users watching
@@ -191,30 +199,6 @@ const Index: React.FC = () => {
       socket.current.emit("pause", vjs.current.currentTime());
       setPlaying(false);
     });
-  }
-
-  // set video src to have a new t param to avoid caching
-  function newVideo(): void {
-    if (!videoName) return;
-    const url = new URL(videoName);
-
-    if (url.protocol === "file:") {
-      vjs.current.src({ type: "video/mp4", src: `/api/media?t=${Math.random()}` });
-      vjs.current.addRemoteTextTrack(
-        { src: "api/media/subs", kind: "subtitles", srclang: "en", label: "English" },
-        false
-      );
-      vjs.current.textTracks()[0].mode = "showing";
-    } else if (url.protocol === "youtube:") {
-      let videoID = url.pathname;
-      while (videoID[0] === "/") videoID = videoID.substr(1);
-      vjs.current.src({
-        type: "video/youtube",
-        src: `http://www.youtube.com/watch?v=${videoID}&rel=0&modestbranding=1`,
-      });
-    } else {
-      throw "Unknown protocol: " + url.protocol;
-    }
   }
 
   function renderControls(): JSX.Element {
@@ -340,17 +324,6 @@ const Index: React.FC = () => {
 };
 
 export default Index;
-
-function useSocket(): React.MutableRefObject<SocketIOClient.Socket> {
-  const socketRef = useRef<SocketIOClient.Socket>();
-  useEffect(() => {
-    socketRef.current = socketIOClient();
-    return () => {
-      socketRef.current.close();
-    };
-  }, []);
-  return socketRef;
-}
 
 function sendNotif(msg: string): void {
   Toastify({
