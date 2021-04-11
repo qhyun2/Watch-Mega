@@ -1,12 +1,10 @@
 import React, { useEffect, useState } from "react";
+
 import { useRouter } from "next/router";
-
-// authentication
-import { defaultAuth } from "../lib/Auth";
-export { defaultAuth as getServerSideProps };
-
 import Link from "next/link";
+
 import Navbar from "../components/navbar";
+
 import moment from "moment";
 import axios from "axios";
 import { stringify } from "qs";
@@ -27,6 +25,10 @@ import {
   Typography,
 } from "@material-ui/core";
 import { Pagination, Skeleton } from "@material-ui/lab";
+
+// authentication
+import { defaultAuth } from "../lib/Auth";
+export { defaultAuth as getServerSideProps };
 
 const YoutubeSelector: React.FC = () => {
   const [youtubeLink, setYoutubeLink] = useState("");

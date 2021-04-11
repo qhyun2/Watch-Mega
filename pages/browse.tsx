@@ -1,20 +1,15 @@
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/router";
 
-import { Box, Typography, Menu, MenuItem, SvgIconTypeMap, Container, Grid } from "@material-ui/core";
-import { OverridableComponent } from "@material-ui/core/OverridableComponent";
-import { Skeleton, TreeItem, TreeView } from "@material-ui/lab";
-import { useTheme } from "@material-ui/core/styles";
-
 import Navbar from "../components/navbar";
+
 import axios from "axios";
 import { stringify } from "qs";
 
-import ArrowForwardIosIcon from "@material-ui/icons/ArrowForwardIos";
-import FolderIcon from "@material-ui/icons/Folder";
-import FolderOpenIcon from "@material-ui/icons/FolderOpen";
-import MovieIcon from "@material-ui/icons/Movie";
-import DescriptionIcon from "@material-ui/icons/Description";
+import { Box, Typography, Menu, MenuItem, SvgIconTypeMap, Container, useTheme } from "@material-ui/core";
+import { OverridableComponent } from "@material-ui/core/OverridableComponent";
+import { Skeleton, TreeItem, TreeView } from "@material-ui/lab";
+import { ArrowForwardIos, Folder, FolderOpen, Movie, Description } from "@material-ui/icons";
 
 // authentication
 import { defaultAuth } from "../lib/Auth";
@@ -56,13 +51,13 @@ const TreeNode: React.FC<TreeNodeProps> = (props) => {
   const type = props.node.type;
   let Icon: OverridableComponent<SvgIconTypeMap<unknown, "svg">>;
   if (type === "media") {
-    Icon = MovieIcon;
+    Icon = Movie;
   } else if (type === "other") {
-    Icon = DescriptionIcon;
+    Icon = Description;
   } else if (props.expanded.indexOf(props.node.path) != -1) {
-    Icon = FolderOpenIcon;
+    Icon = FolderOpen;
   } else {
-    Icon = FolderIcon;
+    Icon = Folder;
   }
 
   return (
@@ -216,8 +211,8 @@ const Browse: React.FC = () => {
       <Box pt={4}>
         <Container maxWidth="md">
           <TreeView
-            defaultCollapseIcon={<ArrowForwardIosIcon style={{ transform: "rotate(90deg)" }} />}
-            defaultExpandIcon={<ArrowForwardIosIcon />}
+            defaultCollapseIcon={<ArrowForwardIos style={{ transform: "rotate(90deg)" }} />}
+            defaultExpandIcon={<ArrowForwardIos />}
             defaultEndIcon={<div style={{ width: 24 }} />}
             onNodeToggle={handleToggle}
             expanded={expanded}>

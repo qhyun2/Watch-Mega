@@ -8,14 +8,8 @@ import PlayingPopup from "../components/PlayingPopup";
 import VJSPlayer from "../components/VJSPlayer";
 
 import { useSubtitleDelay, useSocket } from "../components/hooks";
-
 import { VideoJsPlayer } from "video.js";
-
 import Toastify from "toastify-js";
-
-// authentication
-import { defaultAuth } from "../lib/Auth";
-export { defaultAuth as getServerSideProps };
 
 import {
   Box,
@@ -31,6 +25,10 @@ import {
   Typography,
 } from "@material-ui/core";
 import { PlayArrow, SkipPrevious, SkipNext, Pause } from "@material-ui/icons";
+
+// authentication
+import { defaultAuth } from "../lib/Auth";
+export { defaultAuth as getServerSideProps };
 
 const PLAYBACK_SPEEDS = [0.25, 0.5, 0.75, 1, 1.1, 1.2, 1.3, 1.4, 1.5, 1.75, 2, 2.5, 3];
 const PLAYBACK_LABELS = [0.25, 1, 2, 3];
@@ -139,7 +137,6 @@ const Index: React.FC = () => {
   function initSocket(): void {
     socket.current.on("info", (info) => {
       setplayingPopup(info.playing);
-      console.log(info);
       setVideoName(info.videoName);
     });
     // video events from server
