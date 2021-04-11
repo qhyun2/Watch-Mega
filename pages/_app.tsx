@@ -4,9 +4,9 @@ import type { AppProps } from "next/app";
 import { createMuiTheme, ThemeProvider } from "@material-ui/core/styles";
 import CssBaseline from "@material-ui/core/CssBaseline";
 
-import "../styles/globals.css";
 import "../styles/toastify.css";
 import "../styles/vjs-lime.css";
+import "../styles/loadingbar.css";
 
 // loading bar
 import { useRouter } from "next/router";

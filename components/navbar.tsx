@@ -24,7 +24,9 @@ const Navbar: React.FC<{ page: string; socket?: SocketIOClient.Socket }> = (prop
               <Link href={path}>
                 <Button>
                   <Typography variant="h6" color={title === props.page ? "secondary" : "textPrimary"}>
-                    <a href={path}>{title}</a>
+                    <a href={path} style={{ color: "inherit", textDecoration: "none" }}>
+                      {title}
+                    </a>
                   </Typography>
                 </Button>
               </Link>

@@ -8,7 +8,6 @@ export default class CustomDocument extends Document {
       <Html>
         <Head>
           <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap" />
-          <link rel="stylesheet" href="/loadingbar.css" />
         </Head>
         <body style={{ background: "#212529" }}>
           <Main />
