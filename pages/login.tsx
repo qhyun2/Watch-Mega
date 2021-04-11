@@ -10,7 +10,7 @@ const Login: React.FC = () => {
   const [password, setPassword] = useState("");
   const router = useRouter();
 
-  function submitPassword(e): void {
+  function submitPassword(e: React.MouseEvent): void {
     e.preventDefault();
     setIsLoading(true);
     axios

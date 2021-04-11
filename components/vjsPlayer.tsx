@@ -6,7 +6,7 @@ import "videojs-youtube";
 import "video.js/dist/video-js.min.css";
 
 const VJSPlayer: React.FC<{ vjs: React.MutableRefObject<VideoJsPlayer>; cb: () => void }> = (props) => {
-  const playerRef = useRef<HTMLVideoElement>();
+  const playerRef = useRef() as React.MutableRefObject<HTMLVideoElement>;
 
   useEffect(() => {
     if (props.vjs.current) return;

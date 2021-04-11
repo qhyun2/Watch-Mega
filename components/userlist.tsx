@@ -32,7 +32,7 @@ export default function renderWatching(props: UserList): JSX.Element {
     );
   }
 
-  function renderRemaining(): JSX.Element {
+  function renderRemaining(): JSX.Element | null {
     if (anon && names.length > 0) {
       return (
         <TableRow>
@@ -41,7 +41,7 @@ export default function renderWatching(props: UserList): JSX.Element {
           </TableCell>
         </TableRow>
       );
-    }
+    } else return null;
   }
   return (
     <Box pt={4}>

@@ -73,13 +73,13 @@ interface HistoryItem {
 }
 
 const HistoryItem: React.FC<HistoryItem> = (props) => {
-  const [videoName, setVideoName] = useState(null);
+  const [videoName, setVideoName] = useState<string>();
   const router = useRouter();
   const url = props.name.split(":");
 
   useEffect(() => {
     if (url[0] === "file") {
-      setVideoName(url[1].split("/").pop());
+      setVideoName(url[1].split("/").pop() ?? "Loading...");
     } else {
       axios.get("/api/media/youtube/?" + stringify({ id: url[1] })).then((res) => setVideoName(res.data));
     }
@@ -136,7 +136,8 @@ const HistoryItems: React.FC<HistoryItemsProps> = (props) => {
     const index = props.page * 5;
     const data: HistoryItem[] = [];
     for (let i = index; i < index + 5; i++) {
-      data.push(props.history.get(i));
+      const item = props.history.get(i);
+      if (item) data.push();
     }
 
     return (
@@ -165,7 +166,7 @@ const HistoryPanel: React.FC = () => {
   });
 
   function loadHistory(page: number): Promise<void> {
-    if (loadedPages.has(page)) return;
+    if (loadedPages.has(page)) return new Promise((r) => r());
     setIsHistoryLoading(true);
     return axios
       .get("/api/media/history", { params: { start: (page - 1) * 5, end: page * 5 - 1 } })

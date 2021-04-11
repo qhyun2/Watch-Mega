@@ -25,7 +25,7 @@ interface TreeNodeProps {
 const TreeNode: React.FC<TreeNodeProps> = (props) => {
   const theme = useTheme();
 
-  let children: JSX.Element;
+  let children: JSX.Element | null;
   if (props.node.children.size !== 0) {
     children = (
       <React.Fragment>
@@ -82,12 +82,15 @@ const TreeNode: React.FC<TreeNodeProps> = (props) => {
   );
 };
 
-interface FileTree {
+interface File {
   name: string;
   path: string;
   size: number;
   added: number;
   type: "folder" | "media" | "other";
+}
+
+interface FileTree extends File {
   isLoaded?: boolean;
   children: Map<string, FileTree>;
 }
@@ -95,7 +98,9 @@ interface FileTree {
 function traverseTree(path: string, root: FileTree): FileTree {
   for (const folder of path.split("/")) {
     if (!folder) continue;
-    root = root.children.get(folder);
+    const next = root.children.get(folder);
+    if (!next) throw new Error("Error traversing path:" + path);
+    root = next;
   }
   return root;
 }
@@ -114,7 +119,7 @@ const Browse: React.FC = () => {
     isLoaded: false,
     children: new Map<string, FileTree>(),
   });
-  const [menuTarget, setMenuTarget] = useState<FileTree>(null);
+  const [menuTarget, setMenuTarget] = useState<FileTree | null>(null);
   const [menuMouseX, setMenuMouseX] = useState<number>(0);
   const [menuMouseY, setMenuMouseY] = useState<number>(0);
   const [expanded, setExpanded] = React.useState<string[]>([]);
@@ -149,7 +154,7 @@ const Browse: React.FC = () => {
               children: new Map<string, FileTree>(),
             });
           } else {
-            response.data.files.map((file) => {
+            response.data.files.map((file: File) => {
               root.children.set(file.name, {
                 name: file.name,
                 path: root.path + "/" + file.name,
@@ -242,14 +247,14 @@ const Browse: React.FC = () => {
         anchorPosition={menuMouseY !== null && menuMouseX !== null ? { top: menuMouseY, left: menuMouseX } : undefined}>
         <MenuItem
           onClick={() => {
-            selectNode(menuTarget);
+            if (menuTarget) selectNode(menuTarget);
             handleClose();
           }}>
           Select
         </MenuItem>
         <MenuItem
           onClick={() => {
-            deleteNode(menuTarget);
+            if (menuTarget) deleteNode(menuTarget);
             handleClose();
           }}>
           Delete

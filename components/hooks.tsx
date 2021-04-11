@@ -14,10 +14,12 @@ export function useSubtitleDelay(
     const change = offset - currentOffset.current;
     Array.from(vjs.current.textTracks()).forEach((track) => {
       if (track.mode === "showing") {
-        Array.from(track.cues).forEach((cue) => {
-          cue.startTime += change;
-          cue.endTime += change;
-        });
+        if (track.cues) {
+          Array.from(track.cues).forEach((cue) => {
+            cue.startTime += change;
+            cue.endTime += change;
+          });
+        }
       }
     });
     currentOffset.current = offset;
@@ -27,7 +29,7 @@ export function useSubtitleDelay(
 }
 
 export function useSocket(): React.MutableRefObject<SocketIOClient.Socket> {
-  const socketRef = useRef<SocketIOClient.Socket>();
+  const socketRef = useRef() as React.MutableRefObject<SocketIOClient.Socket>;
   useEffect(() => {
     socketRef.current = socketIOClient();
     return () => {

@@ -44,7 +44,7 @@ const LinearProgressWithLabel: React.FC<LinearProgressProps & { value: number }>
 
 interface TableRowProps {
   torrent: TorrentProgress;
-  deleteCallback: (string) => void;
+  deleteCallback: (id: string) => void;
 }
 
 const ProgressRow: React.FC<TableRowProps> = (props) => {
@@ -152,7 +152,7 @@ const Torrent: React.FC = () => {
                 </TableHead>
                 <TableBody>
                   {progress.map((r) => (
-                    <ProgressRow deleteCallback={(s) => deleteTorrent(s)} torrent={r}></ProgressRow>
+                    <ProgressRow deleteCallback={deleteTorrent} torrent={r}></ProgressRow>
                   ))}
                 </TableBody>
               </Table>

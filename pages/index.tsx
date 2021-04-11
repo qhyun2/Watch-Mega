@@ -1,11 +1,11 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, MutableRefObject } from "react";
 
 import Navbar from "../components/navbar";
-import ThickSlider from "../components/ThickSlider";
-import ChatBox from "../components/Chat";
-import VideoBar from "../components/VideoBar";
-import PlayingPopup from "../components/PlayingPopup";
-import VJSPlayer from "../components/VJSPlayer";
+import ThickSlider from "../components/thickSlider";
+import ChatBox from "../components/chat";
+import VideoBar from "../components/videoBar";
+import PlayingPopup from "../components/playingPopup";
+import VJSPlayer from "../components/vjsPlayer";
 
 import { useSubtitleDelay, useSocket } from "../components/hooks";
 import { VideoJsPlayer } from "video.js";
@@ -35,7 +35,7 @@ const PLAYBACK_LABELS = [0.25, 1, 2, 3];
 
 const Index: React.FC = () => {
   const socket = useSocket();
-  const vjs = useRef<VideoJsPlayer>();
+  const vjs = useRef() as MutableRefObject<VideoJsPlayer>;
 
   const ignoreSeek = useRef(false);
   const ignorePlay = useRef(false);
@@ -135,17 +135,17 @@ const Index: React.FC = () => {
   }
 
   function initSocket(): void {
-    socket.current.on("info", (info) => {
+    socket.current.on("info", (info: { playing: boolean; videoName: string }) => {
       setplayingPopup(info.playing);
       setVideoName(info.videoName);
     });
     // video events from server
-    socket.current.on("seek", (user, time) => {
+    socket.current.on("seek", (user: string, time: number) => {
       ignoreSeek.current = true;
       vjs.current.currentTime(time);
       if (user) sendNotif(`${user} seeked the video`);
     });
-    socket.current.on("play", (user, time) => {
+    socket.current.on("play", (user: string, time: number) => {
       ignorePlay.current = true;
       ignoreSeek.current = true;
       vjs.current.currentTime(time);
@@ -153,7 +153,7 @@ const Index: React.FC = () => {
       vjs.current.play();
       if (user) sendNotif(`${user} played the video`);
     });
-    socket.current.on("pause", (user, time) => {
+    socket.current.on("pause", (user: string, time: number) => {
       ignorePause.current = true;
       ignoreSeek.current = true;
       vjs.current.pause();
@@ -161,13 +161,13 @@ const Index: React.FC = () => {
       vjs.current.currentTime(time);
       if (user) sendNotif(`${user} paused the video`);
     });
-    socket.current.on("newvideo", (name) => {
+    socket.current.on("newvideo", (name: string) => {
       setVideoName(name);
       setPlaying(false);
     });
 
     // users watching
-    socket.current.on("watching", (msg) => {
+    socket.current.on("watching", (msg: { count: number }) => {
       setCount(msg.count);
     });
   }

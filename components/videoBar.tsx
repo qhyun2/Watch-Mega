@@ -6,7 +6,7 @@ import { stringify } from "qs";
 import { Box, Container, Paper, Typography, useTheme } from "@material-ui/core";
 
 const VideoBar: React.FC<{ name: string }> = (props) => {
-  const [videoName, setVideoName] = useState(null);
+  const [videoName, setVideoName] = useState("");
   const theme = useTheme();
 
   useEffect(() => {
@@ -14,7 +14,7 @@ const VideoBar: React.FC<{ name: string }> = (props) => {
 
     const url = props.name.split(":");
     if (url[0] === "file") {
-      setVideoName(url[1].split("/").pop());
+      setVideoName(url[1].split("/").pop() ?? "Loading...");
     } else {
       axios.get("/api/media/youtube/?" + stringify({ id: url[1] })).then((res) => setVideoName(res.data));
     }
