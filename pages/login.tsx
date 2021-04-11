@@ -10,7 +10,8 @@ const Login: React.FC = () => {
   const [password, setPassword] = useState("");
   const router = useRouter();
 
-  function submitPassword(): void {
+  function submitPassword(e): void {
+    e.preventDefault();
     setIsLoading(true);
     axios
       .post("/api/auth/login", { password: password })
@@ -30,30 +31,38 @@ const Login: React.FC = () => {
 
   return (
     <Container maxWidth="md" style={{ height: "100vh" }}>
-      <Grid container spacing={4} direction="column" alignContent="center" justify="center" style={{ height: "100vh" }}>
-        <Grid item>
-          <Typography variant="h5" align="center">
-            Enter Access Code
-          </Typography>
+      <form>
+        <Grid
+          container
+          spacing={4}
+          direction="column"
+          alignContent="center"
+          justify="center"
+          style={{ height: "100vh" }}>
+          <Grid item>
+            <Typography variant="h5" align="center">
+              Enter Access Code
+            </Typography>
+          </Grid>
+          <Grid item>
+            <TextField
+              type="password"
+              error={isInvalid}
+              helperText={isInvalid ? "Acess code incorrect" : ""}
+              value={password}
+              onBlur={() => setIsInvalid(false)}
+              onChange={(e) => setPassword(e.target.value)}
+              inputProps={{ style: { textAlign: "center" } }}
+            />
+          </Grid>
+          <Grid item style={{ display: "flex", justifyContent: "center" }}>
+            <Button variant="contained" color="primary" disabled={isLoading} onClick={submitPassword} type="submit">
+              {isLoading && <CircularProgress size="1rem" color="secondary" style={{ marginRight: "10px" }} />}
+              Submit
+            </Button>
+          </Grid>
         </Grid>
-        <Grid item>
-          <TextField
-            type="password"
-            error={isInvalid}
-            helperText={isInvalid ? "Acess code incorrect" : ""}
-            value={password}
-            onBlur={() => setIsInvalid(false)}
-            onChange={(e) => setPassword(e.target.value)}
-            inputProps={{ style: { textAlign: "center" } }}
-          />
-        </Grid>
-        <Grid item style={{ display: "flex", justifyContent: "center" }}>
-          <Button variant="contained" color="primary" disabled={isLoading} onClick={submitPassword}>
-            {isLoading && <CircularProgress size="1rem" color="secondary" style={{ marginRight: "10px" }} />}
-            Submit
-          </Button>
-        </Grid>
-      </Grid>
+      </form>
     </Container>
   );
 };
