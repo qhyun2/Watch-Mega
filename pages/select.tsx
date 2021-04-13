@@ -3,7 +3,7 @@ import React, { useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import Link from "next/link";
 
-import Navbar from "../components/navbar";
+import Navbar from "../components/Navbar";
 
 import moment from "moment";
 import axios from "axios";

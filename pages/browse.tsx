@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/router";
 
-import Navbar from "../components/navbar";
+import Navbar from "../components/Navbar";
 
 import axios from "axios";
 import { stringify } from "qs";

@@ -16,7 +16,7 @@ import {
   Typography,
 } from "@material-ui/core";
 
-import Navbar from "../components/navbar";
+import Navbar from "../components/Navbar";
 
 import axios from "axios";
 

@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, MutableRefObject } from "react";
 
-import Navbar from "../components/navbar";
+import Navbar from "../components/Navbar";
 import ThickSlider from "../components/thickSlider";
 import ChatBox from "../components/chat";
 import VideoBar from "../components/videoBar";
