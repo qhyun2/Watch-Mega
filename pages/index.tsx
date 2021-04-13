@@ -23,12 +23,34 @@ import {
   Switch,
   TextField,
   Typography,
+  makeStyles,
 } from "@material-ui/core";
 import { PlayArrow, SkipPrevious, SkipNext, Pause } from "@material-ui/icons";
 
 // authentication
 import { defaultAuth } from "../lib/Auth";
 export { defaultAuth as getServerSideProps };
+
+const useStyles = makeStyles((theme) => ({
+  sliders: {
+    order: 1,
+    [theme.breakpoints.down("xs")]: {
+      order: 2,
+    },
+  },
+  controls: {
+    order: 2,
+    [theme.breakpoints.down("xs")]: {
+      order: 1,
+    },
+  },
+  toggles: {
+    order: 3,
+    [theme.breakpoints.down("xs")]: {
+      order: 3,
+    },
+  },
+}));
 
 const PLAYBACK_SPEEDS = [0.25, 0.5, 0.75, 1, 1.1, 1.2, 1.3, 1.4, 1.5, 1.75, 2, 2.5, 3];
 const PLAYBACK_LABELS = [0.25, 1, 2, 3];
@@ -199,6 +221,7 @@ const Index: React.FC = () => {
   }
 
   function renderControls(): JSX.Element {
+    const classes = useStyles();
     return (
       <Box pt={4}>
         <Container maxWidth="md">
@@ -206,7 +229,7 @@ const Index: React.FC = () => {
             <Box p={4}>
               <FormControl style={{ width: "100%" }}>
                 <Grid container justify="center" alignContent="center" spacing={2}>
-                  <Grid item lg={3} md={6} xs={12}>
+                  <Grid item sm={3} xs={12} className={classes.sliders}>
                     <Typography>Volume</Typography>
                     <ThickSlider
                       min={0}
@@ -232,7 +255,7 @@ const Index: React.FC = () => {
                       valueLabelFormat={(v) => PLAYBACK_SPEEDS[v] + "x"}
                     />
                   </Grid>
-                  <Grid item container justify="center" md={6} xs={12}>
+                  <Grid item sm={6} xs={12} className={classes.controls} container justify="center">
                     <Grid item container justify="center" wrap="nowrap">
                       <IconButton onClick={() => socket.current.emit("prev")} disabled={disableControls}>
                         <SkipPrevious fontSize="large" />
@@ -265,7 +288,7 @@ const Index: React.FC = () => {
                       </Container>
                     </Grid>
                   </Grid>
-                  <Grid item lg={3} md={6} xs={12}>
+                  <Grid item sm={3} xs={12} className={classes.toggles}>
                     <FormGroup>
                       <FormControlLabel
                         control={

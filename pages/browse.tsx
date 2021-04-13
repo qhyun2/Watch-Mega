@@ -70,7 +70,7 @@ const TreeNode: React.FC<TreeNodeProps> = (props) => {
         e.stopPropagation();
       }}
       label={
-        <div style={{ display: "flex", alignItems: "center", padding: theme.spacing(0.5, 0) }}>
+        <div style={{ display: "flex", alignItems: "center", padding: theme.spacing(0.5, 0), width: "95%" }}>
           <Icon color="primary" style={{ marginRight: theme.spacing(1) }} />
           <Typography color={props.node.name == "[empty]" ? "error" : "textPrimary"} noWrap>
             {props.node.name}

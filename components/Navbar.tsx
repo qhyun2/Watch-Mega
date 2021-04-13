@@ -42,8 +42,9 @@ const useStyles = makeStyles((theme) => ({
 
 const NAVITEMS = [
   { title: "Watch", path: "/" },
-  { title: "Select", path: "/select" },
   { title: "Browse", path: "/browse" },
+  { title: "History", path: "/history" },
+  { title: "Youtube", path: "/youtube" },
   { title: "Torrent", path: "/torrent" },
 ];
 
@@ -60,8 +61,8 @@ const NavDrawer: React.FC<{ page: string; open: boolean; setOpen: (state: boolea
           Watch Mega
         </Typography>
         {NAVITEMS.map(({ title, path }) => (
-          <Link href={path}>
-            <ListItem key={title} button>
+          <Link href={path} key={title}>
+            <ListItem button>
               <Typography variant="h5" color={title === props.page ? "secondary" : "textPrimary"}>
                 <a href={path} style={{ color: "inherit", textDecoration: "none" }}>
                   <ListItemText primary={title} />

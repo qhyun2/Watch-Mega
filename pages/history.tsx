@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 
 import { useRouter } from "next/router";
-import Link from "next/link";
 
 import Navbar from "../components/Navbar";
 
@@ -11,17 +10,14 @@ import { stringify } from "qs";
 
 import {
   Box,
-  Button,
   ButtonBase,
   Card,
   CardContent,
   CardMedia,
   Container,
-  Divider,
   Grid,
   GridList,
   GridListTile,
-  TextField,
   Typography,
 } from "@material-ui/core";
 import { Pagination, Skeleton } from "@material-ui/lab";
@@ -29,43 +25,6 @@ import { Pagination, Skeleton } from "@material-ui/lab";
 // authentication
 import { defaultAuth } from "../lib/Auth";
 export { defaultAuth as getServerSideProps };
-
-const YoutubeSelector: React.FC = () => {
-  const [youtubeLink, setYoutubeLink] = useState("");
-  const router = useRouter();
-
-  return (
-    <Grid item container spacing={1} wrap="nowrap">
-      <Grid item style={{ flexGrow: 1 }}>
-        <TextField
-          id="outlined-basic"
-          label="Youtube Link"
-          fullWidth
-          value={youtubeLink}
-          onChange={(e) => setYoutubeLink(e.target.value)}
-        />
-      </Grid>
-      <Grid item>
-        <Button
-          variant="contained"
-          color="primary"
-          style={{ height: "100%" }}
-          onClick={() => {
-            if (!youtubeLink) return;
-            const regex = youtubeLink.match(/^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/);
-            const id = regex ? regex.pop() : null;
-            if (id) {
-              axios.post("/api/media/select", { src: "youtube:" + id }).then(() => {
-                router.push("/");
-              });
-            }
-          }}>
-          select
-        </Button>
-      </Grid>
-    </Grid>
-  );
-};
 
 interface HistoryItem {
   name: string;
@@ -209,45 +168,24 @@ const HistoryPanel: React.FC = () => {
   );
 };
 
-const Select: React.FC = () => {
+const History: React.FC = () => {
   return (
     <React.Fragment>
       <header>
-        <Navbar page="Select" />
+        <Navbar page="History" />
       </header>
       <Box pt={4}>
-        <Container>
+        <Container maxWidth="md">
           <Box pb={2}>
             <Typography variant="h4" color="textPrimary">
               History
             </Typography>
           </Box>
-          <Grid container spacing={8}>
-            <Grid item xs={12} md={8}>
-              <HistoryPanel />
-            </Grid>
-            <Grid item container xs={12} md={4} spacing={2} direction="column">
-              <Grid item>
-                <Box>
-                  <Link href="/browse">
-                    <Button variant="contained" color="primary" size="large" fullWidth>
-                      Open file bowser
-                    </Button>
-                  </Link>
-                </Box>
-              </Grid>
-              <Grid item>
-                <Divider />
-              </Grid>
-              <Grid item>
-                <YoutubeSelector />
-              </Grid>
-            </Grid>
-          </Grid>
+          <HistoryPanel />
         </Container>
       </Box>
     </React.Fragment>
   );
 };
 
-export default Select;
+export default History;
