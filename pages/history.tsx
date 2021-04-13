@@ -96,7 +96,7 @@ const HistoryItems: React.FC<HistoryItemsProps> = (props) => {
     const data: HistoryItem[] = [];
     for (let i = index; i < index + 5; i++) {
       const item = props.history.get(i);
-      if (item) data.push();
+      if (item) data.push(item);
     }
 
     return (
