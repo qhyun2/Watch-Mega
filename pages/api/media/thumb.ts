@@ -1,6 +1,5 @@
 import withSession from "../../../lib/session";
 import getInfo from "ffprobe";
-import { path as ffprobePath } from "ffprobe-static";
 import { join } from "path";
 import { existsSync } from "fs";
 import { spawn } from "child_process";
@@ -26,7 +25,7 @@ async function fileThumbnail(res, url: string[]): Promise<void> {
   res.writeHead(200, { "Content-Type": "image/jpeg" });
 
   // get middle of video
-  const info = await getInfo(videoPath, { path: ffprobePath });
+  const info = await getInfo(videoPath, { path: "/usr/bin/ffprobe" });
   let middle = info.streams[0].duration / 2;
   if (isNaN(middle)) middle = 300;
 

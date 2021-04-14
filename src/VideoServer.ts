@@ -3,7 +3,6 @@ import * as path from "path";
 import Redis from "ioredis";
 import * as RC from "./RedisConstants";
 import getInfo from "ffprobe";
-import { path as ffprobePath } from "ffprobe-static";
 import { logger } from "./Instances";
 
 const redis = new Redis(6379, process.env.REDIS_URL);
@@ -30,7 +29,7 @@ export function subscribeRedis(): void {
 async function newVideo(): Promise<void> {
   const url = (await redis.get(RC.REDIS_VIDEO_PATH)).split(":");
   if (url[0] != "file") return;
-  getInfo(url[1], { path: ffprobePath })
+  getInfo(url[1], { path: "/usr/bin/ffprobe" })
     .then((info) => {
       redis.set(RC.REDIS_PLAYING, RC.RFALSE);
       redis.set(RC.REDIS_POSITION, 0);
