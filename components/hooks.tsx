@@ -38,3 +38,26 @@ export function useSocket(): React.MutableRefObject<SocketIOClient.Socket> {
   }, []);
   return socketRef;
 }
+
+export function useLocalStorage<T>(key: string, initialValue: T): [T, React.Dispatch<React.SetStateAction<T>>] {
+  const [storedValue, setStoredValue] = useState(initialValue);
+
+  useEffect(() => {
+    const item = window.localStorage.getItem(key);
+    setStoredValue(item ? JSON.parse(item) : initialValue);
+  }, []);
+
+  const setValue = (value: T | ((val: T) => T)) => {
+    try {
+      const valueToStore = value instanceof Function ? value(storedValue) : value;
+      setStoredValue(valueToStore);
+
+      if (typeof window !== "undefined") {
+        window.localStorage.setItem(key, JSON.stringify(valueToStore));
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+  return [storedValue, setValue];
+}

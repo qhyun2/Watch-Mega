@@ -7,7 +7,7 @@ import VideoBar from "../components/videoBar";
 import PlayingPopup from "../components/playingPopup";
 import VJSPlayer from "../components/vjsPlayer";
 
-import { useSubtitleDelay, useSocket } from "../components/hooks";
+import { useSubtitleDelay, useSocket, useLocalStorage } from "../components/hooks";
 import { VideoJsPlayer } from "video.js";
 import Toastify from "toastify-js";
 
@@ -69,7 +69,14 @@ const Index: React.FC = () => {
   const [count, setCount] = useState(0);
   const [videoName, setVideoName] = useState("");
   const [playbackSpeed, setPlaybackSpeed] = useState(PLAYBACK_SPEEDS.indexOf(1));
+
+  // local state
   const [disableControls, setDisableControls] = useState(false);
+  const [volume, setVolume] = useLocalStorage("volume", 0.7);
+
+  useEffect(() => {
+    vjs.current.volume(volume);
+  }, [volume]);
 
   // new video
   useEffect(() => {
@@ -134,11 +141,11 @@ const Index: React.FC = () => {
             e.preventDefault();
             break;
           case "ArrowUp":
-            vjs.current.volume(Math.min(vjs.current.volume() + 0.1, 1));
+            setVolume((volume) => Math.min(volume + 0.1, 1));
             e.preventDefault();
             break;
           case "ArrowDown":
-            vjs.current.volume(Math.max(vjs.current.volume() - 0.1, 0));
+            setVolume((volume) => Math.max(volume - 0.1, 0));
             e.preventDefault();
             break;
           case "[":
@@ -234,8 +241,8 @@ const Index: React.FC = () => {
                     <ThickSlider
                       min={0}
                       max={100}
-                      defaultValue={80}
-                      onChange={(_, value) => vjs.current.volume((value as number) / 100)}
+                      value={Math.round(volume * 100)}
+                      onChange={(_, value) => setVolume((value as number) / 100)}
                       valueLabelDisplay="auto"
                       disabled={disableControls}
                     />
