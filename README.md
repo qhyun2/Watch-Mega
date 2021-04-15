@@ -1,7 +1,7 @@
 # Watch-Mega
 
 ![Last Commit](https://img.shields.io/github/last-commit/qhyun2/Watch-Mega)
-![Build Status](https://img.shields.io/docker/cloud/build/qhyun2/watch-mega)
+![Build Status](https://img.shields.io/github/workflow/status/qhyun2/watch-mega/CI)
 
 Watch videos in sync with your friends!
 
