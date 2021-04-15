@@ -31,7 +31,7 @@ export function useSubtitleDelay(
 export function useSocket(): React.MutableRefObject<SocketIOClient.Socket> {
   const socketRef = useRef() as React.MutableRefObject<SocketIOClient.Socket>;
   useEffect(() => {
-    socketRef.current = socketIOClient();
+    socketRef.current = socketIOClient(process.env.NEXT_PUBLIC_SOCKET_IO_URL);
     return () => {
       socketRef.current.close();
     };

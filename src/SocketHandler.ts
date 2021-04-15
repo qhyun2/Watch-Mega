@@ -1,4 +1,3 @@
-import { Server } from "http";
 import { Server as SocketIOServer, Socket } from "socket.io";
 import { logger } from "./Instances";
 import * as Redis from "ioredis";
@@ -10,12 +9,21 @@ export class SocketServer {
   redis: Redis.Redis;
   redisSub: Redis.Redis;
 
-  constructor(http: Server) {
-    this.io = new SocketIOServer(http);
+  constructor() {
+    this.io = new SocketIOServer(parseInt(process.env.SOCKET_IO_PORT), {
+      cors: {
+        origin: "*",
+      },
+    });
     this.redis = new Redis.default(6379, process.env.REDIS_URL);
     this.redisSub = new Redis.default(6379, process.env.REDIS_URL);
+
     this.redis.set(RC.REDIS_CONNECTIONS, 0);
-    this.redis.set(RC.REDIS_VIDEO_PATH, "file:public/default.mp4");
+    this.redis.get(RC.REDIS_VIDEO_PATH).then((value) => {
+      if (!value) {
+        this.redis.set(RC.REDIS_VIDEO_PATH, "file:public/default.mp4");
+      }
+    });
     this.redis.publish(RC.VIDEO_EVENT, RC.VE_NEWVID);
 
     setInterval(() => {

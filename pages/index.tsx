@@ -84,7 +84,6 @@ const Index: React.FC = () => {
 
   // new video
   useEffect(() => {
-    console.log("loading new video:" + videoName);
     if (!videoName) return;
     const url = new URL(videoName);
 
@@ -158,9 +157,6 @@ const Index: React.FC = () => {
   }
 
   function applyVideoState() {
-    console.log("state");
-    console.log(videoState);
-    console.log(vjs.current.currentTime());
     // TODO tighten threshold for updating postition once new watchers joining does not cause state broadcast
     if (Math.abs(videoState.position - vjs.current.currentTime()) > 2) updateCurrentTime();
     if (videoState.isPaused !== vjs.current.paused()) {
@@ -360,11 +356,10 @@ const Index: React.FC = () => {
       <PlayingPopup
         open={playingPopup}
         cb={() => {
+          // TODO fix seeking issues with youtube player
           setplayingPopup(false);
           socket.current.emit("reqsync");
-          console.log("starting" + videoState.position);
           vjs.current.one("play", () => {
-            console.log(videoState.position);
             updateCurrentTime();
           });
         }}
