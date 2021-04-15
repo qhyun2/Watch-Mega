@@ -1,0 +1,26 @@
+# typescript builder
+FROM node:15-alpine AS builder
+WORKDIR /app
+COPY tsconfig.server.json .
+COPY package.json ./
+COPY package-lock.json ./
+RUN npm ci
+COPY ./lib ./lib
+COPY ./src ./src
+RUN npm run build:server
+
+# production container
+FROM node:15-alpine
+WORKDIR /app
+ENV NODE_ENV=production
+# git needed by unknown npm library
+# ffmpeg needed for encoding videos
+RUN apk add git && apk add ffmpeg
+COPY ./public ./public
+COPY package.json .
+COPY package-lock.json .
+RUN npm ci --only=production
+COPY --from=builder /app/dist ./
+
+EXPOSE 3000
+CMD ["node", "src/index.js"]

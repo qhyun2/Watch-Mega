@@ -1,0 +1,29 @@
+# next builder
+FROM node:15-alpine AS builder
+WORKDIR /app
+COPY tsconfig.json .
+COPY package.json package-lock.json ./
+RUN npm ci
+COPY ./styles ./styles
+COPY ./lib ./lib
+COPY ./src ./src
+COPY ./components ./components
+COPY ./pages ./pages
+RUN npm run build:next
+
+# production container
+FROM node:15-alpine
+WORKDIR /app
+ENV NODE_ENV production
+COPY next.config.js ./
+COPY ./public ./public
+COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app/.next ./.next
+COPY ./src ./src
+COPY ./lib ./lib
+RUN addgroup -g 1001 -S nodejs
+RUN adduser -S nextjs -u 1001
+RUN chown -R nextjs:nodejs /app/.next
+USER nextjs
+EXPOSE 3000
+CMD ["npx", "next", "start"]

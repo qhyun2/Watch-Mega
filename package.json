@@ -6,10 +6,10 @@
   "scripts": {
     "start": "node -r ts-node/register ./src/index.ts",
     "dev": "nodemon",
-    "ts:build": "tsc --build tsconfig.server.json",
-    "next:build": "next build",
-    "docker:build": "docker build . -t watchmega:latest",
-    "docker:push": "docker tag watchmega:latest registry.digitalocean.com/watchmega/watchmega && docker push registry.digitalocean.com/watchmega/watchmega"
+    "build:next": "next build",
+    "build:server": "tsc --build tsconfig.server.json",
+    "docker:build:next": "docker build --file Dockerfile.next . -t watchmega:latest-next",
+    "docker:build:server": "docker build --file Dockerfile.server . -t watchmega:latest-server"
   },
   "repository": {
     "type": "git",
