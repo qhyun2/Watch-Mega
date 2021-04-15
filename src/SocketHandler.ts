@@ -1,13 +1,12 @@
 import { Server } from "http";
 import { Server as SocketIOServer, Socket } from "socket.io";
 import { logger } from "./Instances";
-import xss from "xss";
 import * as Redis from "ioredis";
 import * as RC from "./RedisConstants";
+import { VideoState } from "../lib/VideoState";
 
 export class SocketServer {
   io: SocketIOServer;
-  idToUserName: Map<string, string> = new Map();
   redis: Redis.Redis;
   redisSub: Redis.Redis;
 
@@ -40,74 +39,55 @@ export class SocketServer {
       );
 
       this.updateWatching();
-      Promise.all([this.redis.get(RC.REDIS_PLAYING), this.redis.get(RC.REDIS_VIDEO_PATH)]).then(
-        ([playing, videoName]) => {
-          socket.emit("info", { playing: playing == RC.RTRUE, videoName });
-        }
-      );
-      socket.emit("seek", null, await this.redis.get(RC.REDIS_POSITION));
-
-      socket.on("ready", () => {
-        Promise.all([this.redis.get(RC.REDIS_PLAYING), this.redis.get(RC.REDIS_POSITION)]).then(([playing, pos]) => {
-          if (playing == RC.RTRUE) {
-            socket.emit("play", null, pos);
-          } else {
-            socket.emit("seek", null, pos);
-          }
-        });
-      });
+      this.sync();
 
       socket.on("seek", (msg) => {
         const pos = parseFloat(msg);
         if (isNaN(pos)) return;
         this.redis.set(RC.REDIS_POSITION, pos);
-        this.redis.get(RC.REDIS_POSITION).then((pos) => {
-          socket.broadcast.emit("seek", socket.handshake.address, pos);
-        });
         logger.info(`${socket.handshake.address} seeked the video to ${pos}`);
+        this.sync();
       });
-
       socket.on("play", async (msg) => {
         const pos = parseFloat(msg);
         if (isNaN(pos)) return;
         this.redis.set(RC.REDIS_PLAYING, RC.RTRUE);
         this.redis.set(RC.REDIS_POSITION, pos);
-        this.redis.get(RC.REDIS_POSITION).then((pos) => {
-          socket.broadcast.emit("play", socket.handshake.address, pos);
-        });
         logger.info(`${socket.handshake.address} played the video at ${pos}`);
+        this.sync();
       });
       socket.on("pause", (msg) => {
         const pos = parseFloat(msg);
         if (isNaN(pos)) return;
         this.redis.set(RC.REDIS_PLAYING, RC.RFALSE);
         this.redis.set(RC.REDIS_POSITION, pos);
-        this.redis.get(RC.REDIS_POSITION).then((pos) => {
-          socket.broadcast.emit("pause", socket.handshake.address, pos);
-        });
         logger.info(`${socket.handshake.address} paused the video at ${pos}`);
+        this.sync();
       });
-
       socket.on("next", () => {
         this.redis.publish(RC.VIDEO_EVENT, RC.VE_NEXTEP);
       });
       socket.on("prev", () => {
         this.redis.publish(RC.VIDEO_EVENT, RC.VE_PREVEP);
       });
-
+      socket.on("reqsync", () => {
+        this.sync();
+      });
       socket.on("disconnect", () => {
-        this.idToUserName.delete(socket.id);
         this.redis.decr(RC.REDIS_CONNECTIONS);
         this.updateWatching();
       });
+    });
+  }
 
-      // received username
-      socket.on("name", (msg) => {
-        msg = xss(String(msg).slice(0, 30)); // cap at 20 chars
-        logger.info(`${socket.handshake.address} set their username to ${msg}`);
-        this.idToUserName.set(socket.id, msg);
-        this.updateWatching();
-      });
+  sync(): void {
+    Promise.all([
+      this.redis.get(RC.REDIS_PLAYING),
+      this.redis.get(RC.REDIS_POSITION),
+      this.redis.get(RC.REDIS_VIDEO_PATH),
+    ]).then(([playing, position, name]) => {
+      const isPaused = playing === RC.RFALSE;
+      this.io.sockets.emit("state", { isPaused, position: parseFloat(position), name } as VideoState);
     });
   }
 
@@ -115,28 +95,14 @@ export class SocketServer {
     this.redisSub.subscribe(RC.VIDEO_EVENT);
     this.redisSub.on("message", (_, event) => {
       if (event == RC.VE_NEWVID) {
-        this.newVideo();
+        this.sync();
       }
     });
   }
 
-  newVideo(): void {
-    this.redis.get(RC.REDIS_VIDEO_PATH).then((videoname) => {
-      this.io.sockets.emit("newvideo", videoname);
-    });
-  }
-
   updateWatching(): void {
-    const users = Array.from(this.idToUserName.values());
     this.redis.get(RC.REDIS_CONNECTIONS).then((connections) => {
-      this.io.sockets.emit("watching", { count: connections, usernames: users });
+      this.io.sockets.emit("watching", { count: connections });
     });
-  }
-
-  getName(id: string): string {
-    if (this.idToUserName.has(id)) {
-      return this.idToUserName.get(id);
-    }
-    return "Anon";
   }
 }

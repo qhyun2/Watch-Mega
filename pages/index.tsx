@@ -4,12 +4,14 @@ import Navbar from "../components/Navbar";
 import ThickSlider from "../components/thickSlider";
 import ChatBox from "../components/chat";
 import VideoBar from "../components/videoBar";
-import PlayingPopup from "../components/playingPopup";
-import VJSPlayer from "../components/vjsPlayer";
+import PlayingPopup from "../components/PlayingPopup";
+import VJSPlayer from "../components/VJSPlayer";
 
+import { VideoState } from "../lib/VideoState";
 import { useSubtitleDelay, useSocket, useLocalStorage } from "../components/hooks";
 import { VideoJsPlayer } from "video.js";
 import Toastify from "toastify-js";
+import canAutoPlay from "can-autoplay";
 
 import {
   Box,
@@ -62,13 +64,15 @@ const Index: React.FC = () => {
   const ignoreSeek = useRef(false);
   const ignorePlay = useRef(false);
   const ignorePause = useRef(false);
+  const firstPlay = useRef(true);
 
   const [playingPopup, setplayingPopup] = useState(false);
-  const [playing, setPlaying] = useState(false);
   const [subtitleDelay, setSubtitleDelay] = useSubtitleDelay(vjs);
   const [count, setCount] = useState(0);
   const [videoName, setVideoName] = useState("");
   const [playbackSpeed, setPlaybackSpeed] = useState(PLAYBACK_SPEEDS.indexOf(1));
+
+  const [videoState, setVideoState] = useState<VideoState>({ isPaused: true, position: 0, name: "" });
 
   // local state
   const [disableControls, setDisableControls] = useState(false);
@@ -80,6 +84,7 @@ const Index: React.FC = () => {
 
   // new video
   useEffect(() => {
+    console.log("loading new video:" + videoName);
     if (!videoName) return;
     const url = new URL(videoName);
 
@@ -101,13 +106,6 @@ const Index: React.FC = () => {
       throw "Unknown protocol: " + url.protocol;
     }
   }, [videoName]);
-
-  function onPlayerReady(): void {
-    vjs.current.volume(0.8);
-    initHotkeys();
-    initSocket();
-    initVideoListeners();
-  }
 
   function initHotkeys(): void {
     document.addEventListener("keydown", (e) => {
@@ -159,43 +157,58 @@ const Index: React.FC = () => {
     });
   }
 
+  function applyVideoState() {
+    console.log("state");
+    console.log(videoState);
+    console.log(vjs.current.currentTime());
+    // TODO tighten threshold for updating postition once new watchers joining does not cause state broadcast
+    if (Math.abs(videoState.position - vjs.current.currentTime()) > 2) updateCurrentTime();
+    if (videoState.isPaused !== vjs.current.paused()) {
+      if (videoState.isPaused) {
+        pause();
+      } else {
+        if (firstPlay.current) {
+          canAutoPlay.video().then(({ result }) => {
+            if (result === true) {
+              firstPlay.current = false;
+              play();
+            } else {
+              setplayingPopup(true);
+            }
+          });
+        } else {
+          play();
+        }
+      }
+    }
+  }
+
+  useEffect(applyVideoState, [videoState]);
+
+  function play(): void {
+    ignorePlay.current = true;
+    vjs.current.play();
+  }
+
+  function pause(): void {
+    ignorePause.current = true;
+    vjs.current.pause();
+  }
+
+  function updateCurrentTime(): void {
+    ignoreSeek.current = true;
+    vjs.current.currentTime(videoState.position);
+  }
+
   function seek(amount: number): void {
     vjs.current.currentTime(vjs.current.currentTime() + amount);
   }
 
   function initSocket(): void {
-    socket.current.on("info", (info: { playing: boolean; videoName: string }) => {
-      setplayingPopup(info.playing);
-      setVideoName(info.videoName);
+    socket.current.on("state", (state: VideoState) => {
+      setVideoName(state.name);
+      setVideoState(state);
     });
-    // video events from server
-    socket.current.on("seek", (user: string, time: number) => {
-      ignoreSeek.current = true;
-      vjs.current.currentTime(time);
-      if (user) sendNotif(`${user} seeked the video`);
-    });
-    socket.current.on("play", (user: string, time: number) => {
-      ignorePlay.current = true;
-      ignoreSeek.current = true;
-      vjs.current.currentTime(time);
-      setPlaying(true);
-      vjs.current.play();
-      if (user) sendNotif(`${user} played the video`);
-    });
-    socket.current.on("pause", (user: string, time: number) => {
-      ignorePause.current = true;
-      ignoreSeek.current = true;
-      vjs.current.pause();
-      setPlaying(false);
-      vjs.current.currentTime(time);
-      if (user) sendNotif(`${user} paused the video`);
-    });
-    socket.current.on("newvideo", (name: string) => {
-      setVideoName(name);
-      setPlaying(false);
-    });
-
-    // users watching
     socket.current.on("watching", (msg: { count: number }) => {
       setCount(msg.count);
     });
@@ -215,7 +228,6 @@ const Index: React.FC = () => {
         return;
       }
       socket.current.emit("play", vjs.current.currentTime());
-      setPlaying(true);
     });
     vjs.current.on("pause", () => {
       if (ignorePause.current) {
@@ -223,8 +235,8 @@ const Index: React.FC = () => {
         return;
       }
       socket.current.emit("pause", vjs.current.currentTime());
-      setPlaying(false);
     });
+    vjs.current.on("sourceset", () => applyVideoState);
   }
 
   function renderControls(): JSX.Element {
@@ -272,7 +284,7 @@ const Index: React.FC = () => {
                           vjs.current.paused() ? vjs.current.play() : vjs.current.pause();
                         }}
                         disabled={disableControls}>
-                        {playing ? <Pause fontSize="large" /> : <PlayArrow fontSize="large" />}
+                        {videoState.isPaused ? <PlayArrow fontSize="large" /> : <Pause fontSize="large" />}
                       </IconButton>
                       <IconButton onClick={() => socket.current.emit("next")} disabled={disableControls}>
                         <SkipNext fontSize="large" />
@@ -334,7 +346,14 @@ const Index: React.FC = () => {
       <Box>
         <VideoBar name={videoName} />
         <Box pt={3} style={{ pointerEvents: disableControls ? "none" : "auto" }}>
-          <VJSPlayer vjs={vjs} cb={() => onPlayerReady()} />
+          <VJSPlayer
+            vjs={vjs}
+            cb={() => {
+              initHotkeys();
+              initSocket();
+              initVideoListeners();
+            }}
+          />
         </Box>
         {renderControls()}
       </Box>
@@ -342,7 +361,12 @@ const Index: React.FC = () => {
         open={playingPopup}
         cb={() => {
           setplayingPopup(false);
-          socket.current.emit("ready");
+          socket.current.emit("reqsync");
+          console.log("starting" + videoState.position);
+          vjs.current.one("play", () => {
+            console.log(videoState.position);
+            updateCurrentTime();
+          });
         }}
       />
       <ChatBox userlist={{ count: count, usernames: [] }} />

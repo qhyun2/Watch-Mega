@@ -1,7 +1,7 @@
 import React, { useEffect, useRef } from "react";
 import { Container, Paper } from "@material-ui/core";
 
-import videojs, { VideoJsPlayer } from "video.js";
+import videojs, { VideoJsPlayer, VideoJsPlayerOptions } from "video.js";
 import "videojs-youtube";
 import "video.js/dist/video-js.min.css";
 
@@ -16,7 +16,8 @@ const VJSPlayer: React.FC<{ vjs: React.MutableRefObject<VideoJsPlayer>; cb: () =
         techOrder: ["youtube", "html5"],
         sources: [{ type: "video/mp4", src: "/default.mp4" }],
         controlBar: { volumePanel: false },
-      },
+        enableSourceset: true,
+      } as VideoJsPlayerOptions,
       props.cb
     );
   }, []);

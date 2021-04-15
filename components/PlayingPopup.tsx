@@ -10,11 +10,11 @@ const PlayingPopup: React.FC<{ open: boolean; cb: () => void }> = (props) => {
           <Typography variant="h4">Welcome to WatchMega</Typography>
           <Box p={2}>
             <Typography variant="subtitle1" align="center">
-              The video is already playing
+              Autoplay was blocked
             </Typography>
           </Box>
           <Button variant="contained" color="primary" onClick={() => props.cb()}>
-            Start watching
+            Play video
           </Button>
         </Box>
       </DialogContent>
