@@ -15,6 +15,7 @@ RUN npm run build:next
 FROM node:15-alpine
 WORKDIR /app
 ENV NODE_ENV production
+RUN apk add ffmpeg
 COPY next.config.js ./
 COPY ./public ./public
 COPY --from=builder /app/node_modules ./node_modules
