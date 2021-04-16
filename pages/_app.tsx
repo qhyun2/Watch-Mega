@@ -7,6 +7,7 @@ import CssBaseline from "@material-ui/core/CssBaseline";
 import "../styles/toastify.css";
 import "../styles/vjs-lime.css";
 import "../styles/loadingbar.css";
+import "../styles/global.css";
 
 // loading bar
 import { useRouter } from "next/router";

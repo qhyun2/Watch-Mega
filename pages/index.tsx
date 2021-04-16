@@ -78,10 +78,6 @@ const Index: React.FC = () => {
   const [disableControls, setDisableControls] = useState(false);
   const [volume, setVolume] = useLocalStorage("volume", 0.7);
 
-  useEffect(() => {
-    vjs.current.volume(volume);
-  }, [volume]);
-
   // new video
   useEffect(() => {
     if (!videoName) return;
@@ -138,18 +134,18 @@ const Index: React.FC = () => {
             e.preventDefault();
             break;
           case "ArrowUp":
-            setVolume((volume) => Math.min(volume + 0.1, 1));
+            setVolume((vol) => Math.min(vol + 0.05, 1));
             e.preventDefault();
             break;
           case "ArrowDown":
-            setVolume((volume) => Math.max(volume - 0.1, 0));
+            setVolume((vol) => Math.max(vol - 0.05, 0));
             e.preventDefault();
             break;
           case "[":
-            setPlaybackSpeed(Math.max(0, playbackSpeed - 1));
+            setPlaybackSpeed((speed) => Math.max(0, speed - 1));
             break;
           case "]":
-            setPlaybackSpeed(Math.min(PLAYBACK_SPEEDS.length - 1, playbackSpeed + 1));
+            setPlaybackSpeed((speed) => Math.min(PLAYBACK_SPEEDS.length - 1, speed + 1));
             break;
         }
       }
@@ -252,7 +248,6 @@ const Index: React.FC = () => {
                       value={Math.round(volume * 100)}
                       onChange={(_, value) => setVolume((value as number) / 100)}
                       valueLabelDisplay="auto"
-                      disabled={disableControls}
                     />
                     <Typography>Playback Speed</Typography>
                     <ThickSlider
@@ -344,6 +339,7 @@ const Index: React.FC = () => {
         <Box pt={3} style={{ pointerEvents: disableControls ? "none" : "auto" }}>
           <VJSPlayer
             vjs={vjs}
+            volume={volume}
             cb={() => {
               initHotkeys();
               initSocket();
