@@ -31,6 +31,7 @@ import { PlayArrow, SkipPrevious, SkipNext, Pause } from "@material-ui/icons";
 
 // authentication
 import { defaultAuth } from "../lib/Auth";
+import SyncDebug from "../components/SyncDebug";
 export { defaultAuth as getServerSideProps };
 
 const useStyles = makeStyles((theme) => ({
@@ -198,6 +199,7 @@ const Index: React.FC = () => {
 
   function initSocket(): void {
     socket.current.on("state", (state: VideoState) => {
+      console.log("got state:", state);
       setVideoName(state.name);
       setVideoState(state);
     });
@@ -207,19 +209,21 @@ const Index: React.FC = () => {
   }
 
   function initVideoListeners(): void {
-    vjs.current.on("seeked", () => {
-      if (ignoreSeek.current) {
-        ignoreSeek.current = false;
-        return;
-      }
-      socket.current.emit("seek", vjs.current.currentTime());
-    });
-    vjs.current.on("play", () => {
+    // vjs.current.on("seeked", () => {
+    //   if (ignoreSeek.current) {
+    //     ignoreSeek.current = false;
+    //     return;
+    //   }
+    //   socket.current.emit("seek", vjs.current.currentTime());
+    //   console.log("seeked", vjs.current.currentTime());
+    // });
+    vjs.current.on("play", (a, b, c, d) => {
       if (ignorePlay.current) {
         ignorePlay.current = false;
         return;
       }
       socket.current.emit("play", vjs.current.currentTime());
+      console.log("play", vjs.current.currentTime());
     });
     vjs.current.on("pause", () => {
       if (ignorePause.current) {
@@ -361,6 +365,7 @@ const Index: React.FC = () => {
         }}
       />
       <ChatBox userlist={{ count: count, usernames: [] }} />
+      <SyncDebug videoState={videoState} vjs={vjs.current} videoName={videoName} />
     </React.Fragment>
   );
 };
