@@ -9,11 +9,7 @@
     "baseUrl": ".",
     "forceConsistentCasingInFileNames": true,
     "resolveJsonModule": true,
-    "isolatedModules": true,
-    "paths": {
-      "*": ["node_modules/*"]
-    }
+    "isolatedModules": true
   },
-  "include": ["**/*.ts"],
-  "exclude": ["node_modules", "components", "pages"]
+  "include": ["src/*.ts", "lib/*.ts", "next-env.d.ts"]
 }

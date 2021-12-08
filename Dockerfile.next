@@ -2,6 +2,7 @@
 FROM node:15-alpine AS builder
 WORKDIR /app
 COPY tsconfig.json .
+COPY next.config.js .
 COPY package.json package-lock.json ./
 RUN npm ci
 COPY ./styles ./styles

@@ -1,6 +1,7 @@
 # typescript builder
 FROM node:15-alpine AS builder
 WORKDIR /app
+COPY next-env.d.ts .
 COPY tsconfig.server.json .
 COPY package.json ./
 COPY package-lock.json ./
