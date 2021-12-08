@@ -233,6 +233,12 @@ const Index: React.FC = () => {
       socket.current.emit("pause", vjs.current.currentTime());
     });
     vjs.current.on("sourceset", () => applyVideoState);
+
+    // don't focus fullscreen button after it is used
+    vjs.current.on("fullscreenchange", () => {
+      if (vjs.current.isFullscreen() && document.activeElement.classList.contains("vjs-fullscreen-control"))
+        (document.activeElement as HTMLElement).blur();
+    });
   }
 
   function renderControls(): JSX.Element {
