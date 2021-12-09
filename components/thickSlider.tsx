@@ -1,4 +1,6 @@
-import { Slider, withStyles } from "@material-ui/core";
+import { Slider } from "@mui/material";
+
+import withStyles from "@mui/styles/withStyles";
 
 const ThickSlider = withStyles({
   root: {
@@ -15,8 +17,6 @@ const ThickSlider = withStyles({
   thumb: {
     height: "25px !important",
     width: "25px !important",
-    marginTop: "-7px !important",
-    marginLeft: "-12px !important",
     backgroundColor: "#fff",
   },
   valueLabel: {

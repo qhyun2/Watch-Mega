@@ -3,7 +3,7 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { stringify } from "qs";
 
-import { Box, Container, Paper, Typography, useTheme } from "@material-ui/core";
+import { Box, Container, Paper, Typography, useTheme } from "@mui/material";
 
 const VideoBar: React.FC<{ name: string }> = (props) => {
   const [videoName, setVideoName] = useState("");

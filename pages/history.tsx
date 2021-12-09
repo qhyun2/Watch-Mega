@@ -16,11 +16,11 @@ import {
   CardMedia,
   Container,
   Grid,
-  GridList,
-  GridListTile,
+  ImageList,
+  ImageListItem,
   Typography,
-} from "@material-ui/core";
-import { Pagination, Skeleton } from "@material-ui/lab";
+} from "@mui/material";
+import { Pagination, Skeleton } from "@mui/material";
 
 // authentication
 import { defaultAuth } from "../lib/Auth";
@@ -85,9 +85,9 @@ const HistoryItems: React.FC<HistoryItemsProps> = (props) => {
         {Array(5)
           .fill(0)
           .map((_, i) => (
-            <GridListTile key={i} style={{ width: "100%", paddingBottom: 10 }}>
-              <Skeleton variant="rect" height={108} animation="wave" />
-            </GridListTile>
+            <ImageListItem key={i} style={{ width: "100%", paddingBottom: 10 }}>
+              <Skeleton variant="rectangular" height={108} animation="wave" />
+            </ImageListItem>
           ))}{" "}
       </React.Fragment>
     );
@@ -103,9 +103,9 @@ const HistoryItems: React.FC<HistoryItemsProps> = (props) => {
       <React.Fragment>
         {data.map((item) =>
           item ? (
-            <GridListTile key={item.name} style={{ width: "100%", paddingBottom: 10 }}>
+            <ImageListItem key={item.name} style={{ width: "100%", paddingBottom: 10 }}>
               <HistoryItem {...item}></HistoryItem>
-            </GridListTile>
+            </ImageListItem>
           ) : null
         )}
       </React.Fragment>
@@ -150,9 +150,9 @@ const HistoryPanel: React.FC = () => {
 
   return (
     <React.Fragment>
-      <GridList cellHeight={120} cols={1} style={{ minHeight: 640, alignContent: "flex-start" }}>
+      <ImageList rowHeight={120} cols={1} style={{ minHeight: 640, alignContent: "flex-start" }}>
         <HistoryItems isHistoryLoading={isHistoryLoading} page={page} history={history} />
-      </GridList>
+      </ImageList>
       <Box display="flex" justifyContent="center">
         <Pagination
           count={maxPages}

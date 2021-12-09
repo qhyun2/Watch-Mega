@@ -1,8 +1,8 @@
 import React from "react";
 import Head from "next/head";
 import type { AppProps } from "next/app";
-import { createMuiTheme, ThemeProvider } from "@material-ui/core/styles";
-import CssBaseline from "@material-ui/core/CssBaseline";
+import { createTheme, ThemeProvider, Theme, StyledEngineProvider, adaptV4Theme } from "@mui/material/styles";
+import CssBaseline from "@mui/material/CssBaseline";
 
 import "../styles/toastify.css";
 import "../styles/vjs-lime.css";
@@ -13,9 +13,14 @@ import "../styles/global.css";
 import { useRouter } from "next/router";
 import NProgress from "nprogress";
 
-const theme = createMuiTheme({
+declare module "@mui/styles/defaultTheme" {
+  // eslint-disable-next-line @typescript-eslint/no-empty-interface
+  interface DefaultTheme extends Theme {}
+}
+
+const theme = createTheme({
   palette: {
-    type: "dark",
+    mode: "dark",
     primary: {
       main: "#680e8b",
     },
@@ -68,10 +73,12 @@ function App({ Component, pageProps }: AppProps): JSX.Element {
       <Head>
         <title>Watch Mega</title>
       </Head>
-      <ThemeProvider theme={theme}>
-        <CssBaseline />
-        <Component {...pageProps} />
-      </ThemeProvider>
+      <StyledEngineProvider injectFirst>
+        <ThemeProvider theme={theme}>
+          <CssBaseline />
+          <Component {...pageProps} />
+        </ThemeProvider>
+      </StyledEngineProvider>
     </React.Fragment>
   );
 }

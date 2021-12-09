@@ -25,9 +25,9 @@ import {
   Switch,
   TextField,
   Typography,
-  makeStyles,
-} from "@material-ui/core";
-import { PlayArrow, SkipPrevious, SkipNext, Pause } from "@material-ui/icons";
+} from "@mui/material";
+import makeStyles from "@mui/styles/makeStyles";
+import { PlayArrow, SkipPrevious, SkipNext, Pause } from "@mui/icons-material";
 
 // authentication
 import { defaultAuth } from "../lib/Auth";
@@ -37,19 +37,19 @@ export { defaultAuth as getServerSideProps };
 const useStyles = makeStyles((theme) => ({
   sliders: {
     order: 1,
-    [theme.breakpoints.down("xs")]: {
+    [theme.breakpoints.down('lg')]: {
       order: 2,
     },
   },
   controls: {
     order: 2,
-    [theme.breakpoints.down("xs")]: {
+    [theme.breakpoints.down('lg')]: {
       order: 1,
     },
   },
   toggles: {
     order: 3,
-    [theme.breakpoints.down("xs")]: {
+    [theme.breakpoints.down('lg')]: {
       order: 3,
     },
   },
@@ -249,7 +249,7 @@ const Index: React.FC = () => {
           <Paper>
             <Box p={4}>
               <FormControl style={{ width: "100%" }}>
-                <Grid container justify="center" alignContent="center" spacing={2}>
+                <Grid container justifyContent="center" alignContent="center" spacing={2}>
                   <Grid item sm={3} xs={12} className={classes.sliders}>
                     <Typography>Volume</Typography>
                     <ThickSlider
@@ -275,19 +275,20 @@ const Index: React.FC = () => {
                       valueLabelFormat={(v) => PLAYBACK_SPEEDS[v] + "x"}
                     />
                   </Grid>
-                  <Grid item sm={6} xs={12} className={classes.controls} container justify="center">
-                    <Grid item container justify="center" wrap="nowrap">
-                      <IconButton onClick={() => socket.current.emit("prev")} disabled={disableControls}>
+                  <Grid item sm={6} xs={12} className={classes.controls} container justifyContent="center">
+                    <Grid item container justifyContent="center" wrap="nowrap">
+                      <IconButton onClick={() => socket.current.emit("prev")} disabled={disableControls} size="large">
                         <SkipPrevious fontSize="large" />
                       </IconButton>
                       <IconButton
                         onClick={() => {
                           vjs.current.paused() ? vjs.current.play() : vjs.current.pause();
                         }}
-                        disabled={disableControls}>
+                        disabled={disableControls}
+                        size="large">
                         {videoState.isPaused ? <PlayArrow fontSize="large" /> : <Pause fontSize="large" />}
                       </IconButton>
-                      <IconButton onClick={() => socket.current.emit("next")} disabled={disableControls}>
+                      <IconButton onClick={() => socket.current.emit("next")} disabled={disableControls} size="large">
                         <SkipNext fontSize="large" />
                       </IconButton>
                     </Grid>

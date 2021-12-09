@@ -1,7 +1,8 @@
 import React, { useEffect, useRef, useState } from "react";
 import { render } from "react-dom";
-import { Box, Container, makeStyles, Paper } from "@material-ui/core";
-import { VolumeUp, VolumeDown, VolumeOff } from "@material-ui/icons";
+import { Box, Container, Paper } from "@mui/material";
+import makeStyles from '@mui/styles/makeStyles';
+import { VolumeUp, VolumeDown, VolumeOff } from "@mui/icons-material";
 
 import videojs, { VideoJsPlayer, VideoJsPlayerOptions } from "video.js";
 import "videojs-youtube";

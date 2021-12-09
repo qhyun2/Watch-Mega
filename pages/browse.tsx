@@ -6,10 +6,10 @@ import Navbar from "../components/Navbar";
 import axios from "axios";
 import { stringify } from "qs";
 
-import { Box, Typography, Menu, MenuItem, SvgIconTypeMap, Container, useTheme } from "@material-ui/core";
-import { OverridableComponent } from "@material-ui/core/OverridableComponent";
-import { Skeleton, TreeItem, TreeView } from "@material-ui/lab";
-import { ArrowForwardIos, Folder, FolderOpen, Movie, Description } from "@material-ui/icons";
+import { Box, Typography, Menu, MenuItem, Skeleton, SvgIconTypeMap, Container, useTheme } from "@mui/material";
+import { OverridableComponent } from "@mui/material/OverridableComponent";
+import { TreeItem, TreeView } from "@mui/lab";
+import { ArrowForwardIos, Folder, FolderOpen, Movie, Description } from "@mui/icons-material";
 
 // authentication
 import { defaultAuth } from "../lib/Auth";
@@ -43,7 +43,7 @@ const TreeNode: React.FC<TreeNodeProps> = (props) => {
       </React.Fragment>
     );
   } else if (props.node.type == "folder") {
-    children = <Skeleton variant="rect" height={32} style={{ margin: "4px 4px" }} />;
+    children = <Skeleton variant="rectangular" height={32} style={{ margin: "4px 4px" }} />;
   } else {
     children = null;
   }
@@ -66,7 +66,7 @@ const TreeNode: React.FC<TreeNodeProps> = (props) => {
       key={props.node.path}
       onClick={() => props.loadCallback(props.node)}
       onContextMenu={(e) => {
-        props.contextCallback(props.node, (e as unknown) as MouseEvent);
+        props.contextCallback(props.node, e as unknown as MouseEvent);
         e.stopPropagation();
       }}
       label={
@@ -234,7 +234,7 @@ const Browse: React.FC = () => {
                 );
               })
             ) : (
-              <Skeleton variant="rect" height={420} />
+              <Skeleton variant="rectangular" height={420} />
             )}
           </TreeView>
         </Container>

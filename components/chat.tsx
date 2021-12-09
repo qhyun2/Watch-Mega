@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 
-import { Box, Hidden, AppBar, IconButton, Typography, Grid, Paper } from "@material-ui/core";
-import { Minimize } from "@material-ui/icons";
+import { Box, Hidden, AppBar, IconButton, Typography, Grid, Paper } from "@mui/material";
+import { Minimize } from "@mui/icons-material";
 
 // interface ChatContentProps {}
 
@@ -28,17 +28,17 @@ const ChatBox: React.FC<ChatBoxProps> = (props) => {
   const userString = `${props.userlist.count} user${props.userlist.count == 1 ? "" : "s"} currently watching`;
 
   return (
-    <Hidden smDown>
+    <Hidden lgDown>
       <Box position="fixed" bottom={0} right={0} width={380}>
         <Paper square>
           <AppBar position="static" onClick={() => setShown(!shown)}>
             <Box p={1} pl={2}>
-              <Grid container wrap="nowrap" justify="space-between">
-                <Grid item container justify="center" direction="column">
+              <Grid container wrap="nowrap" justifyContent="space-between">
+                <Grid item container justifyContent="center" direction="column">
                   <Typography variant="h6">{userString}</Typography>
                 </Grid>
                 <Grid item>
-                  <IconButton style={{ borderRadius: 0 }}>
+                  <IconButton style={{ borderRadius: 0 }} size="large">
                     <Minimize fontSize="small" />
                   </IconButton>
                 </Grid>

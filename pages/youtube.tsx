@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { useRouter } from "next/router";
 import Navbar from "../components/Navbar";
 import axios from "axios";
-import { Box, Button, Container, Grid, TextField, Typography } from "@material-ui/core";
+import { Box, Button, Container, Grid, TextField, Typography } from "@mui/material";
 
 // authentication
 import { defaultAuth } from "../lib/Auth";
@@ -13,10 +13,10 @@ const YoutubeSelector: React.FC = () => {
   const router = useRouter();
 
   return (
-    <Grid item container spacing={1} wrap="nowrap">
+    <Grid item container spacing={1} wrap="nowrap" alignItems="center">
       <Grid item style={{ flexGrow: 1 }}>
         <TextField
-          id="outlined-basic"
+          variant="standard"
           placeholder="https://www.youtube.com/watch?v=dQw4w9WgXcQ"
           fullWidth
           value={youtubeLink}
@@ -27,7 +27,6 @@ const YoutubeSelector: React.FC = () => {
         <Button
           variant="contained"
           color="primary"
-          style={{ height: "100%" }}
           onClick={() => {
             if (!youtubeLink) return;
             const regex = youtubeLink.match(/^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/);
@@ -38,7 +37,7 @@ const YoutubeSelector: React.FC = () => {
               });
             }
           }}>
-          select
+          SELECT
         </Button>
       </Grid>
     </Grid>

@@ -8,29 +8,29 @@ import {
   Typography,
   List,
   ListItem,
-  makeStyles,
   SwipeableDrawer,
   ListItemText,
   IconButton,
-} from "@material-ui/core";
-import MenuIcon from "@material-ui/icons/Menu";
+} from "@mui/material";
+import makeStyles from "@mui/styles/makeStyles";
+import MenuIcon from "@mui/icons-material/Menu";
 
 const useStyles = makeStyles((theme) => ({
   burger: {
     display: "none",
-    [theme.breakpoints.down("xs")]: {
+    [theme.breakpoints.down("md")]: {
       display: "block",
     },
   },
   navbar: {
     display: "flex",
-    [theme.breakpoints.down("xs")]: {
+    [theme.breakpoints.down("md")]: {
       display: "none",
     },
   },
   toolbar: {
     minHeight: 64,
-    [theme.breakpoints.down("xs")]: {
+    [theme.breakpoints.down("md")]: {
       justifyContent: "space-between",
     },
   },
@@ -83,7 +83,7 @@ const Navbar: React.FC<{ page: string }> = (props) => {
   return (
     <AppBar position="static">
       <Toolbar className={classes.toolbar}>
-        <IconButton edge="end" className={classes.burger} onClick={() => setOpen(true)}>
+        <IconButton edge="end" className={classes.burger} onClick={() => setOpen(true)} size="large">
           <MenuIcon fontSize="large" />
         </IconButton>
         <Box px={2}>

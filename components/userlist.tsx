@@ -9,8 +9,8 @@ import {
   TableCell,
   TableRow,
   Typography,
-} from "@material-ui/core";
-import { ExpandMore } from "@material-ui/icons";
+} from "@mui/material";
+import { ExpandMore } from "@mui/icons-material";
 
 interface UserList {
   count: number;

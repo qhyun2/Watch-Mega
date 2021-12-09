@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useRouter } from "next/router";
-import { TextField, Typography, Button, Grid, Container, CircularProgress } from "@material-ui/core";
+import { TextField, Typography, Button, Grid, Container, CircularProgress } from "@mui/material";
 
 import axios from "axios";
 
@@ -37,7 +37,7 @@ const Login: React.FC = () => {
           spacing={4}
           direction="column"
           alignContent="center"
-          justify="center"
+          justifyContent="center"
           style={{ height: "100vh" }}>
           <Grid item>
             <Typography variant="h5" align="center">

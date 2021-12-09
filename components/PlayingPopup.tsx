@@ -1,6 +1,6 @@
 import React from "react";
 
-import { Box, Button, Dialog, DialogContent, Typography } from "@material-ui/core";
+import { Box, Button, Dialog, DialogContent, Typography } from "@mui/material";
 
 const PlayingPopup: React.FC<{ open: boolean; cb: () => void }> = (props) => {
   return (

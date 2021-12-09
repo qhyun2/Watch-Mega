@@ -14,7 +14,7 @@ import {
   TableRow,
   TextField,
   Typography,
-} from "@material-ui/core";
+} from "@mui/material";
 
 import Navbar from "../components/Navbar";
 
@@ -109,7 +109,7 @@ const Torrent: React.FC = () => {
       </header>
       <Box pt={4}>
         <Container maxWidth="lg">
-          <Grid container justify="center">
+          <Grid container justifyContent="center">
             <Grid item xs={4}>
               <form
                 action="/api/torrent/start"
@@ -121,7 +121,13 @@ const Torrent: React.FC = () => {
                 }}>
                 <Grid item container spacing={1}>
                   <Grid item xs={9}>
-                    <TextField type="text" name="magnet" placeholder="magnet:?xt=urn:btih:" fullWidth />
+                    <TextField
+                      variant="standard"
+                      type="text"
+                      name="magnet"
+                      placeholder="magnet:?xt=urn:btih:"
+                      fullWidth
+                    />
                   </Grid>
                   <Grid item xs={3}>
                     <Button
@@ -131,14 +137,14 @@ const Torrent: React.FC = () => {
                       style={{
                         height: "100%",
                       }}>
-                      Download
+                      DOWNLOAD
                     </Button>
                   </Grid>
                 </Grid>
               </form>
             </Grid>
           </Grid>
-          <Grid container justify="center">
+          <Grid container justifyContent="center">
             <Grid item xs={10}>
               <Table style={{ tableLayout: "fixed" }}>
                 <TableHead>
