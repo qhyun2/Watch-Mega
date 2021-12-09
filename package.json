@@ -27,6 +27,7 @@
     "@material-ui/core": "^4.11.3",
     "@material-ui/icons": "^4.11.2",
     "@material-ui/lab": "^4.0.0-alpha.57",
+    "aws-sdk": "^2.1045.0",
     "axios": "^0.21.1",
     "can-autoplay": "shlajin/can-autoplay#master",
     "dotenv": "^8.2.0",
