@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import { render } from "react-dom";
 import { Box, Container, Paper } from "@mui/material";
-import makeStyles from '@mui/styles/makeStyles';
+import makeStyles from "@mui/styles/makeStyles";
 import { VolumeUp, VolumeDown, VolumeOff } from "@mui/icons-material";
 
 import videojs, { VideoJsPlayer, VideoJsPlayerOptions } from "video.js";
@@ -55,6 +55,7 @@ const useStyles = makeStyles(() => ({
   },
 }));
 
+// eslint-disable-next-line react/jsx-key
 const VOLUME_ICONS = [<VolumeOff fontSize="large" />, <VolumeUp fontSize="large" />, <VolumeDown fontSize="large" />];
 
 const VJSPlayer: React.FC<{
@@ -94,11 +95,12 @@ const VJSPlayer: React.FC<{
       } as VideoJsPlayerOptions,
       () => {
         overlay.current = document.createElement("div");
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         (props.vjs.current as any).overlay({ content: overlay.current });
         props.cb();
       }
     );
-  }, []);
+  }, [props]);
 
   useEffect(() => {
     if (firstUpdate.current) {
@@ -119,14 +121,22 @@ const VJSPlayer: React.FC<{
         overlay.current
       );
     }
-  }, [props.vjs.current, overlay.current, volumeIndicator, props.volume, volumeType]);
+  }, [
+    volumeIndicator,
+    props.volume,
+    volumeType,
+    classes.bezelTextWrapper,
+    classes.bezelText,
+    classes.bezelIconWrapper,
+    classes.icon,
+  ]);
 
   useEffect(() => {
     props.vjs.current.volume(props.volume);
     setVolumeIndicator(true);
     if (currentTimeout.current) clearTimeout(currentTimeout.current);
     currentTimeout.current = setTimeout(() => setVolumeIndicator(false), 500);
-  }, [props.volume]);
+  }, [props.vjs, props.volume]);
 
   return (
     <Container maxWidth="md">

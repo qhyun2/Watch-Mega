@@ -61,7 +61,7 @@ const NavDrawer: React.FC<{ page: string; open: boolean; setOpen: (state: boolea
           Watch Mega
         </Typography>
         {NAVITEMS.map(({ title, path }) => (
-          <Link href={path} key={title}>
+          <Link href={path} key={title} passHref>
             <ListItem button>
               <Typography variant="h5" color={title === props.page ? "secondary" : "textPrimary"}>
                 <a href={path} style={{ color: "inherit", textDecoration: "none" }}>
@@ -94,7 +94,7 @@ const Navbar: React.FC<{ page: string }> = (props) => {
         <List component="nav" disablePadding className={classes.navbar}>
           {NAVITEMS.map(({ title, path }) => (
             <ListItem key={title} disableGutters>
-              <Link href={path}>
+              <Link href={path} passHref>
                 <Button>
                   <Typography variant="h6" color={title === props.page ? "secondary" : "textPrimary"}>
                     <a href={path} style={{ color: "inherit", textDecoration: "none" }}>

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/router";
 
 import Navbar from "../components/Navbar";
@@ -124,55 +124,59 @@ const Browse: React.FC = () => {
   const [menuMouseY, setMenuMouseY] = useState<number>(0);
   const [expanded, setExpanded] = React.useState<string[]>([]);
   const router = useRouter();
-  useEffect(() => {
-    loadFiles("/");
-  }, []);
 
   function handleToggle(event: React.ChangeEvent<unknown>, nodeIds: string[]): void {
     setExpanded(nodeIds);
   }
 
-  async function loadFiles(path: string): Promise<void> {
-    const root = traverseTree(path, files);
-    if (root.isLoaded) return;
-    return axios("/api/media/info?" + stringify({ src: "file:" + path }))
-      .then((response) => {
-        if (response.status != 200) return;
-        setFiles((prev) => {
-          const ans = { ...prev };
-          const root = traverseTree(path, ans);
-          root.children.clear();
-          if (response.data.files.length === 0) {
-            const empty = "[empty]";
-            root.children.set(empty, {
-              name: empty,
-              path: root.path + "/" + empty,
-              size: 0,
-              added: 0,
-              type: "other",
-              isLoaded: false,
-              children: new Map<string, FileTree>(),
-            });
-          } else {
-            response.data.files.map((file: File) => {
-              root.children.set(file.name, {
-                name: file.name,
-                path: root.path + "/" + file.name,
-                size: file.size,
-                added: file.added,
-                type: file.type,
+  const loadFiles = useCallback(
+    async (path: string) => {
+      const root = traverseTree(path, files);
+      if (root.isLoaded) return;
+      return axios("/api/media/info?" + stringify({ src: "file:" + path }))
+        .then((response) => {
+          if (response.status != 200) return;
+          setFiles((prev) => {
+            const ans = { ...prev };
+            const root = traverseTree(path, ans);
+            root.children.clear();
+            if (response.data.files.length === 0) {
+              const empty = "[empty]";
+              root.children.set(empty, {
+                name: empty,
+                path: root.path + "/" + empty,
+                size: 0,
+                added: 0,
+                type: "other",
                 isLoaded: false,
                 children: new Map<string, FileTree>(),
               });
-            });
-          }
+            } else {
+              response.data.files.map((file: File) => {
+                root.children.set(file.name, {
+                  name: file.name,
+                  path: root.path + "/" + file.name,
+                  size: file.size,
+                  added: file.added,
+                  type: file.type,
+                  isLoaded: false,
+                  children: new Map<string, FileTree>(),
+                });
+              });
+            }
 
-          root.isLoaded = true;
-          return ans;
-        });
-      })
-      .catch(Function.prototype()); // noop
-  }
+            root.isLoaded = true;
+            return ans;
+          });
+        })
+        .catch(Function.prototype()); // noop
+    },
+    [files]
+  );
+
+  useEffect(() => {
+    loadFiles("/");
+  }, [loadFiles]);
 
   function loadCallback(node: FileTree): void {
     if (node.type === "folder") {

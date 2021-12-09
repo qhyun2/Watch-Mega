@@ -1,4 +1,4 @@
-import dynamoDb from "../../../lib/aws";
+import dynamoDb from "../../../lib/AWS";
 import withSession from "../../../lib/session";
 
 export default withSession(async (req, res) => {

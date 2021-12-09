@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, MutableRefObject } from "react";
+import React, { useState, useEffect, useRef, MutableRefObject, useCallback } from "react";
 
 import Navbar from "../components/Navbar";
 import ThickSlider from "../components/ThickSlider";
@@ -8,7 +8,7 @@ import PlayingPopup from "../components/PlayingPopup";
 import VJSPlayer from "../components/VJSPlayer";
 
 import { VideoState } from "../lib/VideoState";
-import { useSubtitleDelay, useSocket, useLocalStorage } from "../components/hooks";
+import { useSubtitleDelay, useSocket, useLocalStorage } from "../lib/hooks";
 import { VideoJsPlayer } from "video.js";
 import Toastify from "toastify-js";
 import canAutoPlay from "can-autoplay";
@@ -79,6 +79,8 @@ const Index: React.FC = () => {
   const [disableControls, setDisableControls] = useState(false);
   const [volume, setVolume] = useLocalStorage("volume", 0.7);
 
+  const classes = useStyles();
+
   // new video
   useEffect(() => {
     if (!videoName) return;
@@ -102,6 +104,50 @@ const Index: React.FC = () => {
       throw "Unknown protocol: " + url.protocol;
     }
   }, [videoName]);
+
+  function applyVideoState() {
+    // TODO tighten threshold for updating postition once new watchers joining does not cause state broadcast
+    if (Math.abs(videoState.position - vjs.current.currentTime()) > 2) updateCurrentTime();
+    if (videoState.isPaused !== vjs.current.paused()) {
+      if (videoState.isPaused) {
+        pause();
+      } else {
+        if (firstPlay.current) {
+          canAutoPlay.video().then(({ result }) => {
+            if (result === true) {
+              firstPlay.current = false;
+              play();
+            } else {
+              setplayingPopup(true);
+            }
+          });
+        } else {
+          play();
+        }
+      }
+    }
+  }
+
+  const updateCurrentTime = useCallback(() => {
+    ignoreSeek.current = true;
+    vjs.current.currentTime(videoState.position);
+  }, [videoState.position]);
+
+  useEffect(applyVideoState, [updateCurrentTime, videoState]);
+
+  function play(): void {
+    ignorePlay.current = true;
+    vjs.current.play();
+  }
+
+  function pause(): void {
+    ignorePause.current = true;
+    vjs.current.pause();
+  }
+
+  function seek(amount: number): void {
+    vjs.current.currentTime(vjs.current.currentTime() + amount);
+  }
 
   function initHotkeys(): void {
     document.addEventListener("keydown", (e) => {
@@ -153,50 +199,6 @@ const Index: React.FC = () => {
     });
   }
 
-  function applyVideoState() {
-    // TODO tighten threshold for updating postition once new watchers joining does not cause state broadcast
-    if (Math.abs(videoState.position - vjs.current.currentTime()) > 2) updateCurrentTime();
-    if (videoState.isPaused !== vjs.current.paused()) {
-      if (videoState.isPaused) {
-        pause();
-      } else {
-        if (firstPlay.current) {
-          canAutoPlay.video().then(({ result }) => {
-            if (result === true) {
-              firstPlay.current = false;
-              play();
-            } else {
-              setplayingPopup(true);
-            }
-          });
-        } else {
-          play();
-        }
-      }
-    }
-  }
-
-  useEffect(applyVideoState, [videoState]);
-
-  function play(): void {
-    ignorePlay.current = true;
-    vjs.current.play();
-  }
-
-  function pause(): void {
-    ignorePause.current = true;
-    vjs.current.pause();
-  }
-
-  function updateCurrentTime(): void {
-    ignoreSeek.current = true;
-    vjs.current.currentTime(videoState.position);
-  }
-
-  function seek(amount: number): void {
-    vjs.current.currentTime(vjs.current.currentTime() + amount);
-  }
-
   function initSocket(): void {
     socket.current.on("state", (state: VideoState) => {
       console.log("got state:", state);
@@ -209,15 +211,15 @@ const Index: React.FC = () => {
   }
 
   function initVideoListeners(): void {
-    // vjs.current.on("seeked", () => {
-    //   if (ignoreSeek.current) {
-    //     ignoreSeek.current = false;
-    //     return;
-    //   }
-    //   socket.current.emit("seek", vjs.current.currentTime());
-    //   console.log("seeked", vjs.current.currentTime());
-    // });
-    vjs.current.on("play", (a, b, c, d) => {
+    vjs.current.on("seeked", () => {
+      if (ignoreSeek.current) {
+        ignoreSeek.current = false;
+        return;
+      }
+      socket.current.emit("seek", vjs.current.currentTime());
+      console.log("seeked", vjs.current.currentTime());
+    });
+    vjs.current.on("play", () => {
       if (ignorePlay.current) {
         ignorePlay.current = false;
         return;
@@ -236,13 +238,12 @@ const Index: React.FC = () => {
 
     // don't focus fullscreen button after it is used
     vjs.current.on("fullscreenchange", () => {
-      if (vjs.current.isFullscreen() && document.activeElement.classList.contains("vjs-fullscreen-control"))
+      if (document.activeElement.classList.contains("vjs-fullscreen-control"))
         (document.activeElement as HTMLElement).blur();
     });
   }
 
   function renderControls(): JSX.Element {
-    const classes = useStyles();
     return (
       <Box pt={4}>
         <Container maxWidth="md">
@@ -379,6 +380,7 @@ const Index: React.FC = () => {
 
 export default Index;
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function sendNotif(msg: string): void {
   Toastify({
     text: msg,

@@ -23,12 +23,6 @@ import axios from "axios";
 import { defaultAuth } from "../lib/Auth";
 export { defaultAuth as getServerSideProps };
 
-interface TorrentProgress {
-  name: string;
-  value: number;
-  id: string;
-}
-
 const LinearProgressWithLabel: React.FC<LinearProgressProps & { value: number }> = (props) => {
   return (
     <Box display="flex" alignItems="center">
@@ -41,6 +35,12 @@ const LinearProgressWithLabel: React.FC<LinearProgressProps & { value: number }>
     </Box>
   );
 };
+
+interface TorrentProgress {
+  name: string;
+  value: number;
+  id: string;
+}
 
 interface TableRowProps {
   torrent: TorrentProgress;
@@ -66,7 +66,7 @@ const ProgressRow: React.FC<TableRowProps> = (props) => {
 };
 
 const Torrent: React.FC = () => {
-  const [progress, setProgress] = useState([]);
+  const [progress, setProgress] = useState<TorrentProgress[]>([]);
   useEffect(() => {
     getData();
     const interval = setInterval(() => getData(), 1000);
@@ -158,7 +158,7 @@ const Torrent: React.FC = () => {
                 </TableHead>
                 <TableBody>
                   {progress.map((r) => (
-                    <ProgressRow deleteCallback={deleteTorrent} torrent={r}></ProgressRow>
+                    <ProgressRow key={r.name} deleteCallback={deleteTorrent} torrent={r}></ProgressRow>
                   ))}
                 </TableBody>
               </Table>

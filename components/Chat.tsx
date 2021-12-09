@@ -3,9 +3,7 @@ import React, { useState } from "react";
 import { Box, Hidden, AppBar, IconButton, Typography, Grid, Paper } from "@mui/material";
 import { Minimize } from "@mui/icons-material";
 
-// interface ChatContentProps {}
-
-const ChatContentBox: React.FC<{}> = (props) => {
+const ChatContentBox: React.FC = () => {
   return (
     <Box height="70vh" p={15}>
       Chat and usernames coming soon!

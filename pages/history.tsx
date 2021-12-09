@@ -42,7 +42,7 @@ const HistoryItem: React.FC<HistoryItem> = (props) => {
     } else {
       axios.get("/api/media/youtube/?" + stringify({ id: url[1] })).then((res) => setVideoName(res.data));
     }
-  }, [props.name]);
+  }, [props.name, url]);
 
   return (
     <ButtonBase

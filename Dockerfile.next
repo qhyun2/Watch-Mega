@@ -1,6 +1,7 @@
 # next builder
 FROM node:15-alpine AS builder
 WORKDIR /app
+COPY .eslintrc .
 COPY tsconfig.json .
 COPY next.config.js .
 COPY package.json package-lock.json ./

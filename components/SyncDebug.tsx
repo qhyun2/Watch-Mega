@@ -3,7 +3,7 @@ import { VideoJsPlayer } from "video.js";
 import { VideoState } from "../lib/VideoState";
 
 const SyncDebug: React.FC<{ videoState: VideoState; vjs: VideoJsPlayer; videoName: string }> = (props) => {
-  const [_, forceUpdate] = React.useState(Date.now());
+  const [, forceUpdate] = React.useState(Date.now());
 
   React.useEffect(() => {
     const interval = setInterval(() => forceUpdate(Date.now()), 117);

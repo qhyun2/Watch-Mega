@@ -1,7 +1,7 @@
 import React from "react";
 import Head from "next/head";
 import type { AppProps } from "next/app";
-import { createTheme, ThemeProvider, Theme, StyledEngineProvider, adaptV4Theme } from "@mui/material/styles";
+import { createTheme, ThemeProvider, Theme, StyledEngineProvider } from "@mui/material/styles";
 import CssBaseline from "@mui/material/CssBaseline";
 
 import "../styles/toastify.css";
@@ -61,7 +61,7 @@ function App({ Component, pageProps }: AppProps): JSX.Element {
       router.events.off("routeChangeComplete", routeChangeComplete);
       router.events.off("routeChangeError", routeChangeComplete);
     };
-  }, []);
+  }, [router.events]);
 
   React.useEffect(() => {
     // Remove the server-side injected CSS.

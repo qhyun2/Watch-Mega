@@ -23,7 +23,7 @@ export function useSubtitleDelay(
       }
     });
     currentOffset.current = offset;
-  }, [subtitleDelay]);
+  }, [subtitleDelay, vjs]);
 
   return [subtitleDelay, setSubtitleDelay];
 }
@@ -45,11 +45,11 @@ export function useLocalStorage<T>(key: string, initialValue: T): [T, React.Disp
   useEffect(() => {
     const item = window.localStorage.getItem(key);
     setValue(item ? JSON.parse(item) : initialValue);
-  }, []);
+  }, [initialValue, key]);
 
   useEffect(() => {
     if (typeof window !== "undefined") window.localStorage.setItem(key, JSON.stringify(value));
-  }, [value]);
+  }, [key, value]);
 
   return [value, setValue];
 }
