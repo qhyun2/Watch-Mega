@@ -81,7 +81,7 @@ const Navbar: React.FC<{ page: string }> = (props) => {
   const [open, setOpen] = useState(false);
 
   return (
-    <AppBar position="static">
+    <AppBar position="static" enableColorOnDark>
       <Toolbar className={classes.toolbar}>
         <IconButton edge="end" className={classes.burger} onClick={() => setOpen(true)} size="large">
           <MenuIcon fontSize="large" />

@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useRef, MutableRefObject } from "react";
 
 import Navbar from "../components/Navbar";
-import ThickSlider from "../components/thickSlider";
-import ChatBox from "../components/chat";
-import VideoBar from "../components/videoBar";
+import ThickSlider from "../components/ThickSlider";
+import ChatBox from "../components/Chat";
+import VideoBar from "../components/VideoBar";
 import PlayingPopup from "../components/PlayingPopup";
 import VJSPlayer from "../components/VJSPlayer";
 
@@ -37,19 +37,19 @@ export { defaultAuth as getServerSideProps };
 const useStyles = makeStyles((theme) => ({
   sliders: {
     order: 1,
-    [theme.breakpoints.down('lg')]: {
+    [theme.breakpoints.down("lg")]: {
       order: 2,
     },
   },
   controls: {
     order: 2,
-    [theme.breakpoints.down('lg')]: {
+    [theme.breakpoints.down("lg")]: {
       order: 1,
     },
   },
   toggles: {
     order: 3,
-    [theme.breakpoints.down('lg')]: {
+    [theme.breakpoints.down("lg")]: {
       order: 3,
     },
   },
