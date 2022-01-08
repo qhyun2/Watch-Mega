@@ -1,10 +1,9 @@
-import withSession from "../../../lib/session";
+import { defaultWithSessionRoute } from "../../../lib/withSession";
 import * as fs from "fs";
 import { redis } from "../../../src/Instances";
 import * as RC from "../../../src/RedisConstants";
 
-export default withSession(async (req, res) => {
-  if (!req.session.get("user")) return res.status(401).end();
+export default defaultWithSessionRoute(async (req, res) => {
   const url = (await redis.get(RC.REDIS_VIDEO_PATH)).split(":");
 
   if (url[0] != "file") {

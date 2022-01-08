@@ -20,8 +20,9 @@ import Navbar from "../components/Navbar";
 
 import axios from "axios";
 
-import { defaultAuth } from "../lib/Auth";
-export { defaultAuth as getServerSideProps };
+// authentication
+import { defaultServerSidePropsAuth } from "../lib/withSession";
+export { defaultServerSidePropsAuth as getServerSideProps };
 
 const LinearProgressWithLabel: React.FC<LinearProgressProps & { value: number }> = (props) => {
   return (

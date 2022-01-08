@@ -1,9 +1,8 @@
-import withSession from "../../../lib/session";
+import { defaultWithSessionRoute } from "../../../lib/withSession";
 import { redis } from "../../../src/Instances";
 import * as RC from "../../../src/RedisConstants";
 
-export default withSession(async (req, res) => {
-  if (!req.session.get("user")) return res.status(401).end();
+export default defaultWithSessionRoute(async (req, res) => {
   const start = parseInt(<string>req.query.start) || 0;
   const end = parseInt(<string>req.query.end) || 5;
   if (end <= start) return res.status(400).send("");

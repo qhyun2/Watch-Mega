@@ -1,8 +1,7 @@
-import withSession from "../../../lib/session";
+import { defaultWithSessionRoute } from "../../../lib/withSession";
 import { tc } from "../../../src/Instances";
 
-export default withSession((req, res) => {
-  if (!req.session.get("user")) return res.status(401).end();
+export default defaultWithSessionRoute((req, res) => {
   if (req.method != "POST") return res.status(405).send("");
   tc.torrents.forEach((t) => {
     if (t.magnetURI == req.body.magnet) {

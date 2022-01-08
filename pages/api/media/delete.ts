@@ -1,12 +1,11 @@
-import withSession from "../../../lib/session";
+import { defaultWithSessionRoute } from "../../../lib/withSession";
 import { join } from "path";
 import * as fs from "fs";
 import { logger } from "../../../src/Instances";
 
 const root = "data";
 
-export default withSession(async (req, res) => {
-  if (!req.session.get("user")) return res.status(401).end();
+export default defaultWithSessionRoute(async (req, res) => {
   if (req.method != "POST") return res.status(405).send("");
   if (!req.body || !req.body.src) return res.status(404).send("");
   const url = (req.body.src as string).split(":");

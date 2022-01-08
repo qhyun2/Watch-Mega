@@ -1,9 +1,8 @@
-import withSession from "../../../lib/session";
+import { defaultWithSessionRoute } from "../../../lib/withSession";
 import axios from "axios";
 import { stringify } from "qs";
 
-export default withSession(async (req, res) => {
-  if (!req.session.get("user")) return res.status(401).end();
+export default defaultWithSessionRoute(async (req, res) => {
   if (!req.query || !req.query.id) return res.status(404).send("");
 
   const query = stringify({

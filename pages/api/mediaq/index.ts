@@ -1,9 +1,7 @@
 import dynamoDb from "../../../lib/AWS";
-import withSession from "../../../lib/session";
+import { defaultWithSessionRoute } from "../../../lib/withSession";
 
-export default withSession(async (req, res) => {
-  if (!req.session.get("user")) return res.status(401).end();
-
+export default defaultWithSessionRoute(async (req, res) => {
   if (req.method === "GET") {
     const { Item } = await dynamoDb.get({
       Key: { id: "root" },

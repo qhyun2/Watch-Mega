@@ -1,4 +1,4 @@
-import withSession from "../../../lib/session";
+import { defaultWithSessionRoute } from "../../../lib/withSession";
 import { tc } from "../../../src/Instances";
 
 interface Torrent {
@@ -7,8 +7,7 @@ interface Torrent {
   id: string;
 }
 
-export default withSession((req, res) => {
-  if (!req.session.get("user")) return res.status(401).end();
+export default defaultWithSessionRoute((req, res) => {
   const info: Torrent[] = [];
   tc.torrents.forEach((t) => {
     info.push({ name: t.name, value: t.progress, id: t.magnetURI });

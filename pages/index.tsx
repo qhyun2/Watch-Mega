@@ -6,6 +6,7 @@ import ChatBox from "../components/Chat";
 import VideoBar from "../components/VideoBar";
 import PlayingPopup from "../components/PlayingPopup";
 import VJSPlayer from "../components/VJSPlayer";
+import SyncDebug from "../components/SyncDebug";
 
 import { VideoState } from "../lib/VideoState";
 import { useSubtitleDelay, useSocket, useLocalStorage } from "../lib/hooks";
@@ -30,9 +31,8 @@ import makeStyles from "@mui/styles/makeStyles";
 import { PlayArrow, SkipPrevious, SkipNext, Pause } from "@mui/icons-material";
 
 // authentication
-import { defaultAuth } from "../lib/Auth";
-import SyncDebug from "../components/SyncDebug";
-export { defaultAuth as getServerSideProps };
+import { defaultServerSidePropsAuth } from "../lib/withSession";
+export { defaultServerSidePropsAuth as getServerSideProps };
 
 const useStyles = makeStyles((theme) => ({
   sliders: {

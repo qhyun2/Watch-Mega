@@ -1,6 +1,6 @@
-import withSession from "../../../lib/session";
+import { withSessionRoute } from "../../../lib/withSession";
 
-export default withSession(async (req, res) => {
+export default withSessionRoute(async (req, res) => {
   if (req.method != "POST") res.status(405).end();
   if (!req.body.password) res.status(400).end();
 
@@ -9,7 +9,7 @@ export default withSession(async (req, res) => {
 
   if (req.body.password === process.env.ACCESS_CODE) {
     const user = { isAdmin: true };
-    req.session.set("user", user);
+    req.session.user = user;
     await req.session.save();
     res.send({ status: "accepted" });
   } else {

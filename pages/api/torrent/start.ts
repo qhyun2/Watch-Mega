@@ -1,4 +1,4 @@
-import withSession from "../../../lib/session";
+import { defaultWithSessionRoute } from "../../../lib/withSession";
 import { tc } from "../../../src/Instances";
 import * as path from "path";
 import { logger } from "../../../src/Instances";
@@ -34,8 +34,7 @@ function addTorrent(magnet: string): void {
   });
 }
 
-export default withSession((req, res) => {
-  if (!req.session.get("user")) return res.status(401).end();
+export default defaultWithSessionRoute((req, res) => {
   if (req.method != "POST") return res.status(405).send("");
   addTorrent(req.body.magnet);
   res.status(303).redirect("/torrent");

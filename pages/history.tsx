@@ -23,8 +23,8 @@ import {
 import { Pagination, Skeleton } from "@mui/material";
 
 // authentication
-import { defaultAuth } from "../lib/Auth";
-export { defaultAuth as getServerSideProps };
+import { defaultServerSidePropsAuth } from "../lib/withSession";
+export { defaultServerSidePropsAuth as getServerSideProps };
 
 interface HistoryItem {
   name: string;

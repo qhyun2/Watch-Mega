@@ -12,8 +12,8 @@ import { TreeItem, TreeView } from "@mui/lab";
 import { ArrowForwardIos, Folder, FolderOpen, Movie, Description } from "@mui/icons-material";
 
 // authentication
-import { defaultAuth } from "../lib/Auth";
-export { defaultAuth as getServerSideProps };
+import { defaultServerSidePropsAuth } from "../lib/withSession";
+export { defaultServerSidePropsAuth as getServerSideProps };
 
 interface TreeNodeProps {
   node: FileTree;

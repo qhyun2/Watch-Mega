@@ -1,4 +1,4 @@
-import withSession from "../../../lib/session";
+import { defaultWithSessionRoute } from "../../../lib/withSession";
 import * as path from "path";
 import * as fs from "fs";
 import { setVideo } from "../../../src/VideoServer";
@@ -15,8 +15,7 @@ function getPath(name: string): string {
   return videoPath;
 }
 
-export default withSession(async (req, res) => {
-  if (!req.session.get("user")) return res.status(401).end();
+export default defaultWithSessionRoute(async (req, res) => {
   if (req.method != "POST") return res.status(405).send("");
   if (!req.body.src) return res.status(400).send("No src included");
   const url = (req.body.src as string).split(":");

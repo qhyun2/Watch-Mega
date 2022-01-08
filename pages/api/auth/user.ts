@@ -1,7 +1,7 @@
-import withSession from "../../../lib/session";
+import { defaultWithSessionRoute } from "../../../lib/withSession";
 
-export default withSession(async (req, res) => {
-  const user = req.session.get("user");
+export default defaultWithSessionRoute(async (req, res) => {
+  const user = req.session.user;
   if (user) {
     res.json({
       isLoggedIn: true,

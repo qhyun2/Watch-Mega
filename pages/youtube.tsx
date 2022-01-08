@@ -5,8 +5,8 @@ import axios from "axios";
 import { Box, Button, Container, Grid, TextField, Typography } from "@mui/material";
 
 // authentication
-import { defaultAuth } from "../lib/Auth";
-export { defaultAuth as getServerSideProps };
+import { defaultServerSidePropsAuth } from "../lib/withSession";
+export { defaultServerSidePropsAuth as getServerSideProps };
 
 const YoutubeSelector: React.FC = () => {
   const [youtubeLink, setYoutubeLink] = useState("");
