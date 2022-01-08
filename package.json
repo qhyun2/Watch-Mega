@@ -54,6 +54,7 @@
     "swr": "^0.5.5",
     "toastify-js": "^1.9.3",
     "video.js": "^7.0.3",
+    "videojs-mobile-ui": "^0.7.0",
     "videojs-overlay": "^2.1.4",
     "videojs-youtube": "^2.6.1",
     "webtorrent": "^0.110.1",

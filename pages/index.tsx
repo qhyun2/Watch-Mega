@@ -182,7 +182,7 @@ const Index: React.FC = () => {
         }
       }
     }
-  }, [updateCurrentTime, videoState]);
+  }, [updateCurrentTime, videoState, videoName]);
 
   useEffect(() => {
     document.addEventListener("keydown", handleHotkeys);
@@ -240,7 +240,6 @@ const Index: React.FC = () => {
       }
       socket.current.emit("pause", vjs.current.currentTime());
     });
-    vjs.current.on("sourceset", () => applyVideoState);
 
     // don't focus fullscreen button after it is used
     vjs.current.on("fullscreenchange", () => {

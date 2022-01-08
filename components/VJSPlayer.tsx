@@ -7,6 +7,8 @@ import { VolumeUp, VolumeDown, VolumeOff } from "@mui/icons-material";
 import videojs, { VideoJsPlayer, VideoJsPlayerOptions } from "video.js";
 import "videojs-youtube";
 import "videojs-overlay";
+import "videojs-mobile-ui";
+import "videojs-mobile-ui/dist/videojs-mobile-ui.css";
 import "video.js/dist/video-js.min.css";
 
 const useStyles = makeStyles(() => ({
@@ -95,6 +97,7 @@ const VJSPlayer: React.FC<{
         enableSourceset: true,
       } as VideoJsPlayerOptions,
       () => {
+        (props.vjs.current as any).mobileUi();
         overlay.current = document.createElement("div");
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         (props.vjs.current as any).overlay({ content: overlay.current });
