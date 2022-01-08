@@ -81,76 +81,13 @@ const Index: React.FC = () => {
 
   const classes = useStyles();
 
-  // new video
-  useEffect(() => {
-    if (!videoName) return;
-    const url = new URL(videoName);
-
-    if (url.protocol === "file:") {
-      vjs.current.src({ type: "video/mp4", src: `/api/media?t=${Math.random()}` });
-      vjs.current.addRemoteTextTrack(
-        { src: "api/media/subs", kind: "subtitles", srclang: "en", label: "English" },
-        false
-      );
-      vjs.current.textTracks()[0].mode = "showing";
-    } else if (url.protocol === "youtube:") {
-      let videoID = url.pathname;
-      while (videoID[0] === "/") videoID = videoID.substr(1);
-      vjs.current.src({
-        type: "video/youtube",
-        src: `http://www.youtube.com/watch?v=${videoID}&rel=0&modestbranding=1`,
-      });
-    } else {
-      throw "Unknown protocol: " + url.protocol;
-    }
-  }, [videoName]);
-
-  function applyVideoState() {
-    // TODO tighten threshold for updating postition once new watchers joining does not cause state broadcast
-    if (Math.abs(videoState.position - vjs.current.currentTime()) > 2) updateCurrentTime();
-    if (videoState.isPaused !== vjs.current.paused()) {
-      if (videoState.isPaused) {
-        pause();
-      } else {
-        if (firstPlay.current) {
-          canAutoPlay.video().then(({ result }) => {
-            if (result === true) {
-              firstPlay.current = false;
-              play();
-            } else {
-              setplayingPopup(true);
-            }
-          });
-        } else {
-          play();
-        }
-      }
-    }
-  }
-
   const updateCurrentTime = useCallback(() => {
     ignoreSeek.current = true;
     vjs.current.currentTime(videoState.position);
   }, [videoState.position]);
 
-  useEffect(applyVideoState, [updateCurrentTime, videoState]);
-
-  function play(): void {
-    ignorePlay.current = true;
-    vjs.current.play();
-  }
-
-  function pause(): void {
-    ignorePause.current = true;
-    vjs.current.pause();
-  }
-
-  function seek(amount: number): void {
-    vjs.current.currentTime(vjs.current.currentTime() + amount);
-  }
-
-  function initHotkeys(): void {
-    document.addEventListener("keydown", (e) => {
+  const handleHotkeys = useCallback(
+    (e) => {
       if (disableControls) return;
 
       if (!e.shiftKey && !e.ctrlKey && !e.altKey && !e.metaKey) {
@@ -196,7 +133,76 @@ const Index: React.FC = () => {
             break;
         }
       }
-    });
+    },
+    [disableControls, setVolume]
+  );
+
+  // new video
+  useEffect(() => {
+    if (!videoName) return;
+    const url = new URL(videoName);
+
+    if (url.protocol === "file:") {
+      vjs.current.src({ type: "video/mp4", src: `/api/media?t=${Math.random()}` });
+      vjs.current.addRemoteTextTrack(
+        { src: "api/media/subs", kind: "subtitles", srclang: "en", label: "English" },
+        false
+      );
+      vjs.current.textTracks()[0].mode = "showing";
+    } else if (url.protocol === "youtube:") {
+      let videoID = url.pathname;
+      while (videoID[0] === "/") videoID = videoID.substr(1);
+      vjs.current.src({
+        type: "video/youtube",
+        src: `http://www.youtube.com/watch?v=${videoID}&rel=0&modestbranding=1`,
+      });
+    } else {
+      throw "Unknown protocol: " + url.protocol;
+    }
+  }, [videoName]);
+
+  useEffect(() => {
+    // TODO tighten threshold for updating postition once new watchers joining does not cause state broadcast
+    if (Math.abs(videoState.position - vjs.current.currentTime()) > 2) updateCurrentTime();
+    if (videoState.isPaused !== vjs.current.paused()) {
+      if (videoState.isPaused) {
+        pause();
+      } else {
+        if (firstPlay.current) {
+          canAutoPlay.video().then(({ result }) => {
+            if (result === true) {
+              firstPlay.current = false;
+              play();
+            } else {
+              setplayingPopup(true);
+            }
+          });
+        } else {
+          play();
+        }
+      }
+    }
+  }, [updateCurrentTime, videoState]);
+
+  useEffect(() => {
+    document.addEventListener("keydown", handleHotkeys);
+    return () => {
+      document.removeEventListener("keydown", handleHotkeys);
+    };
+  }, [vjs, handleHotkeys]);
+
+  function play(): void {
+    ignorePlay.current = true;
+    vjs.current.play();
+  }
+
+  function pause(): void {
+    ignorePause.current = true;
+    vjs.current.pause();
+  }
+
+  function seek(amount: number): void {
+    vjs.current.currentTime(vjs.current.currentTime() + amount);
   }
 
   function initSocket(): void {
@@ -353,7 +359,6 @@ const Index: React.FC = () => {
             vjs={vjs}
             volume={volume}
             cb={() => {
-              initHotkeys();
               initSocket();
               initVideoListeners();
             }}

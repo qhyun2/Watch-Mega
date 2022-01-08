@@ -83,6 +83,7 @@ const VJSPlayer: React.FC<{
     prevVolume.current = props.volume;
   }
 
+  // setup and dispose player
   useEffect(() => {
     if (props.vjs.current) return;
     props.vjs.current = videojs(
@@ -100,7 +101,12 @@ const VJSPlayer: React.FC<{
         props.cb();
       }
     );
-  }, [props]);
+
+    return () => {
+      if (props.vjs.current) props.vjs.current.dispose();
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   useEffect(() => {
     if (firstUpdate.current) {
