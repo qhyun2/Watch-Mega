@@ -38,7 +38,6 @@
     "ffprobe": "^1.1.2",
     "ioredis": "^4.22.0",
     "iron-session": "^6.0.5",
-    "mediainfo.js": "^0.1.4",
     "moment": "^2.29.1",
     "next": "^12.0.7",
     "nprogress": "^0.2.0",
