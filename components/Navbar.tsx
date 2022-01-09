@@ -12,33 +12,8 @@ import {
   ListItemText,
   IconButton,
 } from "@mui/material";
-import makeStyles from "@mui/styles/makeStyles";
 import MenuIcon from "@mui/icons-material/Menu";
-
-const useStyles = makeStyles((theme) => ({
-  burger: {
-    display: "none",
-    [theme.breakpoints.down("md")]: {
-      display: "block",
-    },
-  },
-  navbar: {
-    display: "flex",
-    [theme.breakpoints.down("md")]: {
-      display: "none",
-    },
-  },
-  toolbar: {
-    minHeight: 64,
-    [theme.breakpoints.down("md")]: {
-      justifyContent: "space-between",
-    },
-  },
-  title: {
-    fontWeight: "bold",
-    padding: 16,
-  },
-}));
+import { useIsMobile } from "../lib/hooks";
 
 const NAVITEMS = [
   { title: "Watch", path: "/" },
@@ -49,7 +24,6 @@ const NAVITEMS = [
 ];
 
 const NavDrawer: React.FC<{ page: string; open: boolean; setOpen: (state: boolean) => void }> = (props) => {
-  const classes = useStyles();
   return (
     <SwipeableDrawer
       anchor={"left"}
@@ -57,7 +31,7 @@ const NavDrawer: React.FC<{ page: string; open: boolean; setOpen: (state: boolea
       onClose={() => props.setOpen(false)}
       onOpen={() => props.setOpen(true)}>
       <List style={{ minWidth: 180 }}>
-        <Typography variant="h5" className={classes.title} noWrap>
+        <Typography variant="h5" sx={{ fontWeight: "bold", padding: 2 }} noWrap>
           Watch Mega
         </Typography>
         {NAVITEMS.map(({ title, path }) => (
@@ -77,21 +51,25 @@ const NavDrawer: React.FC<{ page: string; open: boolean; setOpen: (state: boolea
 };
 
 const Navbar: React.FC<{ page: string }> = (props) => {
-  const classes = useStyles();
   const [open, setOpen] = useState(false);
+  const isMobile = useIsMobile();
 
   return (
     <AppBar position="static" enableColorOnDark>
-      <Toolbar className={classes.toolbar}>
-        <IconButton edge="end" className={classes.burger} onClick={() => setOpen(true)} size="large">
+      <Toolbar variant={isMobile ? "dense" : undefined}>
+        <IconButton
+          edge="start"
+          sx={{ display: { xs: "flex", md: "none" }, padding: "1px" }}
+          onClick={() => setOpen(true)}
+          size="small">
           <MenuIcon fontSize="large" />
         </IconButton>
-        <Box px={2}>
-          <Typography className={classes.title} variant="h4" noWrap>
+        <Box px={2} sx={{ display: { xs: "none", md: "block" } }}>
+          <Typography sx={{ fontWeight: "bold" }} variant="h4" noWrap>
             Watch Mega
           </Typography>
         </Box>
-        <List component="nav" disablePadding className={classes.navbar}>
+        <List component="nav" disablePadding sx={{ display: { xs: "none", md: "flex" } }}>
           {NAVITEMS.map(({ title, path }) => (
             <ListItem key={title} disableGutters>
               <Link href={path} passHref>

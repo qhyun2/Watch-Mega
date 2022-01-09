@@ -3,6 +3,7 @@ import { render } from "react-dom";
 import { Box, Container, Paper } from "@mui/material";
 import makeStyles from "@mui/styles/makeStyles";
 import { VolumeUp, VolumeDown, VolumeOff } from "@mui/icons-material";
+import { useIsMobile } from "../lib/hooks";
 
 import videojs, { VideoJsPlayer, VideoJsPlayerOptions } from "video.js";
 import "videojs-youtube";
@@ -73,6 +74,7 @@ const VJSPlayer: React.FC<{
   const [volumeIndicator, setVolumeIndicator] = useState(false);
   const prevVolume = useRef(props.volume);
   const [volumeType, setVolumeType] = useState(0);
+  const isMobile = useIsMobile();
 
   if (props.volume != prevVolume.current) {
     if (props.volume == 0) {
@@ -148,7 +150,7 @@ const VJSPlayer: React.FC<{
   }, [props.vjs, props.volume]);
 
   return (
-    <Container maxWidth="md">
+    <Container maxWidth="md" style={isMobile ? { padding: 0 } : undefined}>
       <Paper elevation={12}>
         <div data-vjs-player>
           <video ref={playerRef} className="video-js vjs-fluid vjs-lime" controls preload="auto" />

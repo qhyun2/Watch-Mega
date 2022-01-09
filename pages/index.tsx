@@ -9,7 +9,7 @@ import VJSPlayer from "../components/VJSPlayer";
 import SyncDebug from "../components/SyncDebug";
 
 import { VideoState } from "../lib/VideoState";
-import { useSubtitleDelay, useSocket, useLocalStorage } from "../lib/hooks";
+import { useSubtitleDelay, useSocket, useLocalStorage, useIsMobile } from "../lib/hooks";
 import { VideoJsPlayer } from "video.js";
 import Toastify from "toastify-js";
 import canAutoPlay from "can-autoplay";
@@ -80,6 +80,7 @@ const Index: React.FC = () => {
   const [volume, setVolume] = useLocalStorage("volume", 0.7);
 
   const classes = useStyles();
+  const isMobile = useIsMobile();
 
   const updateCurrentTime = useCallback(() => {
     ignoreSeek.current = true;
@@ -250,8 +251,8 @@ const Index: React.FC = () => {
 
   function renderControls(): JSX.Element {
     return (
-      <Box pt={4}>
-        <Container maxWidth="md">
+      <Box pt={isMobile ? 0 : 4}>
+        <Container maxWidth="md" style={isMobile ? { padding: 0 } : undefined}>
           <Paper>
             <Box p={4}>
               <FormControl style={{ width: "100%" }}>
@@ -353,7 +354,7 @@ const Index: React.FC = () => {
       </header>
       <Box>
         <VideoBar name={videoName} />
-        <Box pt={3} style={{ pointerEvents: disableControls ? "none" : "auto" }}>
+        <Box pt={isMobile ? 0 : 3} style={{ pointerEvents: disableControls ? "none" : "auto" }}>
           <VJSPlayer
             vjs={vjs}
             volume={volume}

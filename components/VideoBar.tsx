@@ -4,9 +4,11 @@ import axios from "axios";
 import { stringify } from "qs";
 
 import { Box, Container, Paper, Typography, useTheme } from "@mui/material";
+import { useIsMobile } from "../lib/hooks";
 
 const VideoBar: React.FC<{ name: string }> = (props) => {
   const [videoName, setVideoName] = useState("");
+  const isMobile = useIsMobile();
   const theme = useTheme();
 
   useEffect(() => {
@@ -21,7 +23,7 @@ const VideoBar: React.FC<{ name: string }> = (props) => {
   }, [props.name]);
   return (
     <Box pt={3}>
-      <Container maxWidth="lg">
+      <Container maxWidth="lg" style={isMobile ? { padding: 0 } : undefined}>
         <Paper
           style={{
             width: "100%",
@@ -32,7 +34,7 @@ const VideoBar: React.FC<{ name: string }> = (props) => {
             justifyContent: "center",
           }}>
           <Box mx={3} my={1}>
-            <Typography variant="h6" align="center" noWrap>
+            <Typography variant="h6" align="center" sx={{ wordWrap: "break-word" }}>
               {videoName ? videoName : "Loading..."}
             </Typography>
           </Box>

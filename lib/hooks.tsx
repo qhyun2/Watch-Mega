@@ -1,4 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
+import { useTheme } from "@mui/material/styles";
+import { useMediaQuery } from "@mui/material";
 import { VideoJsPlayer } from "video.js";
 import socketIOClient from "socket.io-client";
 
@@ -52,4 +54,9 @@ export function useLocalStorage<T>(key: string, initialValue: T): [T, React.Disp
   }, [key, value]);
 
   return [value, setValue];
+}
+
+export function useIsMobile(): boolean {
+  const theme = useTheme();
+  return useMediaQuery(theme.breakpoints.down("md"));
 }
