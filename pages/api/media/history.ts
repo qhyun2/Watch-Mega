@@ -9,8 +9,15 @@ export default defaultWithSessionRoute(async (req, res) => {
   const history = await redis.zrevrange(RC.VIDEO_HISTORY, start, end, "WITHSCORES");
   const maxPages = Math.ceil((await redis.zcard(RC.VIDEO_HISTORY)) / 5);
   const response = [];
+
   for (let i = 0; i < history.length; i += 2) {
-    response.push({ name: history[i], timestamp: parseInt(history[i + 1]) });
+    const data = JSON.parse(history[i]);
+    response.push({
+      path: data.path,
+      watchPosition: parseFloat(data.watchPosition),
+      videoLength: parseFloat(data.videoLength),
+      timestamp: parseInt(history[i + 1]),
+    });
   }
   res.send({ history: response, maxPages });
 });

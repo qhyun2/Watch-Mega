@@ -18,6 +18,7 @@ import {
   Grid,
   ImageList,
   ImageListItem,
+  LinearProgress,
   Typography,
 } from "@mui/material";
 import { Pagination, Skeleton } from "@mui/material";
@@ -27,14 +28,16 @@ import { defaultServerSidePropsAuth } from "../lib/withSession";
 export { defaultServerSidePropsAuth as getServerSideProps };
 
 interface HistoryItem {
-  name: string;
+  path: string;
   timestamp: number;
+  watchPosition: number;
+  videoLength: number;
 }
 
 const HistoryItem: React.FC<HistoryItem> = (props) => {
   const [videoName, setVideoName] = useState<string>();
   const router = useRouter();
-  const url = props.name.split(":");
+  const url = props.path.split(":");
 
   useEffect(() => {
     if (url[0] === "file") {
@@ -42,12 +45,12 @@ const HistoryItem: React.FC<HistoryItem> = (props) => {
     } else {
       axios.get("/api/media/youtube/?" + stringify({ id: url[1] })).then((res) => setVideoName(res.data));
     }
-  }, [props.name, url]);
+  }, [props.path, url]);
 
   return (
     <ButtonBase
       onClick={() => {
-        axios.post("/api/media/select", { src: props.name }).then(() => {
+        axios.post("/api/media/select", { src: props }).then(() => {
           router.push("/");
         });
       }}
@@ -56,8 +59,11 @@ const HistoryItem: React.FC<HistoryItem> = (props) => {
         <Grid container wrap="nowrap">
           <CardMedia
             style={{ width: 192, height: 108, flexShrink: 0 }}
-            image={"/api/media/thumb?" + stringify({ src: props.name })}
+            image={"/api/media/thumb?" + stringify({ src: props.path })}
           />
+          <Box sx={{ position: "absolute", width: 192, bottom: 0 }}>
+            <LinearProgress variant="determinate" value={(props.watchPosition / props.videoLength) * 100} />
+          </Box>
           <CardContent style={{ minWidth: 0 }}>
             <Typography component="h6" variant="subtitle1" align="left" noWrap>
               {videoName ? videoName : "Loading..."}
@@ -103,7 +109,7 @@ const HistoryItems: React.FC<HistoryItemsProps> = (props) => {
       <React.Fragment>
         {data.map((item) =>
           item ? (
-            <ImageListItem key={item.name} style={{ width: "100%", paddingBottom: 10 }}>
+            <ImageListItem key={item.timestamp} style={{ width: "100%", paddingBottom: 10 }}>
               <HistoryItem {...item}></HistoryItem>
             </ImageListItem>
           ) : null

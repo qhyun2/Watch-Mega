@@ -32,7 +32,6 @@ async function newVideo(): Promise<void> {
   getInfo(url[1], { path: "/usr/bin/ffprobe" })
     .then((info) => {
       redis.set(RC.REDIS_PLAYING, RC.RFALSE);
-      redis.set(RC.REDIS_POSITION, 0);
       redis.set(RC.REDIS_VIDEO_LENGTH, info.streams[0].duration);
     })
     .catch((err) => {
@@ -40,14 +39,28 @@ async function newVideo(): Promise<void> {
     });
 }
 
-export function setVideo(path: string): void {
+export async function setVideo(path: string, watchPosition = 0): Promise<void> {
   logger.info(`New video selected: ${path}`);
-  redis.set(RC.REDIS_VIDEO_PATH, path);
-  redis.zcard(RC.VIDEO_HISTORY).then((size) => {
-    if (size > RC.VIDEO_HISTORY_SIZE) redis.zpopmin(RC.VIDEO_HISTORY);
+
+  // store current video into history
+  const data = await Promise.all([
+    redis.get(RC.REDIS_VIDEO_PATH),
+    redis.get(RC.REDIS_POSITION),
+    redis.get(RC.REDIS_VIDEO_LENGTH),
+  ]);
+
+  const historyItem: RC.RedisHistoryItem = {
+    path: data[0].replace("data/", ""),
+    watchPosition: data[1],
+    videoLength: data[2],
+  };
+
+  redis.zadd(RC.VIDEO_HISTORY, Date.now(), JSON.stringify(historyItem));
+
+  // update video
+  Promise.all([redis.set(RC.REDIS_VIDEO_PATH, path), redis.set(RC.REDIS_POSITION, watchPosition)]).then(() => {
+    redis.publish(RC.VIDEO_EVENT, RC.VE_NEWVID);
   });
-  redis.zadd(RC.VIDEO_HISTORY, Date.now(), path.replace("data/", ""));
-  redis.publish(RC.VIDEO_EVENT, RC.VE_NEWVID);
 }
 
 async function seekEpisode(n: number): Promise<void> {

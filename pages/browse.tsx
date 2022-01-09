@@ -194,7 +194,7 @@ const Browse: React.FC = () => {
   }
 
   function selectNode(node: FileTree): void {
-    axios.post("/api/media/select", { src: "file:" + node.path }).then(() => {
+    axios.post("/api/media/select", { src: { path: "file:" + node.path } }).then(() => {
       router.push("/");
     });
   }
