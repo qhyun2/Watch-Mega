@@ -75,6 +75,8 @@ const Index: React.FC = () => {
 
   const [videoState, setVideoState] = useState<VideoState>({ isPaused: true, position: 0, name: "" });
 
+  const [showDebugOverlay, setShowDebugOverlay] = useState(false);
+
   // local state
   const [disableControls, setDisableControls] = useState(false);
   const [volume, setVolume] = useLocalStorage("volume", 0.7);
@@ -131,6 +133,9 @@ const Index: React.FC = () => {
             break;
           case "]":
             setPlaybackSpeed((speed) => Math.min(PLAYBACK_SPEEDS.length - 1, speed + 1));
+            break;
+          case "o":
+            setShowDebugOverlay((value) => !value);
             break;
         }
       }
@@ -378,7 +383,7 @@ const Index: React.FC = () => {
         }}
       />
       <ChatBox userlist={{ count: count, usernames: [] }} />
-      <SyncDebug videoState={videoState} vjs={vjs.current} videoName={videoName} />
+      {showDebugOverlay && <SyncDebug videoState={videoState} vjs={vjs.current} videoName={videoName} />}
     </React.Fragment>
   );
 };
