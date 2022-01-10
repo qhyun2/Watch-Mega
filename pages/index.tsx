@@ -9,7 +9,7 @@ import VJSPlayer from "../components/VJSPlayer";
 import SyncDebug from "../components/SyncDebug";
 
 import { VideoState } from "../lib/VideoState";
-import { useSubtitleDelay, useSocket, useLocalStorage, useIsMobile } from "../lib/hooks";
+import { useSubtitleDelay, useSocket, useLocalStorage, useIsMobile, useSubtitleEnabled } from "../lib/hooks";
 import { VideoJsPlayer } from "video.js";
 import Toastify from "toastify-js";
 import canAutoPlay from "can-autoplay";
@@ -69,6 +69,7 @@ const Index: React.FC = () => {
 
   const [playingPopup, setplayingPopup] = useState(false);
   const [subtitleDelay, setSubtitleDelay] = useSubtitleDelay(vjs);
+  const [subtitleEnabled, setSubtitleEnabled] = useSubtitleEnabled(vjs);
   const [count, setCount] = useState(0);
   const [videoName, setVideoName] = useState("");
   const [playbackSpeed, setPlaybackSpeed] = useState(PLAYBACK_SPEEDS.indexOf(1));
@@ -137,10 +138,13 @@ const Index: React.FC = () => {
           case "o":
             setShowDebugOverlay((value) => !value);
             break;
+          case "c":
+            setSubtitleEnabled((value) => !value);
+            break;
         }
       }
     },
-    [disableControls, setVolume]
+    [disableControls, setVolume, setSubtitleEnabled]
   );
 
   // new video
@@ -332,6 +336,17 @@ const Index: React.FC = () => {
                           />
                         }
                         label="Disable Controls"
+                      />
+                      <FormControlLabel
+                        control={
+                          <Switch
+                            color="primary"
+                            checked={subtitleEnabled}
+                            onChange={(e) => setSubtitleEnabled(e.target.checked)}
+                            disabled={disableControls}
+                          />
+                        }
+                        label="Subtitles"
                       />
                       <FormControlLabel
                         control={<Switch color="primary" disabled={disableControls || true} />}

@@ -30,6 +30,20 @@ export function useSubtitleDelay(
   return [subtitleDelay, setSubtitleDelay];
 }
 
+export function useSubtitleEnabled(
+  vjs: React.MutableRefObject<VideoJsPlayer>
+): [boolean, React.Dispatch<React.SetStateAction<boolean>>] {
+  const [subtitleEnabled, setSubtitleEnabled] = useState(true);
+
+  useEffect(() => {
+    Array.from(vjs.current.textTracks()).forEach((track) => {
+      track.mode = subtitleEnabled ? "showing" : "hidden";
+    });
+  }, [subtitleEnabled, vjs]);
+
+  return [subtitleEnabled, setSubtitleEnabled];
+}
+
 export function useSocket(): React.MutableRefObject<SocketIOClient.Socket> {
   const socketRef = useRef() as React.MutableRefObject<SocketIOClient.Socket>;
   useEffect(() => {

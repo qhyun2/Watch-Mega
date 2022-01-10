@@ -97,6 +97,7 @@ const VJSPlayer: React.FC<{
         sources: [{ type: "video/mp4", src: "/default.mp4" }],
         controlBar: { volumePanel: false },
         enableSourceset: true,
+        textTrackSettings: false,
       } as VideoJsPlayerOptions,
       () => {
         (props.vjs.current as any).mobileUi();
@@ -113,6 +114,7 @@ const VJSPlayer: React.FC<{
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // setup volume adjustment overall on first load
   useEffect(() => {
     if (firstUpdate.current) {
       firstUpdate.current = false;
@@ -143,6 +145,7 @@ const VJSPlayer: React.FC<{
   ]);
 
   useEffect(() => {
+    if (!props.vjs.current) return;
     props.vjs.current.volume(props.volume);
     setVolumeIndicator(true);
     if (currentTimeout.current) clearTimeout(currentTimeout.current);
