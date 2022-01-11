@@ -1,11 +1,13 @@
-import { defaultWithSessionRoute } from "../../../lib/withSession";
+import { createAuthedApiRoute } from "../../../lib/withSession";
 import getInfo from "ffprobe";
 import { join } from "path";
 import { existsSync } from "fs";
 import { spawn } from "child_process";
 import { logger } from "../../../src/Instances";
 
-export default defaultWithSessionRoute(async (req, res) => {
+const router = createAuthedApiRoute();
+
+router.get(async (req, res) => {
   if (!req.query || !req.query.src) return res.status(404).send("");
   const url = (req.query.src as string).split(":");
   if (url[0] === "file") {
@@ -54,3 +56,5 @@ async function fileThumbnail(res, url: string[]): Promise<void> {
     logger.error("Thumbnail generation error: " + data);
   });
 }
+
+export default router;

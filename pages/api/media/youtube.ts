@@ -1,8 +1,10 @@
-import { defaultWithSessionRoute } from "../../../lib/withSession";
+import { createAuthedApiRoute } from "../../../lib/withSession";
 import axios from "axios";
 import { stringify } from "qs";
 
-export default defaultWithSessionRoute(async (req, res) => {
+const router = createAuthedApiRoute();
+
+router.get(async (req, res) => {
   if (!req.query || !req.query.id) return res.status(404).send("");
 
   const query = stringify({
@@ -16,3 +18,5 @@ export default defaultWithSessionRoute(async (req, res) => {
     res.status(200).send(apiRes.data.items[0]?.snippet.title);
   });
 });
+
+export default router;

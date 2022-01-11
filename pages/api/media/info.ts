@@ -1,10 +1,11 @@
-import { defaultWithSessionRoute } from "../../../lib/withSession";
+import { createAuthedApiRoute } from "../../../lib/withSession";
 import { join } from "path";
 import * as fs from "fs";
 
+const router = createAuthedApiRoute();
 const root = "data";
 
-export default defaultWithSessionRoute(async (req, res) => {
+router.get(async (req, res) => {
   if (!req.query || !req.query.src) return res.status(404).send("");
   const url = (req.query.src as string).split(":");
   if (url.length != 2) return res.status(404).send("");
@@ -38,3 +39,5 @@ export default defaultWithSessionRoute(async (req, res) => {
   res.setHeader("Content-Type", "application/json");
   res.send({ files: response });
 });
+
+export default router;

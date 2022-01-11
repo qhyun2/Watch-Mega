@@ -1,15 +1,19 @@
-import { defaultWithSessionRoute } from "../../../lib/withSession";
+import { createAuthedApiRoute } from "../../../lib/withSession";
 import { tc } from "../../../src/Instances";
 import * as path from "path";
 import { logger } from "../../../src/Instances";
 import { processVideos } from "../../../src/VideoProcessor";
 
-function addTorrent(magnet: string): void {
+const router = createAuthedApiRoute();
+
+router.post((req, res) => {
+  const magnet = req.body.magnet;
+
   // alreadying downloading
   if (tc.torrents.some((t) => t.magnetURI == magnet)) return;
 
   tc.add(magnet, { path: "data/" }, (torrent) => {
-    torrent.on("ready", () => {
+    torrent.once("download", () => {
       logger.info(`${torrent.name} download started`);
     });
     torrent.on("done", () => {
@@ -32,10 +36,8 @@ function addTorrent(magnet: string): void {
   }).on("error", () => {
     logger.warn(`Invalid torrent magnet: ${magnet}`);
   });
-}
 
-export default defaultWithSessionRoute((req, res) => {
-  if (req.method != "POST") return res.status(405).send("");
-  addTorrent(req.body.magnet);
   res.status(303).redirect("/torrent");
 });
+
+export default router;

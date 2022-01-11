@@ -1,8 +1,10 @@
-import { defaultWithSessionRoute } from "../../../lib/withSession";
+import { createAuthedApiRoute } from "../../../lib/withSession";
 import { redis } from "../../../src/Instances";
 import * as RC from "../../../src/RedisConstants";
 
-export default defaultWithSessionRoute(async (req, res) => {
+const router = createAuthedApiRoute();
+
+router.get(async (req, res) => {
   const start = parseInt(<string>req.query.start) || 0;
   const end = parseInt(<string>req.query.end) || 5;
   if (end <= start) return res.status(400).send("");
@@ -21,3 +23,5 @@ export default defaultWithSessionRoute(async (req, res) => {
   }
   res.send({ history: response, maxPages });
 });
+
+export default router;

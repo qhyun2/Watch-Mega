@@ -1,7 +1,9 @@
-import { defaultWithSessionRoute } from "../../../lib/withSession";
+import { createAuthedApiRoute } from "../../../lib/withSession";
 import * as path from "path";
 import * as fs from "fs";
 import { setVideo } from "../../../src/VideoServer";
+
+const router = createAuthedApiRoute();
 
 function getPath(name: string): string {
   let videoPath = path.join("data", name);
@@ -15,9 +17,7 @@ function getPath(name: string): string {
   return videoPath;
 }
 
-export default defaultWithSessionRoute(async (req, res) => {
-  if (req.method != "POST") return res.status(405).send("");
-
+router.post(async (req, res) => {
   if (!req.body.src) return res.status(400).send("No src included");
   const url = (req.body.src.path as string).split(":");
   if (url.length != 2) return res.status(400).send("Invalid src format");
@@ -35,3 +35,5 @@ export default defaultWithSessionRoute(async (req, res) => {
   }
   res.status(200).send("");
 });
+
+export default router;

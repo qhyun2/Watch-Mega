@@ -1,12 +1,17 @@
-import { defaultWithSessionRoute } from "../../../lib/withSession";
+import { createAuthedApiRoute } from "../../../lib/withSession";
+import { logger } from "../../../src/Instances";
 import { tc } from "../../../src/Instances";
 
-export default defaultWithSessionRoute((req, res) => {
-  if (req.method != "POST") return res.status(405).send("");
-  tc.torrents.forEach((t) => {
-    if (t.magnetURI == req.body.magnet) {
-      t.destroy({ destroyStore: true });
+const router = createAuthedApiRoute();
+
+router.post((req, res) => {
+  tc.torrents.forEach((torrent) => {
+    if (torrent.magnetURI == req.body.magnet) {
+      logger.info(`${torrent.name} download cancelled`);
+      torrent.destroy({ destroyStore: true });
     }
   });
   res.status(303).redirect("/torrent");
 });
+
+export default router;

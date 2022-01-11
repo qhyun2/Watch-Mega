@@ -1,6 +1,13 @@
 import { IronSessionOptions } from "iron-session";
 import { withIronSessionApiRoute, withIronSessionSsr } from "iron-session/next";
-import { GetServerSidePropsContext, GetServerSidePropsResult, NextApiHandler } from "next";
+import {
+  GetServerSidePropsContext,
+  GetServerSidePropsResult,
+  NextApiHandler,
+  NextApiRequest,
+  NextApiResponse,
+} from "next";
+import nextConnect, { NextConnect } from "next-connect";
 
 declare module "iron-session" {
   interface IronSessionData {
@@ -53,3 +60,11 @@ export const defaultServerSidePropsAuth = withSessionSsr(async ({ req }) => {
     },
   };
 });
+
+export const createAuthedApiRoute = (): NextConnect<NextApiRequest, NextApiResponse> => {
+  return nextConnect({
+    onNoMatch(req, res) {
+      res.status(405).send(`Method '${req.method}' Not Allowed`);
+    },
+  });
+};
