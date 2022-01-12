@@ -17,10 +17,11 @@ import { useIsMobile } from "../lib/hooks";
 
 const NAVITEMS = [
   { title: "Watch", path: "/" },
-  { title: "Browse", path: "/browse" },
   { title: "History", path: "/history" },
-  { title: "Youtube", path: "/youtube" },
+  { title: "Browse", path: "/browse" },
   { title: "Torrent", path: "/torrent" },
+  { title: "Youtube", path: "/youtube" },
+  { title: "Upload", path: "/upload" },
 ];
 
 const NavDrawer: React.FC<{ page: string; open: boolean; setOpen: (state: boolean) => void }> = (props) => {
